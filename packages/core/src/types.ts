@@ -115,7 +115,11 @@ export type Paint =
       angle?: number;
       /** Center for radial/angular/diamond, 0..1 of the box. */
       center?: { x: number; y: number };
-      /** Outer radius for radial/diamond, 0..1 of the box (1 = half the box). */
+      /**
+       * Outer radius for radial/diamond, as a fraction of `max(width, height)`
+       * (DOM: `ellipse <radius*100>%`; canvas: `radius * max(w,h)` px). So ~0.5
+       * reaches the nearest edge from a centered origin; default 0.7.
+       */
       radius?: number;
       stops: Array<{ pos: number; color: string | RGBA }>;
     }

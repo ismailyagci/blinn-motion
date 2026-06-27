@@ -14,13 +14,18 @@
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "clean": "rimraf 'packages/*/dist' 'examples/*/dist'"
   },
   "devDependencies": {
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.2",
     "@types/node": "^22.10.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "@vitest/coverage-v8": "^2.1.9",
     "jsdom": "^25.0.1",
+    "react-dom": "^18.3.1",
     "rimraf": "^6.0.1",
     "tsup": "^8.3.5",
     "typescript": "^5.9.3",

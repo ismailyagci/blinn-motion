@@ -206,15 +206,51 @@ function paintText(ctx: CanvasRenderingContext2D, node: RenderNode): void {
   ctx.fillText(t.characters || "", x, node.height / 2);
 }
 
+// A reusable hidden SVG <path> for measuring/sampling path geometry (PATH_TRIM).
+let svgMeasure: SVGPathElement | null = null;
+function measurer(): SVGPathElement | null {
+  if (svgMeasure) return svgMeasure;
+  if (typeof document === "undefined") return null;
+  try {
+    svgMeasure = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  } catch {
+    return null;
+  }
+  return svgMeasure;
+}
+
+/**
+ * Build a polyline Path2D covering only [a, b] (0..1) of `d`'s length, by sampling
+ * an SVG path's getPointAtLength. Returns null if measuring isn't available.
+ */
+function trimmedStrokePath(d: string, a: number, b: number): Path2D | null {
+  const m = measurer();
+  if (!m || typeof (m as any).getTotalLength !== "function") return null;
+  try {
+    m.setAttribute("d", d);
+    const len = m.getTotalLength();
+    if (!(len > 0)) return null;
+    const start = clamp01(a) * len;
+    const end = clamp01(b) * len;
+    if (end <= start) return new Path2D();
+    const steps = Math.max(2, Math.ceil((end - start) / 2));
+    const p = new Path2D();
+    for (let i = 0; i <= steps; i++) {
+      const pt = m.getPointAtLength(start + ((end - start) * i) / steps);
+      if (i === 0) p.moveTo(pt.x, pt.y);
+      else p.lineTo(pt.x, pt.y);
+    }
+    return p;
+  } catch {
+    return null;
+  }
+}
+
 function paintVectorPath(ctx: CanvasRenderingContext2D, node: RenderNode): void {
   const shape = node.shape;
   if (!shape || shape.kind !== "path") return;
-  // PATH_TRIM: node.trimStart / node.trimEnd (0..1) should clip the drawn length.
-  // TODO: canvas path trim needs path sampling — the 2D context has no
-  // getTotalLength/getPointAtLength on Path2D, so we can't slice a sub-path
-  // reliably. Skip trimming for now (draw the full path) rather than block the
-  // other features or crash.
-  // const trimmed = node.trimStart > 0 || node.trimEnd < 1;
+  // PATH_TRIM: reveal only [trimStart, trimEnd] of the stroke length.
+  const trimmed = node.trimStart > 0 || node.trimEnd < 1;
   for (const pd of shape.paths || []) {
     let p: Path2D;
     try {
@@ -232,7 +268,9 @@ function paintVectorPath(ctx: CanvasRenderingContext2D, node: RenderNode): void 
       ctx.lineWidth = pd.strokeWidth != null ? pd.strokeWidth : node.stroke ? node.stroke.weight : 1;
       ctx.lineCap = (pd.cap as CanvasLineCap) || "butt";
       ctx.lineJoin = "round";
-      ctx.stroke(p);
+      // trim the stroked outline (fall back to the full path if measuring is unavailable)
+      const strokePath = trimmed ? trimmedStrokePath(pd.d || "", node.trimStart, node.trimEnd) : null;
+      ctx.stroke(strokePath || p);
     }
   }
 }

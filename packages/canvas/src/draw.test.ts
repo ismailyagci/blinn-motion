@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import {
+  arcVertices,
   sample,
   type MotionDoc,
   type RenderNode,
@@ -184,5 +185,79 @@ describe("@fottie/canvas drawTree", () => {
     expect(() => drawTree(m.ctx, tree([n]), 1)).not.toThrow();
     expect(m.calls.fillRect).toBeGreaterThanOrEqual(1); // noise dots
     expect(m.calls.save).toBe(m.calls.restore); // balanced
+  });
+
+  it("strokes a uniform border exactly once via the box path", () => {
+    const m = mockCtx();
+    const n = node({
+      fill: { type: "solid", color: { r: 0, g: 0, b: 0, a: 1 } },
+      stroke: { color: { r: 255, g: 0, b: 0, a: 1 }, weight: 3, sides: null },
+    });
+    drawTree(m.ctx, tree([n]), 1);
+    expect(m.calls.stroke).toBe(1);
+  });
+
+  it("treats equal per-side weights as a single uniform stroke (not 4 edges)", () => {
+    const m = mockCtx();
+    const n = node({
+      stroke: { color: { r: 0, g: 0, b: 0, a: 1 }, weight: 3, sides: [3, 3, 3, 3] },
+    });
+    drawTree(m.ctx, tree([n]), 1);
+    expect(m.calls.stroke).toBe(1);
+  });
+
+  it("falls back to a uniform stroke for per-side weights on a non-rect shape", () => {
+    const m = mockCtx();
+    const n = node({
+      clipShape: { kind: "ellipse" },
+      stroke: { color: { r: 0, g: 0, b: 0, a: 1 }, weight: 3, sides: [10, 1, 10, 1] },
+    });
+    drawTree(m.ctx, tree([n]), 1);
+    expect(m.calls.stroke).toBe(1); // not 4 separate edges (clip shape isn't a rect)
+    expect(m.calls.ellipse).toBeGreaterThanOrEqual(1);
+  });
+
+  it("traces an arc/polygon clip shape with moveTo + per-vertex lineTo", () => {
+    const m = mockCtx();
+    const verts = arcVertices(-90, 200, 0.45);
+    const n = node({
+      fill: { type: "solid", color: { r: 52, g: 211, b: 153, a: 1 } },
+      clipShape: { kind: "polygon", vertices: verts },
+    });
+    drawTree(m.ctx, tree([n]), 1);
+    expect(m.calls.lineTo).toBeGreaterThanOrEqual(verts.length - 1);
+    expect(m.calls.fill).toBeGreaterThanOrEqual(1);
+  });
+
+  it("strokes a PATH_TRIM vector node (full-path fallback when no SVG measurer)", () => {
+    // Node env has no document → the SVG measurer is null, so the trimmed path
+    // falls back to the full Path2D. Provide a Path2D stub so paintVectorPath runs.
+    const hadPath2D = "Path2D" in globalThis;
+    if (!hadPath2D) (globalThis as any).Path2D = class { constructor(_d?: string) {} };
+    try {
+      const m = mockCtx();
+      const n = node({
+        type: "vector",
+        trimStart: 0,
+        trimEnd: 0.5,
+        shape: {
+          kind: "path",
+          vw: 100,
+          vh: 100,
+          paths: [{ d: "M18 52 L42 78 L84 22", fill: null, stroke: "#4ADE80FF", strokeWidth: 9, cap: "round" }],
+        },
+      });
+      expect(() => drawTree(m.ctx, tree([n]), 1)).not.toThrow();
+      expect(m.calls.stroke).toBeGreaterThanOrEqual(1);
+    } finally {
+      if (!hadPath2D) delete (globalThis as any).Path2D;
+    }
+  });
+
+  it("clips to the node box when clip is set", () => {
+    const m = mockCtx();
+    const n = node({ clip: true, fill: { type: "solid", color: { r: 0, g: 0, b: 0, a: 1 } } });
+    drawTree(m.ctx, tree([n]), 1);
+    expect(m.calls.clip).toBeGreaterThanOrEqual(1);
   });
 });

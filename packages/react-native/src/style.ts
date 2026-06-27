@@ -47,9 +47,10 @@ export function nodeToTransform(node: RenderNode): FottieNodeStyle {
   if (fill) {
     if (fill.type === "solid") {
       style.backgroundColor = rgbaToCss(fill.color);
-    } else if (fill.type === "linear" && fill.stops.length > 0) {
+    } else if (fill.type !== "image" && fill.stops.length > 0) {
       // TODO: react-native-svg / expo-linear-gradient for real gradients.
-      // v1 falls back to the first stop's colour so the box is at least tinted.
+      // v1 falls back to the first stop's colour for every gradient kind
+      // (linear/radial/angular/diamond) so the box is at least tinted.
       style.backgroundColor = rgbaToCss(fill.stops[0]!.color);
     }
     // image fills are handled by <Image> nodes, not here.
