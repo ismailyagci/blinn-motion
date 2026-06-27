@@ -1,23 +1,31 @@
 {
-  "name": "motion-to-code",
-  "version": "1.0.0",
-  "description": "Your Figma Plugin",
-  "main": "code.js",
+  "name": "fottie",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Fottie — Figma Motion → own document format (MotionDoc) → pure-JS render engine with DOM / Canvas / React / React Native adapters.",
+  "license": "MIT",
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "examples/*"
+  ],
   "scripts": {
-    "build": "tsc -p tsconfig.json && node build.js",
-    "test": "node engine/test.js",
+    "build": "npm run build --workspace @fottie/core && npm run build --workspace @fottie/dom --workspace @fottie/canvas --workspace @fottie/react --workspace @fottie/react-native",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "watch": "tsc -p tsconfig.json --watch"
+    "clean": "rimraf 'packages/*/dist' 'examples/*/dist'"
   },
-  "author": "",
-  "license": "",
   "devDependencies": {
-    "@eslint/js": "^9.39.4",
-    "@figma/eslint-plugin-figma-plugins": "*",
-    "@figma/plugin-typings": "*",
-    "eslint": "^9.39.4",
+    "@types/node": "^22.10.0",
+    "jsdom": "^25.0.1",
+    "rimraf": "^6.0.1",
+    "tsup": "^8.3.5",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.1"
+    "vitest": "^2.1.8"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
