@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Fottie RN Example",
+    "slug": "fottie-rn-example",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": { "backgroundColor": "#0b0d12" },
+    "ios": { "supportsTablet": true },
+    "android": { "adaptiveIcon": { "backgroundColor": "#0b0d12" } },
+    "web": { "bundler": "metro" }
+  }
+}

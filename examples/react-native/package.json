@@ -1,0 +1,19 @@
+{
+  "name": "@fottie/example-react-native",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@fottie/core": "^0.1.0",
+    "@fottie/react-native": "^0.1.0"
+  },
+  "comments": {
+    "install": "This is an Expo template. To run it, install the Expo runtime deps (kept out of the workspace install to stay lightweight): `cd examples/react-native && npx expo install expo expo-status-bar react react-native`, then `npm start`. Metro is preconfigured (metro.config.js) to resolve the @fottie/* workspace packages."
+  }
+}

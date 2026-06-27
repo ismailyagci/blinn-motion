@@ -297,6 +297,12 @@ export class DomPlayer {
   get isPlaying(): boolean {
     return this.ticker.isPlaying;
   }
+  get loop(): boolean {
+    return this.ticker.loop;
+  }
+  set loop(v: boolean) {
+    this.ticker.loop = v;
+  }
   play(): this {
     this.ticker.play();
     return this;

@@ -1,0 +1,36 @@
+{
+  "name": "@fottie/react",
+  "version": "0.1.0",
+  "description": "Fottie React adapter — a <Fottie/> component and useFottie() hook that play a MotionDoc via the DOM or Canvas backend.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=17"
+  },
+  "dependencies": {
+    "@fottie/core": "^0.1.0",
+    "@fottie/dom": "^0.1.0",
+    "@fottie/canvas": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "react": "^18.3.1"
+  }
+}

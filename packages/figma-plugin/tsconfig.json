@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "lib": ["es2020"],
+    "strict": true,
+    "rootDir": "src",
+    "outDir": "dist",
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "types": ["@figma/plugin-typings"]
+  },
+  "include": ["src/code.ts"]
+}

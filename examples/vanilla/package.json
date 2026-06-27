@@ -1,0 +1,19 @@
+{
+  "name": "@fottie/example-vanilla",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@fottie/core": "^0.1.0",
+    "@fottie/dom": "^0.1.0",
+    "@fottie/canvas": "^0.1.0"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  }
+}

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Fottie · Vanilla (DOM + Canvas)</title>
+    <style>
+      :root { color-scheme: dark; }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0; padding: 32px;
+        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
+        background: #0b0d12; color: #e7eaf0;
+      }
+      h1 { margin: 0 0 4px; font-size: 22px; }
+      .sub { color: #8b93a7; margin: 0 0 24px; font-size: 14px; }
+      .row { display: flex; gap: 32px; flex-wrap: wrap; }
+      .pane { background: #11141b; border: 1px solid #1e2430; border-radius: 14px; padding: 16px; }
+      .pane h2 { margin: 0 0 12px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: #8b93a7; }
+      .controls { display: flex; align-items: center; gap: 14px; margin-top: 24px; flex-wrap: wrap; }
+      button { background: #2d6cff; color: #fff; border: 0; border-radius: 8px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
+      button.ghost { background: #1e2430; }
+      input[type="range"] { width: 280px; }
+      label { font-size: 13px; color: #8b93a7; display: inline-flex; gap: 6px; align-items: center; }
+      code { color: #9fb4ff; }
+    </style>
+  </head>
+  <body>
+    <h1>Fottie · Vanilla</h1>
+    <p class="sub">
+      One <code>MotionDoc</code>, two backends — <strong>@fottie/dom</strong> and
+      <strong>@fottie/canvas</strong> — both driven by the same
+      <code>@fottie/core</code> render method.
+    </p>
+
+    <div class="row">
+      <div class="pane"><h2>DOM adapter</h2><div id="dom"></div></div>
+      <div class="pane"><h2>Canvas adapter</h2><div id="canvas"></div></div>
+    </div>
+
+    <div class="controls">
+      <button id="toggle">❚❚ Pause</button>
+      <button id="restart" class="ghost">↺ Restart</button>
+      <label>Scrub <input id="scrub" type="range" min="0" max="1000" value="0" /></label>
+      <label>Speed
+        <select id="speed">
+          <option value="0.25">0.25×</option>
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+        </select>
+      </label>
+      <span id="time" style="color:#8b93a7;font-variant-numeric:tabular-nums"></span>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
