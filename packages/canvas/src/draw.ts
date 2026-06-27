@@ -14,6 +14,7 @@ import {
   type RGBA,
   type Vec2,
 } from "@fottie/core";
+import { paintShader } from "./shaders.js";
 
 /** Image cache so fills don't reload every frame. */
 const imageCache = new Map<string, HTMLImageElement>();
@@ -411,7 +412,7 @@ function applyTransform(ctx: CanvasRenderingContext2D, node: RenderNode): void {
   ctx.translate(-ax, -ay);
 }
 
-function drawNode(ctx: CanvasRenderingContext2D, node: RenderNode, inheritedAlpha: number): void {
+function drawNode(ctx: CanvasRenderingContext2D, node: RenderNode, inheritedAlpha: number, time: number): void {
   const alpha = inheritedAlpha * node.opacity;
   if (alpha <= 0) return;
   ctx.save();
@@ -448,6 +449,15 @@ function drawNode(ctx: CanvasRenderingContext2D, node: RenderNode, inheritedAlph
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
 
+  // procedural shader fill (Figma SHADER / NOISE / "Water caustic"), clipped to the box
+  if (node.shader) {
+    ctx.save();
+    boxPath(ctx, node);
+    ctx.clip();
+    paintShader(ctx, node.shader.kind, node.width, node.height, time);
+    ctx.restore();
+  }
+
   // overlay effects, painted over the body (each self-contained via save/restore)
   for (const e of node.effects) {
     if (e.type === "inner") paintInnerShadow(ctx, node, e as InnerEffect);
@@ -463,7 +473,7 @@ function drawNode(ctx: CanvasRenderingContext2D, node: RenderNode, inheritedAlph
     boxPath(ctx, node);
     ctx.clip();
   }
-  for (const child of node.children) drawNode(ctx, child, alpha);
+  for (const child of node.children) drawNode(ctx, child, alpha, time);
   ctx.restore();
 }
 
@@ -476,5 +486,5 @@ export function drawTree(ctx: CanvasRenderingContext2D, tree: RenderTree, dpr = 
     ctx.fillStyle = css(parseColor(background));
     ctx.fillRect(0, 0, width, height);
   }
-  for (const node of tree.nodes) drawNode(ctx, node, 1);
+  for (const node of tree.nodes) drawNode(ctx, node, 1, tree.time);
 }
