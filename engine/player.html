@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MotionEngine — standalone player</title>
+<style>
+  :root { --bg:#0b0d12; --panel:#151922; --line:#232a36; --txt:#e6e9ef; --mut:#8b94a7; --acc:#5b8cff; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:14px/1.4 ui-sans-serif,system-ui,Inter,sans-serif; background:var(--bg); color:var(--txt);
+         display:grid; grid-template-columns:1fr 420px; height:100vh; }
+  .stageWrap { display:flex; align-items:center; justify-content:center; padding:24px; overflow:auto;
+               background:radial-gradient(circle at 50% 30%, #161b26, #0b0d12 70%); }
+  #host { box-shadow:0 30px 80px rgba(0,0,0,.5); border-radius:8px; overflow:hidden; }
+  .side { border-left:1px solid var(--line); background:var(--panel); display:flex; flex-direction:column; min-width:0; }
+  header { padding:14px 16px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; }
+  header b { font-size:15px; } header span { color:var(--mut); font-size:12px; }
+  .controls { padding:12px 16px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:10px; }
+  .row { display:flex; align-items:center; gap:10px; }
+  button { background:#222a39; color:var(--txt); border:1px solid var(--line); border-radius:7px; padding:7px 12px;
+           cursor:pointer; font-size:13px; } button:hover { border-color:var(--acc); }
+  button.primary { background:var(--acc); border-color:var(--acc); color:#fff; }
+  input[type=range] { flex:1; accent-color:var(--acc); }
+  .t { color:var(--mut); font-variant-numeric:tabular-nums; min-width:84px; text-align:right; }
+  label.chk { color:var(--mut); display:flex; gap:6px; align-items:center; cursor:pointer; }
+  textarea { flex:1; width:100%; resize:none; border:none; background:#0e121a; color:#cdd6e6; padding:12px 14px;
+             font:12px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace; outline:none; }
+  .bar { padding:10px 16px; border-top:1px solid var(--line); display:flex; gap:8px; align-items:center; }
+  .err { color:#ff6b6b; font-size:12px; padding:0 16px 8px; min-height:16px; }
+  .drop { position:fixed; inset:0; background:rgba(91,140,255,.15); border:3px dashed var(--acc);
+          display:none; align-items:center; justify-content:center; font-size:20px; z-index:9; }
+  .drop.on { display:flex; }
+</style>
+</head>
+<body>
+  <div class="stageWrap"><div id="host"></div></div>
+  <div class="side">
+    <header><b>MotionEngine</b><span>our own runtime · not Lottie</span></header>
+    <div class="controls">
+      <div class="row">
+        <button id="play" class="primary">▶ Play</button>
+        <button id="restart">⟲ Restart</button>
+        <label class="chk"><input type="checkbox" id="loop" checked /> loop</label>
+      </div>
+      <div class="row">
+        <input type="range" id="scrub" min="0" max="1000" value="0" />
+        <span class="t" id="time">0.00 / 0.00s</span>
+      </div>
+    </div>
+    <div class="err" id="err"></div>
+    <textarea id="json" spellcheck="false"></textarea>
+    <div class="bar">
+      <button id="render" class="primary">Render JSON</button>
+      <button id="sampleBtn">Load sample</button>
+      <span style="color:var(--mut);font-size:12px">drop a .json anywhere</span>
+    </div>
+  </div>
+  <div class="drop" id="drop">Drop MotionDoc JSON to play</div>
+
+<script src="motion-engine.js"></script>
+<script>
+const SAMPLE = {
+  "format": "motion-engine",
+  "version": "1.0",
+  "meta": { "name": "Card intro (hand-authored sample)", "source": "manual" },
+  "duration": 1.6,
+  "fps": 60,
+  "stage": { "width": 375, "height": 600, "background": "#0E1116FF" },
+  "layers": [
+    {
+      "id": "card",
+      "name": "Card",
+      "type": "rect",
+      "base": {
+        "x": 44, "y": 200, "width": 287, "height": 200,
+        "opacity": 1, "rotation": 0, "scaleX": 1, "scaleY": 1,
+        "anchor": { "x": 0.5, "y": 0.5 },
+        "cornerRadius": [24, 24, 24, 24],
+        "fill": { "type": "linear", "angle": 135, "stops": [
+          { "pos": 0, "color": "#3B82F6FF" },
+          { "pos": 1, "color": "#8B5CF6FF" }
+        ] },
+        "clip": false
+      },
+      "tracks": [
+        { "property": "opacity", "op": "set", "unit": "none", "base": 1, "keys": [
+          { "t": 0.0, "v": 0, "easing": { "type": "cubicBezier", "p": [0, 0, 0.58, 1] } },
+          { "t": 0.45, "v": 1, "easing": { "type": "hold" } }
+        ] },
+        { "property": "translateY", "op": "offset", "unit": "px", "base": 0, "keys": [
+          { "t": 0.0, "v": 80, "easing": { "type": "spring", "bounce": 0.45 } },
+          { "t": 0.8, "v": 0, "easing": { "type": "hold" } }
+        ] },
+        { "property": "scaleXY", "op": "set", "unit": "ratio", "base": 1, "keys": [
+          { "t": 0.0, "v": [0.7, 0.7], "easing": { "type": "spring", "bounce": 0.55 } },
+          { "t": 0.8, "v": [1, 1], "easing": { "type": "hold" } }
+        ] }
+      ],
+      "children": [
+        {
+          "id": "badge",
+          "name": "Badge",
+          "type": "ellipse",
+          "base": {
+            "x": 24, "y": 24, "width": 56, "height": 56,
+            "opacity": 1, "rotation": 0, "scaleX": 1, "scaleY": 1,
+            "anchor": { "x": 0.5, "y": 0.5 },
+            "cornerRadius": [28, 28, 28, 28],
+            "fill": { "type": "solid", "color": "#FACC15FF" }
+          },
+          "tracks": [
+            { "property": "rotation", "op": "offset", "unit": "deg", "base": 0, "keys": [
+              { "t": 0.0, "v": 0, "easing": { "type": "linear" } },
+              { "t": 1.6, "v": 360, "easing": { "type": "hold" } }
+            ] },
+            { "property": "scaleXY", "op": "set", "unit": "ratio", "base": 1, "keys": [
+              { "t": 0.4, "v": [1, 1], "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+              { "t": 0.7, "v": [1.25, 1.25], "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+              { "t": 1.0, "v": [1, 1], "easing": { "type": "hold" } }
+            ] },
+            { "property": "fillColor", "op": "set", "unit": "none", "base": "#FACC15FF", "keys": [
+              { "t": 0.4, "v": "#FACC15FF", "easing": { "type": "linear" } },
+              { "t": 1.0, "v": "#22D3EEFF", "easing": { "type": "hold" } }
+            ] }
+          ]
+        },
+        {
+          "id": "title",
+          "name": "Title",
+          "type": "text",
+          "base": {
+            "x": 24, "y": 110, "width": 239, "height": 40,
+            "opacity": 1, "rotation": 0, "scaleX": 1, "scaleY": 1,
+            "anchor": { "x": 0, "y": 0.5 },
+            "text": { "characters": "Our own engine", "fontSize": 26, "fontFamily": "Inter",
+                      "fontWeight": 700, "color": "#FFFFFFFF", "lineHeight": 1.2,
+                      "letterSpacing": 0, "align": "left" }
+          },
+          "tracks": [
+            { "property": "opacity", "op": "set", "unit": "none", "base": 1, "keys": [
+              { "t": 0.5, "v": 0, "easing": { "type": "cubicBezier", "p": [0, 0, 0.58, 1] } },
+              { "t": 0.9, "v": 1, "easing": { "type": "hold" } }
+            ] },
+            { "property": "translateX", "op": "offset", "unit": "px", "base": 0, "keys": [
+              { "t": 0.5, "v": -24, "easing": { "type": "cubicBezier", "p": [0.16, 1, 0.3, 1] } },
+              { "t": 0.95, "v": 0, "easing": { "type": "hold" } }
+            ] }
+          ]
+        }
+      ]
+    }
+  ]
+};
+const host = document.getElementById('host');
+const ta = document.getElementById('json');
+const err = document.getElementById('err');
+const scrub = document.getElementById('scrub');
+const timeEl = document.getElementById('time');
+const playBtn = document.getElementById('play');
+let player = null;
+
+function fmt(t, d){ return t.toFixed(2) + ' / ' + d.toFixed(2) + 's'; }
+
+function render(){
+  err.textContent = '';
+  let doc;
+  try { doc = JSON.parse(ta.value); } catch(e){ err.textContent = 'JSON parse error: ' + e.message; return; }
+  try {
+    if (player) player.pause();
+    player = MotionEngine.create(host, doc, {
+      loop: document.getElementById('loop').checked,
+      onframe: (t, f) => { scrub.value = Math.round(f*1000); timeEl.textContent = fmt(t, player.duration); }
+    });
+    timeEl.textContent = fmt(0, player.duration);
+    playBtn.textContent = '▶ Play';
+  } catch(e){ err.textContent = 'Render error: ' + e.message; }
+}
+
+playBtn.onclick = () => { if(!player) return; player.toggle(); playBtn.textContent = player._playing ? '❚❚ Pause' : '▶ Play'; };
+document.getElementById('restart').onclick = () => { if(!player) return; player.stop(); player.play(); playBtn.textContent='❚❚ Pause'; };
+document.getElementById('loop').onclick = () => { if(player) player.loop = document.getElementById('loop').checked; };
+document.getElementById('render').onclick = render;
+document.getElementById('sampleBtn').onclick = () => { ta.value = JSON.stringify(SAMPLE, null, 2); render(); };
+scrub.oninput = () => { if(!player) return; player.pause(); playBtn.textContent='▶ Play'; player.seekFraction(scrub.value/1000); };
+
+// drag & drop a json file
+const drop = document.getElementById('drop');
+window.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('on'); });
+window.addEventListener('dragleave', e => { if(e.target===drop) drop.classList.remove('on'); });
+window.addEventListener('drop', e => {
+  e.preventDefault(); drop.classList.remove('on');
+  const f = e.dataTransfer.files[0]; if(!f) return;
+  const r = new FileReader(); r.onload = () => { ta.value = r.result; render(); }; r.readAsText(f);
+});
+
+ta.value = JSON.stringify(SAMPLE, null, 2);
+render();
+</script>
+</body>
+</html>
