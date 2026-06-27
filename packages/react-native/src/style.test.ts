@@ -53,7 +53,7 @@ describe("@fottie/react-native nodeToTransform", () => {
 
     const withStroke: RenderNode = {
       ...badge,
-      stroke: { color: { r: 10, g: 20, b: 30, a: 1 }, weight: 3 },
+      stroke: { color: { r: 10, g: 20, b: 30, a: 1 }, weight: 3, sides: null },
     };
     const s = nodeToTransform(withStroke);
     expect(s.borderWidth).toBe(3);

@@ -12,8 +12,8 @@ import {
   type LayerState,
   type MotionDoc,
 } from "@fottie/core";
-import { colorCss, effectsToCss, paintToCss, shapeClipCss } from "./css.js";
-import { drawCaustics, type CausticEntry } from "./caustics.js";
+import { colorCss, effectsToCss, fillWithStops, paintToCss, shapeClipCss } from "./css.js";
+import { drawShader, type CausticEntry } from "./caustics.js";
 import { buildPathSvg, type SvgEl } from "./svg.js";
 
 export interface DomPlayerOptions {
@@ -55,6 +55,7 @@ function buildLayerDom(layer: Layer): Built {
   st.transformOrigin = anchor.x * 100 + "% " + anchor.y * 100 + "%";
   st.willChange = "transform, opacity";
   if (b.clip) st.overflow = "hidden";
+  if (b.blendMode && b.blendMode !== "normal") st.mixBlendMode = b.blendMode;
 
   if (b.effects && b.effects.length) {
     const fx = effectsToCss(b.effects);
@@ -66,7 +67,7 @@ function buildLayerDom(layer: Layer): Built {
     }
   }
   const isPath = b.shape && b.shape.kind === "path";
-  const isClip = b.shape && (b.shape.kind === "polygon" || b.shape.kind === "star");
+  const isClip = b.shape && (b.shape.kind === "polygon" || b.shape.kind === "star" || b.shape.kind === "arc");
   let causticHere: CausticEntry | null = null;
 
   if (layer.type === "text" && b.text) {
@@ -85,10 +86,10 @@ function buildLayerDom(layer: Layer): Built {
   } else if (isPath) {
     buildPathSvg(el, b);
   } else {
-    const isCaustic = b.shader && b.shader.kind === "caustics";
-    if (isCaustic) {
+    const shaderKind = b.shader && (b.shader.kind === "caustics" || b.shader.kind === "noise") ? b.shader.kind : null;
+    if (shaderKind) {
       const cv = document.createElement("canvas");
-      const CRES = 360;
+      const CRES = shaderKind === "noise" ? 180 : 360;
       cv.width = CRES;
       cv.height = CRES;
       cv.style.position = "absolute";
@@ -98,7 +99,7 @@ function buildLayerDom(layer: Layer): Built {
       cv.style.height = "100%";
       cv.style.display = "block";
       el.appendChild(cv);
-      causticHere = { canvas: cv, ctx: cv.getContext("2d")!, w: CRES, h: CRES };
+      causticHere = { canvas: cv, ctx: cv.getContext("2d")!, w: CRES, h: CRES, kind: shaderKind };
     } else if (b.image) {
       st.backgroundImage = "url(" + b.image + ")";
       st.backgroundSize = "100% 100%";
@@ -112,13 +113,25 @@ function buildLayerDom(layer: Layer): Built {
       (st as any).webkitClipPath = cp;
     } else if (layer.type === "ellipse") {
       st.borderRadius = "50%";
-    } else if (!b.image && !isCaustic) {
+    } else if (!b.image && !shaderKind) {
       const cr = b.cornerRadius || [0, 0, 0, 0];
       st.borderRadius = cr[0] + "px " + cr[1] + "px " + cr[2] + "px " + cr[3] + "px";
     }
   }
   if (b.stroke && !isPath && !isClip) {
-    st.border = (b.stroke.weight || 1) + "px solid " + colorCss(b.stroke.color || "#000000FF");
+    const col = colorCss(b.stroke.color || "#000000FF");
+    if (b.borderWeights) {
+      // per-side borders [top, right, bottom, left]
+      const w = b.borderWeights;
+      st.borderStyle = "solid";
+      st.borderColor = col;
+      st.borderTopWidth = w[0] + "px";
+      st.borderRightWidth = w[1] + "px";
+      st.borderBottomWidth = w[2] + "px";
+      st.borderLeftWidth = w[3] + "px";
+    } else {
+      st.border = (b.stroke.weight || 1) + "px solid " + col;
+    }
   }
 
   const entry: Entry = { layer, el };
@@ -180,6 +193,23 @@ function buildLayerDom(layer: Layer): Built {
   return { el, entries, maskEntries, caustics };
 }
 
+/** Merge animated effect overrides into the base effects, then return CSS. */
+function animatedEffectsCss(b: any, s: LayerState) {
+  const merged = (b.effects || []).map((e: any, i: number) => {
+    const o = s.effectOverrides[i];
+    if (!o) return e;
+    return {
+      ...e,
+      x: o.offsetX != null ? o.offsetX : e.x,
+      y: o.offsetY != null ? o.offsetY : e.y,
+      radius: o.radius != null ? o.radius : e.radius,
+      spread: o.spread != null ? o.spread : e.spread,
+      color: o.color != null ? o.color : e.color,
+    };
+  });
+  return effectsToCss(merged);
+}
+
 function applyState(el: SvgEl, layer: Layer, s: LayerState): void {
   el.style.transform =
     "translate(" + s.translateX + "px," + s.translateY + "px) rotate(" + s.rotation + "deg) scale(" + s.scaleX + "," + s.scaleY + ")";
@@ -188,26 +218,70 @@ function applyState(el: SvgEl, layer: Layer, s: LayerState): void {
   if (b.width !== s.width) el.style.width = s.width + "px";
   if (b.height !== s.height) el.style.height = s.height + "px";
   const shape = b.shape;
-  if (shape && (shape.kind === "polygon" || shape.kind === "star")) {
+  if (shape && (shape.kind === "polygon" || shape.kind === "star" || shape.kind === "arc")) {
     const cp = shapeClipCss(shape, s.shapeCount != null ? s.shapeCount : (shape as any).points);
     el.style.clipPath = cp;
     (el.style as any).webkitClipPath = cp;
   }
   if (shape && shape.kind === "path" && el._svgPaths) {
+    const trimmed = s.trimStart > 0 || s.trimEnd < 1;
     for (let pi = 0; pi < el._svgPaths.length; pi++) {
+      const path = el._svgPaths[pi]!;
       const pd = (shape.paths || [])[pi] || ({} as any);
-      if (pd.stroke || (b.stroke && b.stroke.color)) el._svgPaths[pi]!.setAttribute("stroke-width", String(s.strokeWeight));
-      if (s.fillColorOverride != null && pd.fill) el._svgPaths[pi]!.setAttribute("fill", colorCss(s.fillColorOverride));
+      if (pd.stroke || (b.stroke && b.stroke.color)) path.setAttribute("stroke-width", String(s.strokeWeight));
+      if (s.strokeColorOverride != null) path.setAttribute("stroke", colorCss(s.strokeColorOverride));
+      if (s.fillColorOverride != null && pd.fill) path.setAttribute("fill", colorCss(s.fillColorOverride));
+      // PATH_TRIM: reveal only [trimStart, trimEnd] of the stroke length
+      if (trimmed) {
+        try {
+          const len = path.getTotalLength();
+          const start = s.trimStart * len;
+          const vis = Math.max(0, (s.trimEnd - s.trimStart) * len);
+          path.style.strokeDasharray = vis + " " + len;
+          path.style.strokeDashoffset = String(-start);
+        } catch {
+          /* getTotalLength unavailable (jsdom) */
+        }
+      }
     }
   }
+
+  // animated effects (shadow offset/radius/spread/color)
+  if (Object.keys(s.effectOverrides).length && b.effects && b.effects.length) {
+    const fx = animatedEffectsCss(b, s);
+    el.style.boxShadow = fx.boxShadow;
+    if (fx.filter) el.style.filter = fx.filter;
+  }
+
+  // animated stroke color / weight on box borders
+  if (b.stroke && !(shape && (shape.kind === "path" || shape.kind === "polygon" || shape.kind === "star" || shape.kind === "arc"))) {
+    const col = s.strokeColorOverride != null ? colorCss(s.strokeColorOverride) : colorCss(b.stroke.color || "#000000FF");
+    if (s.borderWeights) {
+      el.style.borderStyle = "solid";
+      el.style.borderColor = col;
+      el.style.borderTopWidth = s.borderWeights[0] + "px";
+      el.style.borderRightWidth = s.borderWeights[1] + "px";
+      el.style.borderBottomWidth = s.borderWeights[2] + "px";
+      el.style.borderLeftWidth = s.borderWeights[3] + "px";
+    } else {
+      el.style.border = s.strokeWeight + "px solid " + col;
+    }
+  }
+
   const isImg = b.image;
+  // animated gradient stops → re-derive the gradient background
+  const fillStopAnim = b.fill && (b.fill.type === "linear" || b.fill.type === "radial" || b.fill.type === "angular" || b.fill.type === "diamond") && Object.keys(s.fillStopOverrides).length;
+  if (fillStopAnim && !isImg) {
+    el.style.background = paintToCss(fillWithStops(b.fill, s.fillStopOverrides));
+  }
+
   if (layer.type !== "text" && !isImg && shape == null) {
     if (s.fillColorOverride != null) el.style.background = colorCss(s.fillColorOverride);
     if (layer.type !== "ellipse") {
       const cr = s.cornerRadius;
       el.style.borderRadius = cr[0] + "px " + cr[1] + "px " + cr[2] + "px " + cr[3] + "px";
     }
-  } else if (layer.type !== "text" && !isImg && shape && (shape.kind === "polygon" || shape.kind === "star")) {
+  } else if (layer.type !== "text" && !isImg && shape && (shape.kind === "polygon" || shape.kind === "star" || shape.kind === "arc")) {
     if (s.fillColorOverride != null) el.style.background = colorCss(s.fillColorOverride);
   } else if (s.fillColorOverride != null && layer.type === "text") {
     el.style.color = colorCss(s.fillColorOverride);
@@ -284,7 +358,7 @@ export class DomPlayer {
     }
     for (const c of this.caustics) {
       try {
-        drawCaustics(c, t);
+        drawShader(c, t);
       } catch {
         /* ignore */
       }

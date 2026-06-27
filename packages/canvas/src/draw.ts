@@ -7,8 +7,10 @@
 import {
   parseColor,
   rgbaToCss,
+  type Corners,
   type RenderNode,
   type RenderTree,
+  type ResolvedPaint,
   type RGBA,
   type Vec2,
 } from "@fottie/core";
@@ -30,17 +32,28 @@ function css(c: RGBA): string {
   return rgbaToCss(c);
 }
 
+function clamp01(v: number): number {
+  return Math.max(0, Math.min(1, v));
+}
+
 /** Build the node's own outline path (in local box coords) into `ctx`. */
 function boxPath(ctx: CanvasRenderingContext2D, node: RenderNode): void {
+  ctx.beginPath();
+  appendBoxPath(ctx, node);
+}
+
+/** Append the node's outline subpath WITHOUT a `beginPath` (for compound paths). */
+function appendBoxPath(ctx: CanvasRenderingContext2D, node: RenderNode): void {
   const w = node.width;
   const h = node.height;
-  ctx.beginPath();
   const clip = node.clipShape;
   if (clip.kind === "ellipse") {
     ctx.ellipse(w / 2, h / 2, Math.abs(w / 2), Math.abs(h / 2), 0, 0, Math.PI * 2);
     return;
   }
   if (clip.kind === "polygon") {
+    // Arc shapes arrive here too: @fottie/core converts arc → polygon vertices,
+    // so the generic polygon path covers pie/donut/arc with no special-casing.
     polyPath(ctx, clip.vertices, w, h);
     return;
   }
@@ -92,7 +105,52 @@ function makeGradient(
   const cy = h / 2;
   const half = (Math.abs(w * dx) + Math.abs(h * dy)) / 2;
   const g = ctx.createLinearGradient(cx - dx * half, cy - dy * half, cx + dx * half, cy + dy * half);
-  for (const s of stops) g.addColorStop(Math.max(0, Math.min(1, s.pos)), css(s.color));
+  for (const s of stops) g.addColorStop(clamp01(s.pos), css(s.color));
+  return g;
+}
+
+/**
+ * Resolve a paint to a canvas `fillStyle` for solid + every gradient kind.
+ * Returns `null` for image paints (the caller clips + draws the bitmap itself).
+ */
+function paintToFillStyle(
+  ctx: CanvasRenderingContext2D,
+  fill: ResolvedPaint,
+  w: number,
+  h: number,
+): string | CanvasGradient | null {
+  if (fill.type === "solid") return css(fill.color);
+  if (fill.type === "image") return null;
+  if (fill.type === "linear") return makeGradient(ctx, fill.angle, w, h, fill.stops);
+
+  // radial / angular / diamond all originate from a center + radius.
+  const cx = fill.center.x * w;
+  const cy = fill.center.y * h;
+  const R = Math.max(0, fill.radius) * Math.max(Math.abs(w), Math.abs(h));
+
+  if (fill.type === "angular") {
+    // Conic gradient (modern canvas only). Fall back to the radial gradient if
+    // the API is missing or throws.
+    const anyCtx = ctx as unknown as {
+      createConicGradient?: (startAngle: number, x: number, y: number) => CanvasGradient;
+    };
+    if (typeof anyCtx.createConicGradient === "function") {
+      try {
+        const start = (fill.angle * Math.PI) / 180;
+        const g = anyCtx.createConicGradient(start, cx, cy);
+        for (const s of fill.stops) g.addColorStop(clamp01(s.pos), css(s.color));
+        return g;
+      } catch {
+        // fall through to the radial approximation
+      }
+    }
+  }
+
+  // radial (and diamond) → radial gradient.
+  // TODO diamond: a true diamond gradient needs a Chebyshev-distance ramp; we
+  // approximate it with the same radial gradient for now.
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
+  for (const s of fill.stops) g.addColorStop(clamp01(s.pos), css(s.color));
   return g;
 }
 
@@ -100,13 +158,7 @@ function paintFill(ctx: CanvasRenderingContext2D, node: RenderNode): void {
   const fill = node.fill;
   if (!fill) return;
   boxPath(ctx, node);
-  if (fill.type === "solid") {
-    ctx.fillStyle = css(fill.color);
-    ctx.fill();
-  } else if (fill.type === "linear") {
-    ctx.fillStyle = makeGradient(ctx, fill.angle, node.width, node.height, fill.stops);
-    ctx.fill();
-  } else if (fill.type === "image") {
+  if (fill.type === "image") {
     const img = getImage(fill.src);
     if (img) {
       ctx.save();
@@ -114,6 +166,12 @@ function paintFill(ctx: CanvasRenderingContext2D, node: RenderNode): void {
       drawCover(ctx, img, node.width, node.height);
       ctx.restore();
     }
+    return;
+  }
+  const style = paintToFillStyle(ctx, fill, node.width, node.height);
+  if (style != null) {
+    ctx.fillStyle = style;
+    ctx.fill();
   }
 }
 
@@ -151,6 +209,12 @@ function paintText(ctx: CanvasRenderingContext2D, node: RenderNode): void {
 function paintVectorPath(ctx: CanvasRenderingContext2D, node: RenderNode): void {
   const shape = node.shape;
   if (!shape || shape.kind !== "path") return;
+  // PATH_TRIM: node.trimStart / node.trimEnd (0..1) should clip the drawn length.
+  // TODO: canvas path trim needs path sampling — the 2D context has no
+  // getTotalLength/getPointAtLength on Path2D, so we can't slice a sub-path
+  // reliably. Skip trimming for now (draw the full path) rather than block the
+  // other features or crash.
+  // const trimmed = node.trimStart > 0 || node.trimEnd < 1;
   for (const pd of shape.paths || []) {
     let p: Path2D;
     try {
@@ -173,6 +237,131 @@ function paintVectorPath(ctx: CanvasRenderingContext2D, node: RenderNode): void 
   }
 }
 
+// --------------------------------------------------------------------- borders ---
+
+function sidesDiffer(s: Corners): boolean {
+  return !(s[0] === s[1] && s[1] === s[2] && s[2] === s[3]);
+}
+
+/**
+ * Stroke the node's border. Uniform (single `boxPath` stroke) unless the node
+ * carries per-side weights that differ AND its clip shape is a plain rect — in
+ * which case each edge is stroked separately with its own line width.
+ */
+function strokeBorder(ctx: CanvasRenderingContext2D, node: RenderNode): void {
+  const stroke = node.stroke;
+  if (!stroke) return;
+  const sides = stroke.sides;
+  if (sides && node.clipShape.kind === "rect" && sidesDiffer(sides)) {
+    strokeSides(ctx, node, sides, stroke.color);
+    return;
+  }
+  if (stroke.weight > 0) {
+    boxPath(ctx, node);
+    ctx.strokeStyle = css(stroke.color);
+    ctx.lineWidth = stroke.weight;
+    ctx.stroke();
+  }
+}
+
+function strokeSides(ctx: CanvasRenderingContext2D, node: RenderNode, sides: Corners, color: RGBA): void {
+  const w = node.width;
+  const h = node.height;
+  const [top, right, bottom, left] = sides;
+  ctx.strokeStyle = css(color);
+  const edge = (x1: number, y1: number, x2: number, y2: number, weight: number) => {
+    if (!(weight > 0)) return;
+    ctx.beginPath();
+    ctx.moveTo(x1, y1);
+    ctx.lineTo(x2, y2);
+    ctx.lineWidth = weight;
+    ctx.stroke();
+  };
+  edge(0, 0, w, 0, top); // top
+  edge(w, 0, w, h, right); // right
+  edge(0, h, w, h, bottom); // bottom
+  edge(0, 0, 0, h, left); // left
+}
+
+// --------------------------------------------------------------------- effects ---
+
+type InnerEffect = { x: number; y: number; radius: number; spread: number; color: RGBA };
+type NoiseEffect = { size: number; density: number; color: RGBA };
+type GlassEffect = { radius: number; color: RGBA };
+
+/**
+ * Inset shadow approximation: clip to the shape, then fill the region OUTSIDE the
+ * shape (a big rect minus the box, via even-odd) with the shadow enabled so it
+ * bleeds inward across the clipped edge.
+ */
+function paintInnerShadow(ctx: CanvasRenderingContext2D, node: RenderNode, eff: InnerEffect): void {
+  const w = node.width;
+  const h = node.height;
+  ctx.save();
+  boxPath(ctx, node);
+  ctx.clip();
+  const pad = Math.max(Math.abs(w), Math.abs(h)) + (Math.abs(eff.x) + Math.abs(eff.y) + eff.radius + eff.spread) * 2 + 100;
+  ctx.beginPath();
+  ctx.rect(-pad, -pad, w + pad * 2, h + pad * 2);
+  appendBoxPath(ctx, node); // inner hole → even-odd fills only the outside
+  ctx.shadowColor = css(eff.color);
+  ctx.shadowBlur = Math.max(0, eff.radius + eff.spread);
+  ctx.shadowOffsetX = eff.x;
+  ctx.shadowOffsetY = eff.y;
+  ctx.fillStyle = css(eff.color); // opaque body; only its inward shadow is visible
+  ctx.fill("evenodd");
+  ctx.restore();
+}
+
+/**
+ * Procedural monochrome noise overlay clipped to the box. Pseudo-randomness comes
+ * from a sine hash of the cell coordinates (no Math.random dependency), in the
+ * spirit of @fottie/dom's caustics. `density` drives both coverage and alpha.
+ */
+function paintNoise(ctx: CanvasRenderingContext2D, node: RenderNode, eff: NoiseEffect): void {
+  const w = Math.abs(node.width);
+  const h = Math.abs(node.height);
+  if (w <= 0 || h <= 0) return;
+  const density = clamp01(eff.density != null ? eff.density : 0.5);
+  const cell = Math.max(1, eff.size || 2);
+  // Cap the grid so a huge box can't explode the loop (best-effort overlay).
+  const cols = Math.min(400, Math.ceil(w / cell));
+  const rows = Math.min(400, Math.ceil(h / cell));
+  const cw = w / cols;
+  const ch = h / rows;
+  ctx.save();
+  boxPath(ctx, node);
+  ctx.clip();
+  ctx.fillStyle = css(eff.color);
+  for (let gy = 0; gy < rows; gy++) {
+    for (let gx = 0; gx < cols; gx++) {
+      if (hash2(gx, gy) < density) {
+        ctx.globalAlpha = clamp01(density * (0.35 + 0.65 * hash2(gy + 1, gx + 1)));
+        ctx.fillRect(gx * cw, gy * ch, cw, ch);
+      }
+    }
+  }
+  ctx.restore();
+}
+
+/** Classic GLSL `fract(sin(dot)*k)` hash → pseudo-random 0..1 from integer coords. */
+function hash2(x: number, y: number): number {
+  const s = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+/**
+ * Glass / liquid refraction. Canvas can't sample a blurred backdrop, so we
+ * approximate it as a translucent tint of `color` over the shape.
+ */
+function paintGlass(ctx: CanvasRenderingContext2D, node: RenderNode, eff: GlassEffect): void {
+  ctx.save();
+  boxPath(ctx, node);
+  ctx.fillStyle = css(eff.color);
+  ctx.fill();
+  ctx.restore();
+}
+
 function applyTransform(ctx: CanvasRenderingContext2D, node: RenderNode): void {
   ctx.translate(node.x, node.y);
   ctx.translate(node.translateX, node.translateY);
@@ -191,13 +380,18 @@ function drawNode(ctx: CanvasRenderingContext2D, node: RenderNode, inheritedAlph
   applyTransform(ctx, node);
   ctx.globalAlpha = alpha;
 
-  // drop shadow (first visible drop effect)
+  // Blend mode: CSS names map 1:1 to canvas composite ops. Restored by `restore`.
+  if (node.blendMode && node.blendMode !== "normal") {
+    ctx.globalCompositeOperation = node.blendMode as GlobalCompositeOperation;
+  }
+
+  // drop shadow (first drop effect). Fold `spread` into the blur so it isn't lost.
   const drop = node.effects.find((e) => e.type === "drop") as
-    | { x: number; y: number; radius: number; color: RGBA }
+    | { x: number; y: number; radius: number; spread: number; color: RGBA }
     | undefined;
   if (drop) {
     ctx.shadowColor = css(drop.color);
-    ctx.shadowBlur = drop.radius;
+    ctx.shadowBlur = Math.max(0, drop.radius + (drop.spread || 0));
     ctx.shadowOffsetX = drop.x;
     ctx.shadowOffsetY = drop.y;
   }
@@ -210,17 +404,21 @@ function drawNode(ctx: CanvasRenderingContext2D, node: RenderNode, inheritedAlph
     paintFill(ctx, node);
   }
 
-  // reset shadow before stroke/children so it doesn't bleed onto them
+  // reset shadow before overlays/stroke/children so it doesn't bleed onto them
   ctx.shadowColor = "transparent";
   ctx.shadowBlur = 0;
   ctx.shadowOffsetX = 0;
   ctx.shadowOffsetY = 0;
 
-  if (node.stroke && node.stroke.weight > 0 && !(node.shape && node.shape.kind === "path")) {
-    boxPath(ctx, node);
-    ctx.strokeStyle = css(node.stroke.color);
-    ctx.lineWidth = node.stroke.weight;
-    ctx.stroke();
+  // overlay effects, painted over the body (each self-contained via save/restore)
+  for (const e of node.effects) {
+    if (e.type === "inner") paintInnerShadow(ctx, node, e as InnerEffect);
+    else if (e.type === "glass") paintGlass(ctx, node, e as GlassEffect);
+    else if (e.type === "noise" || e.type === "texture") paintNoise(ctx, node, e as NoiseEffect);
+  }
+
+  if (node.stroke && !(node.shape && node.shape.kind === "path")) {
+    strokeBorder(ctx, node);
   }
 
   if (node.clip) {

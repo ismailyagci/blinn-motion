@@ -68,10 +68,18 @@ export function nodeToTransform(node: RenderNode): FottieNodeStyle {
     }
   }
 
-  // Stroke → border.
-  if (node.stroke && node.stroke.weight > 0) {
-    style.borderWidth = node.stroke.weight;
+  // Stroke → border (per-side when the four weights differ).
+  if (node.stroke && (node.stroke.weight > 0 || node.stroke.sides)) {
     style.borderColor = rgbaToCss(node.stroke.color);
+    if (node.stroke.sides) {
+      const [t, r, b, l] = node.stroke.sides;
+      style.borderTopWidth = t;
+      style.borderRightWidth = r;
+      style.borderBottomWidth = b;
+      style.borderLeftWidth = l;
+    } else {
+      style.borderWidth = node.stroke.weight;
+    }
   }
 
   return style;

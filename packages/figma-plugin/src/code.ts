@@ -30,6 +30,33 @@ const PROP_MAP: Record<string, string> = {
   RECTANGLE_BOTTOM_LEFT_CORNER_RADIUS: 'cornerRadiusBL',
   PATH_TRIM_START: 'trimStart',
   PATH_TRIM_END: 'trimEnd',
+  // per-side border weights
+  BORDER_TOP_WEIGHT: 'borderTopWeight',
+  BORDER_RIGHT_WEIGHT: 'borderRightWeight',
+  BORDER_BOTTOM_WEIGHT: 'borderBottomWeight',
+  BORDER_LEFT_WEIGHT: 'borderLeftWeight',
+  // auto-layout / grid (data-preserved; engine may reflow)
+  STACK_SPACING: 'stackSpacing',
+  STACK_PADDING_TOP: 'stackPaddingTop',
+  STACK_PADDING_RIGHT: 'stackPaddingRight',
+  STACK_PADDING_BOTTOM: 'stackPaddingBottom',
+  STACK_PADDING_LEFT: 'stackPaddingLeft',
+  STACK_COUNTER_SPACING: 'stackCounterSpacing',
+  GRID_ROW_GAP: 'gridRowGap',
+  GRID_COLUMN_GAP: 'gridColumnGap',
+};
+
+// Figma BlendMode -> CSS mix-blend-mode (PASS_THROUGH / NORMAL -> normal).
+const BLEND_MAP: Record<string, string> = {
+  MULTIPLY: 'multiply', SCREEN: 'screen', OVERLAY: 'overlay', DARKEN: 'darken',
+  LIGHTEN: 'lighten', COLOR_DODGE: 'color-dodge', COLOR_BURN: 'color-burn',
+  HARD_LIGHT: 'hard-light', SOFT_LIGHT: 'soft-light', DIFFERENCE: 'difference',
+  EXCLUSION: 'exclusion', HUE: 'hue', SATURATION: 'saturation', COLOR: 'color',
+  LUMINOSITY: 'luminosity',
+};
+// EffectKeyframeFieldName -> our effect override field
+const EFFECT_FIELD_MAP: Record<string, string> = {
+  OFFSET_X: 'offsetX', OFFSET_Y: 'offsetY', RADIUS: 'radius', SPREAD: 'spread', COLOR: 'color',
 };
 
 // corner radii that should expand into all four corners
@@ -51,15 +78,33 @@ function paintToOur(paint: Paint | undefined): any {
     const o = paint.opacity == null ? 1 : paint.opacity;
     return { type: 'solid', color: rgbaToHex({ r: paint.color.r, g: paint.color.g, b: paint.color.b, a: o }) };
   }
-  if (paint.type === 'GRADIENT_LINEAR') {
-    // approximate gradient angle from gradientTransform
-    const gt = (paint as GradientPaint).gradientTransform;
-    let angle = 180;
-    try { angle = Math.round((Math.atan2(gt[1][0], gt[0][0]) * 180) / Math.PI) + 90; } catch (e) {}
-    const stops = (paint as GradientPaint).gradientStops.map((s) => ({
+  if (paint.type === 'GRADIENT_LINEAR' || paint.type === 'GRADIENT_RADIAL' ||
+      paint.type === 'GRADIENT_ANGULAR' || paint.type === 'GRADIENT_DIAMOND') {
+    const gp = paint as GradientPaint;
+    const stops = gp.gradientStops.map((s) => ({
       pos: s.position, color: rgbaToHex({ r: s.color.r, g: s.color.g, b: s.color.b, a: s.color.a }),
     }));
-    return { type: 'linear', angle, stops };
+    // gradientHandlePositions: [start/center, end, width] in 0..1 of the box.
+    let center = { x: 0.5, y: 0.5 };
+    let radius = 0.7;
+    let angle = 180;
+    try {
+      const hp = (gp as any).gradientHandlePositions;
+      if (hp && hp.length >= 2) {
+        center = { x: hp[0].x, y: hp[0].y };
+        const dx = hp[1].x - hp[0].x, dy = hp[1].y - hp[0].y;
+        radius = Math.sqrt(dx * dx + dy * dy) || 0.7;
+        angle = Math.round((Math.atan2(dy, dx) * 180) / Math.PI);
+      }
+    } catch (e) {}
+    if (paint.type === 'GRADIENT_LINEAR') {
+      // linear angle is more reliable from the transform matrix (existing path)
+      try { const gt = gp.gradientTransform; angle = Math.round((Math.atan2(gt[1][0], gt[0][0]) * 180) / Math.PI) + 90; } catch (e) {}
+      return { type: 'linear', angle, stops };
+    }
+    if (paint.type === 'GRADIENT_RADIAL') return { type: 'radial', center, radius, stops };
+    if (paint.type === 'GRADIENT_DIAMOND') return { type: 'diamond', center, radius, stops };
+    return { type: 'angular', center, angle: angle + 90, stops };
   }
   if (paint.type === 'IMAGE') return { type: 'solid', color: '#888888FF' }; // image data needs async export; placeholder for v1
   return null;
@@ -89,6 +134,16 @@ function effectsToOur(node: any): any[] {
         out.push({ type: 'blur', radius: e.radius || 0 });
       } else if (e.type === 'BACKGROUND_BLUR') {
         out.push({ type: 'bgblur', radius: e.radius || 0 });
+      } else if (e.type === 'GLASS') {
+        // glass/liquid: approximate as a frosted (blurred) translucent surface
+        out.push({ type: 'glass', radius: e.radius || 8, color: '#FFFFFF22' });
+      } else if (e.type === 'NOISE') {
+        out.push({ type: 'noise',
+          size: e.noiseSize || 1,
+          density: e.density == null ? 0.5 : e.density,
+          color: e.color ? rgbaToHex({ r: e.color.r, g: e.color.g, b: e.color.b, a: e.color.a == null ? 1 : e.color.a }) : '#000000FF' });
+      } else if (e.type === 'TEXTURE') {
+        out.push({ type: 'texture', size: e.noiseSize || e.radius || 1 });
       }
     }
   } catch (e) {}
@@ -108,8 +163,10 @@ function hasTextureFill(node: any): boolean {
     for (const p of fills) {
       if (p.visible === false) continue;
       if (p.type === 'SOLID') continue;
-      if (p.type === 'GRADIENT_LINEAR' && !isPathNode(node)) continue; // native CSS gradient OK
-      return true; // image/shader/pattern/radial, or a gradient on a freeform path
+      // all gradient kinds now render natively (CSS / canvas) on box/clip nodes
+      if ((p.type === 'GRADIENT_LINEAR' || p.type === 'GRADIENT_RADIAL' ||
+           p.type === 'GRADIENT_ANGULAR' || p.type === 'GRADIENT_DIAMOND') && !isPathNode(node)) continue;
+      return true; // image/shader/pattern, or a gradient on a freeform path
     }
   } catch (e) {}
   return false;
@@ -117,7 +174,7 @@ function hasTextureFill(node: any): boolean {
 
 // Effects we CAN'T express as CSS box-shadow / filter (shaders, noise, texture, glass…).
 // Such a node must still rasterize so its appearance (e.g. the water-shader polygon) survives.
-const SUPPORTED_EFFECTS = ['DROP_SHADOW', 'INNER_SHADOW', 'LAYER_BLUR', 'BACKGROUND_BLUR'];
+const SUPPORTED_EFFECTS = ['DROP_SHADOW', 'INNER_SHADOW', 'LAYER_BLUR', 'BACKGROUND_BLUR', 'GLASS', 'NOISE', 'TEXTURE'];
 function hasUnsupportedEffect(node: any): boolean {
   try {
     const fx = node.effects;
@@ -204,6 +261,8 @@ function convValue(kv: any): any {
     case 'TEXT_DATA': return kv.value;
     case 'VECTOR': return [kv.value.x, kv.value.y];
     case 'COLOR': return rgbaToHex(kv.value);
+    case 'COLOR_POINT': return kv.value && kv.value.color ? rgbaToHex(kv.value.color) : null;
+    // CIRCLE / LINE / CIRCLE_POINT (gradient/shape handles) — not yet mapped; ignore safely
     default: return null;
   }
 }
@@ -309,19 +368,46 @@ function tracksFromAnims(anims: any): any[] {
   for (const key of propKeys) {
     try {
       if (key === 'fills' || key === 'strokes' || key === 'effects') {
-        // fills[i] color animation -> single fillColor track (first animated fill)
+        // Indexed collections: fills[i] / strokes[i] color, effects[i].<field>, and
+        // animated gradient stops (COLOR_POINT). The Beta API's exact shape varies, so
+        // we probe both "binding with .tracks" and "record keyed by field" forms.
         const coll = anims[key];
         if (!coll) continue;
         for (const idx of Object.keys(coll)) {
-          const binding = coll[idx];
-          if (!binding || !binding.tracks) continue;
-          for (const tr of binding.tracks) {
-            const keys = (tr.keyframes || []).map((k: any) => ({
-              t: k.timelinePosition, v: convValue(k.value), easing: convEasing(k.easing),
-            })).filter((k: any) => k.v != null);
-            if (keys.length && key === 'fills') {
-              tracks.push({ property: 'fillColor', op: (tr.keyframeOperation || 'SET').toLowerCase(),
-                base: binding.baseValue ? convValue(binding.baseValue) : undefined, keys });
+          const entry = coll[idx];
+          if (!entry) continue;
+          const bindings: Array<{ field: any; binding: any }> = entry.tracks
+            ? [{ field: entry.field, binding: entry }]
+            : Object.keys(entry).map((f) => ({ field: f, binding: (entry as any)[f] }));
+          for (const { field, binding } of bindings) {
+            if (!binding || !binding.tracks) continue;
+            const baseV = binding.baseValue !== undefined ? convValue(binding.baseValue) : undefined;
+            for (const tr of binding.tracks) {
+              const op = (tr.keyframeOperation || 'SET').toLowerCase();
+              const scalar: any[] = [];
+              const stopColor: any[] = [];
+              const stopPos: any[] = [];
+              for (const k of tr.keyframes || []) {
+                const val: any = k.value;
+                const ease = convEasing(k.easing);
+                if (val && val.type === 'COLOR_POINT' && val.value) {
+                  stopColor.push({ t: k.timelinePosition, v: rgbaToHex(val.value.color), easing: ease });
+                  stopPos.push({ t: k.timelinePosition, v: val.value.x, easing: ease });
+                } else {
+                  const cv = convValue(val);
+                  if (cv != null) scalar.push({ t: k.timelinePosition, v: cv, easing: ease });
+                }
+              }
+              if (key === 'fills') {
+                if (scalar.length) tracks.push({ property: 'fillColor', op, base: baseV, keys: scalar });
+                if (stopColor.length) tracks.push({ property: 'fillStop:' + idx + ':color', op: 'set', keys: stopColor });
+                if (stopPos.length) tracks.push({ property: 'fillStop:' + idx + ':pos', op: 'set', keys: stopPos });
+              } else if (key === 'strokes') {
+                if (scalar.length) tracks.push({ property: 'strokeColor', op, base: baseV, keys: scalar });
+              } else if (key === 'effects') {
+                const f = EFFECT_FIELD_MAP[String(field || tr.field || '').toUpperCase()];
+                if (f && scalar.length) tracks.push({ property: 'effect:' + idx + ':' + f, op, base: baseV, keys: scalar });
+              }
             }
           }
         }
@@ -508,6 +594,26 @@ function buildLayer(node: any, parentAbsX: number, parentAbsY: number): any {
     if (stroke && stroke.type === 'SOLID' && node.strokeWeight && node.strokeWeight !== figma.mixed) {
       base.stroke = { color: rgbaToHex({ r: stroke.color.r, g: stroke.color.g, b: stroke.color.b, a: stroke.opacity == null ? 1 : stroke.opacity }), weight: node.strokeWeight };
     }
+    // Per-side border weights (individual strokes) — set when the four sides differ.
+    try {
+      const t = node.strokeTopWeight, r = node.strokeRightWeight, btm = node.strokeBottomWeight, l = node.strokeLeftWeight;
+      if ([t, r, btm, l].every((v) => typeof v === 'number') && !(t === r && r === btm && btm === l)) {
+        base.borderWeights = [t, r, btm, l];
+        if (!base.stroke && stroke && stroke.type === 'SOLID') {
+          base.stroke = { color: rgbaToHex({ r: stroke.color.r, g: stroke.color.g, b: stroke.color.b, a: stroke.opacity == null ? 1 : stroke.opacity }), weight: Math.max(t, r, btm, l) };
+        }
+      }
+    } catch (e) {}
+    // Ellipse arc / pie / donut (arcData). Angles are radians in Figma.
+    if (node.type === 'ELLIPSE') {
+      try {
+        const arc = node.arcData;
+        if (arc && (Math.abs((arc.endingAngle - arc.startingAngle) - Math.PI * 2) > 1e-3 || (arc.innerRadius || 0) > 0)) {
+          const toDeg = (rad: number) => Math.round((rad * 180) / Math.PI);
+          base.shape = { kind: 'arc', startAngle: toDeg(arc.startingAngle), endAngle: toDeg(arc.endingAngle), innerRadius: arc.innerRadius || 0 };
+        }
+      } catch (e) {}
+    }
     const fxList = effectsToOur(node);
     if (fxList.length) base.effects = fxList;
     // Polygon/star keep their shape even when rasterized (engine clips the texture to the
@@ -542,6 +648,8 @@ function buildLayer(node: any, parentAbsX: number, parentAbsY: number): any {
     }
   }
   if (isContainer) base.clip = !!node.clipsContent;
+  // Layer blend mode (MULTIPLY / SCREEN / OVERLAY / …). PASS_THROUGH / NORMAL → normal.
+  try { const bm = BLEND_MAP[node.blendMode]; if (bm) base.blendMode = bm; } catch (e) {}
 
   const tracks = nodeTracks(node);
   const layer: any = {

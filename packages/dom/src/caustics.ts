@@ -10,6 +10,42 @@ export interface CausticEntry {
   w: number;
   h: number;
   img?: ImageData;
+  /** Which procedural shader to draw. */
+  kind?: "caustics" | "noise";
+}
+
+/** Pseudo-random in [0,1) from integer coords + time (no Math.random — deterministic). */
+function hash(x: number, y: number, t: number): number {
+  const s = Math.sin(x * 12.9898 + y * 78.233 + t * 0.5) * 43758.5453;
+  return s - Math.floor(s);
+}
+
+/** Procedural monochrome noise/grain overlay (Figma NOISE / TEXTURE effect). */
+export function drawNoise(ent: CausticEntry, t: number): void {
+  const ctx = ent.ctx;
+  const W = ent.w;
+  const H = ent.h;
+  const img = ent.img || (ent.img = ctx.createImageData(W, H));
+  const d = img.data;
+  let i = 0;
+  const drift = Math.floor(t * 8); // animate the grain over time
+  for (let y = 0; y < H; y++) {
+    for (let x = 0; x < W; x++) {
+      const n = hash(x, y, drift);
+      const v = n * 255;
+      d[i++] = v;
+      d[i++] = v;
+      d[i++] = v;
+      d[i++] = Math.round(80 + n * 80); // semi-transparent grain
+    }
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+/** Dispatch to the right shader by entry kind. */
+export function drawShader(ent: CausticEntry, t: number): void {
+  if (ent.kind === "noise") drawNoise(ent, t);
+  else drawCaustics(ent, t);
 }
 
 export function drawCaustics(ent: CausticEntry, t: number): void {

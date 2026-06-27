@@ -50,17 +50,25 @@ export function cubicBezier(x1: number, y1: number, x2: number, y2: number): Eas
 }
 
 /**
- * Perceptual damped spring. bounce 0 → no overshoot; 1 → very wobbly.
- * `p(0) = 0`, settles near `p(1) = 1`. May exceed 1 (overshoot).
+ * Normalized damped-spring step response (Figma `CUSTOM_SPRING` / `NormalizedSpring`).
+ * `bounce` maps to the damping ratio ζ = 1 − bounce: 0 → critically damped (no
+ * overshoot), → 1 → lightly damped (very wobbly). `p(0) = 0`, settles at `p(≥1) ≈ 1`,
+ * and may exceed 1 (overshoot). This is a proper underdamped oscillator, not the old
+ * cosine-envelope approximation, so it tracks Figma's spring feel closely.
  */
 export function springFn(bounce?: number): EasingFn {
-  const b = clamp(bounce == null ? 0.3 : bounce, 0, 1);
-  const decay = 4 + (1 - b) * 5; // 4..9 envelope decay
-  const freq = b * 6 * Math.PI; // 0..~18.8 rad → up to ~3 visible bounces
+  const b = clamp(bounce == null ? 0.3 : bounce, 0, 0.99);
+  const zeta = 1 - b; // damping ratio: 1 (no overshoot) .. ~0.01 (very bouncy)
+  const omega = 6 + b * 12; // natural frequency: more bounce → more visible oscillations
   return (u) => {
     if (u <= 0) return 0;
-    if (u >= 1 && freq === 0) return 1;
-    return 1 - Math.exp(-decay * u) * Math.cos(freq * u);
+    if (u >= 1.6) return 1; // fully settled
+    if (zeta >= 0.999) {
+      // critically damped: no oscillation
+      return 1 - Math.exp(-omega * u) * (1 + omega * u);
+    }
+    const wd = omega * Math.sqrt(1 - zeta * zeta); // damped angular frequency
+    return 1 - Math.exp(-zeta * omega * u) * (Math.cos(wd * u) + ((zeta * omega) / wd) * Math.sin(wd * u));
   };
 }
 

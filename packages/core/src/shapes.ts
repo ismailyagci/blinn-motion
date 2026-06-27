@@ -50,6 +50,29 @@ export function starVertices(n: number, ratio = 0.4, rot = 0): Vec2[] {
   return pts;
 }
 
+/**
+ * Ellipse arc / pie / donut sector as unit-square vertices. Angles in degrees
+ * (0 = 3 o'clock, clockwise). `innerRadius` 0 = pie wedge, >0 = donut sector
+ * (fraction of the outer radius).
+ */
+export function arcVertices(startAngle = 0, endAngle = 360, innerRadius = 0, samples = 64): Vec2[] {
+  const a0 = (startAngle * Math.PI) / 180;
+  const a1 = (endAngle * Math.PI) / 180;
+  const span = a1 - a0;
+  const n = Math.max(2, Math.round((Math.abs(span) / (Math.PI * 2)) * samples));
+  const outer = 0.5;
+  const inner = 0.5 * Math.max(0, Math.min(1, innerRadius));
+  const pt = (ang: number, r: number): Vec2 => [0.5 + r * Math.cos(ang), 0.5 + r * Math.sin(ang)];
+  const pts: Vec2[] = [];
+  for (let i = 0; i <= n; i++) pts.push(pt(a0 + (span * i) / n, outer));
+  if (inner > 0) {
+    for (let i = n; i >= 0; i--) pts.push(pt(a0 + (span * i) / n, inner));
+  } else {
+    pts.push([0.5, 0.5]); // pie wedge closes through the center
+  }
+  return pts;
+}
+
 /** CSS `clip-path: polygon(...)` from unit-square vertices. */
 export function verticesToClipPath(v: Vec2[]): string {
   return "polygon(" + v.map((p) => (p[0] * 100).toFixed(2) + "% " + (p[1] * 100).toFixed(2) + "%").join(", ") + ")";

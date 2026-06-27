@@ -1,24 +1,36 @@
-import { create as createDom } from "@fottie/dom";
-import { create as createCanvas } from "@fottie/canvas";
+import { create as createDom, type DomPlayer } from "@fottie/dom";
+import { create as createCanvas, type CanvasPlayer } from "@fottie/canvas";
 import type { MotionDoc } from "@fottie/core";
-import doc from "../../../fixtures/card.motion.json";
+import card from "../../../fixtures/card.motion.json";
+import showcase from "../../../fixtures/showcase.motion.json";
 
-const motionDoc = doc as MotionDoc;
+const docs: Record<string, MotionDoc> = { card: card as MotionDoc, showcase: showcase as MotionDoc };
 const $ = <T extends HTMLElement>(id: string) => document.getElementById(id) as T;
 
-// Same doc, two backends. The DOM player owns the clock + onFrame for the UI;
-// the canvas player is kept in lockstep by seeking it to the same time.
-const canvas = createCanvas($("canvas"), motionDoc, { autoplay: false, loop: true });
+let dom: DomPlayer;
+let canvas: CanvasPlayer;
 
-const dom = createDom($("dom"), motionDoc, {
-  autoplay: true,
-  loop: true,
-  onframe: (t, f) => {
-    canvas.seek(t); // mirror the canvas to the DOM clock
-    const scrub = $<HTMLInputElement>("scrub");
-    if (document.activeElement !== scrub) scrub.value = String(Math.round(f * 1000));
-    $("time").textContent = `${t.toFixed(2)}s / ${dom.duration.toFixed(2)}s`;
-  },
+function mount(doc: MotionDoc) {
+  // Same doc, two backends. The DOM player owns the clock + onFrame for the UI;
+  // the canvas player is kept in lockstep by seeking it to the same time.
+  canvas = createCanvas($("canvas"), doc, { autoplay: false, loop: true });
+  dom = createDom($("dom"), doc, {
+    autoplay: true,
+    loop: true,
+    onframe: (t, f) => {
+      canvas.seek(t);
+      const scrub = $<HTMLInputElement>("scrub");
+      if (document.activeElement !== scrub) scrub.value = String(Math.round(f * 1000));
+      $("time").textContent = `${t.toFixed(2)}s / ${dom.duration.toFixed(2)}s`;
+    },
+  });
+  $("toggle").textContent = "❚❚ Pause";
+}
+
+mount(docs.showcase!);
+
+$<HTMLSelectElement>("doc").addEventListener("change", (e) => {
+  mount(docs[(e.target as HTMLSelectElement).value]!);
 });
 
 $("toggle").addEventListener("click", () => {

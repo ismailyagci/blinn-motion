@@ -1,0 +1,179 @@
+{
+  "format": "motion-engine",
+  "version": "1.0",
+  "meta": { "name": "Feature showcase", "source": "manual" },
+  "duration": 2.0,
+  "fps": 60,
+  "stage": { "width": 480, "height": 320, "background": "#0E1116FF" },
+  "layers": [
+    {
+      "id": "radial",
+      "name": "Radial gradient + animated stop",
+      "type": "ellipse",
+      "base": {
+        "x": 20, "y": 30, "width": 100, "height": 100,
+        "anchor": { "x": 0.5, "y": 0.5 },
+        "fill": { "type": "radial", "center": { "x": 0.4, "y": 0.4 }, "radius": 0.8,
+          "stops": [ { "pos": 0, "color": "#FDE047FF" }, { "pos": 1, "color": "#7C3AEDFF" } ] }
+      },
+      "tracks": [
+        { "property": "fillStop:1:color", "op": "set", "keys": [
+          { "t": 0.0, "v": "#7C3AEDFF", "easing": { "type": "linear" } },
+          { "t": 1.0, "v": "#06B6D4FF", "easing": { "type": "linear" } },
+          { "t": 2.0, "v": "#7C3AEDFF", "easing": { "type": "hold" } }
+        ] }
+      ]
+    },
+    {
+      "id": "conic",
+      "name": "Angular (conic) gradient rotating",
+      "type": "rect",
+      "base": {
+        "x": 140, "y": 30, "width": 100, "height": 100,
+        "anchor": { "x": 0.5, "y": 0.5 },
+        "cornerRadius": [16, 16, 16, 16],
+        "fill": { "type": "angular", "center": { "x": 0.5, "y": 0.5 }, "angle": 0,
+          "stops": [ { "pos": 0, "color": "#F43F5EFF" }, { "pos": 0.5, "color": "#3B82F6FF" }, { "pos": 1, "color": "#F43F5EFF" } ] }
+      },
+      "tracks": [
+        { "property": "rotation", "op": "set", "keys": [
+          { "t": 0.0, "v": 0, "easing": { "type": "linear" } },
+          { "t": 2.0, "v": 360, "easing": { "type": "hold" } }
+        ] }
+      ]
+    },
+    {
+      "id": "border",
+      "name": "Per-side border (animated top)",
+      "type": "rect",
+      "base": {
+        "x": 260, "y": 30, "width": 100, "height": 100,
+        "anchor": { "x": 0.5, "y": 0.5 },
+        "cornerRadius": [12, 12, 12, 12],
+        "fill": { "type": "solid", "color": "#1F2937FF" },
+        "stroke": { "color": "#22D3EEFF", "weight": 4 },
+        "borderWeights": [4, 2, 4, 2]
+      },
+      "tracks": [
+        { "property": "borderTopWeight", "op": "set", "keys": [
+          { "t": 0.0, "v": 4, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+          { "t": 1.0, "v": 22, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+          { "t": 2.0, "v": 4, "easing": { "type": "hold" } }
+        ] },
+        { "property": "strokeColor", "op": "set", "keys": [
+          { "t": 0.0, "v": "#22D3EEFF", "easing": { "type": "linear" } },
+          { "t": 1.0, "v": "#F472B6FF", "easing": { "type": "linear" } },
+          { "t": 2.0, "v": "#22D3EEFF", "easing": { "type": "hold" } }
+        ] }
+      ]
+    },
+    {
+      "id": "pie",
+      "name": "Ellipse arc (pie + donut)",
+      "type": "ellipse",
+      "base": {
+        "x": 380, "y": 30, "width": 100, "height": 100,
+        "anchor": { "x": 0.5, "y": 0.5 },
+        "fill": { "type": "solid", "color": "#34D399FF" },
+        "shape": { "kind": "arc", "startAngle": -90, "endAngle": 200, "innerRadius": 0.45 }
+      },
+      "tracks": [
+        { "property": "rotation", "op": "set", "keys": [
+          { "t": 0.0, "v": 0, "easing": { "type": "linear" } },
+          { "t": 2.0, "v": -360, "easing": { "type": "hold" } }
+        ] }
+      ]
+    },
+    {
+      "id": "trim",
+      "name": "PATH_TRIM self-drawing checkmark",
+      "type": "vector",
+      "base": {
+        "x": 20, "y": 180, "width": 100, "height": 100,
+        "anchor": { "x": 0.5, "y": 0.5 },
+        "shape": { "kind": "path", "vw": 100, "vh": 100,
+          "paths": [ { "d": "M18 52 L42 78 L84 22", "fill": null, "stroke": "#4ADE80FF", "strokeWidth": 9, "cap": "round" } ] }
+      },
+      "tracks": [
+        { "property": "trimEnd", "op": "set", "keys": [
+          { "t": 0.0, "v": 0, "easing": { "type": "cubicBezier", "p": [0.65, 0, 0.35, 1] } },
+          { "t": 1.0, "v": 1, "easing": { "type": "hold" } },
+          { "t": 1.7, "v": 1, "easing": { "type": "linear" } },
+          { "t": 2.0, "v": 0, "easing": { "type": "hold" } }
+        ] }
+      ]
+    },
+    {
+      "id": "shadow",
+      "name": "Animated drop shadow",
+      "type": "rect",
+      "base": {
+        "x": 140, "y": 180, "width": 100, "height": 100,
+        "anchor": { "x": 0.5, "y": 0.5 },
+        "cornerRadius": [18, 18, 18, 18],
+        "fill": { "type": "solid", "color": "#F59E0BFF" },
+        "effects": [ { "type": "drop", "x": 0, "y": 4, "radius": 6, "spread": 0, "color": "#000000AA" } ]
+      },
+      "tracks": [
+        { "property": "effect:0:offsetY", "op": "set", "keys": [
+          { "t": 0.0, "v": 4, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+          { "t": 1.0, "v": 26, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+          { "t": 2.0, "v": 4, "easing": { "type": "hold" } }
+        ] },
+        { "property": "effect:0:radius", "op": "set", "keys": [
+          { "t": 0.0, "v": 6, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+          { "t": 1.0, "v": 30, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+          { "t": 2.0, "v": 6, "easing": { "type": "hold" } }
+        ] },
+        { "property": "translateY", "op": "offset", "keys": [
+          { "t": 0.0, "v": 0, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+          { "t": 1.0, "v": -16, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+          { "t": 2.0, "v": 0, "easing": { "type": "hold" } }
+        ] }
+      ]
+    },
+    {
+      "id": "blendA",
+      "name": "Blend mode base",
+      "type": "ellipse",
+      "base": {
+        "x": 268, "y": 188, "width": 84, "height": 84,
+        "anchor": { "x": 0.5, "y": 0.5 },
+        "fill": { "type": "solid", "color": "#F43F5EFF" }
+      },
+      "children": [
+        {
+          "id": "blendB",
+          "name": "Screen blend overlap",
+          "type": "ellipse",
+          "base": {
+            "x": 28, "y": 14, "width": 84, "height": 84,
+            "anchor": { "x": 0.5, "y": 0.5 },
+            "fill": { "type": "solid", "color": "#3B82F6FF" },
+            "blendMode": "screen"
+          },
+          "tracks": [
+            { "property": "translateX", "op": "offset", "keys": [
+              { "t": 0.0, "v": 0, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+              { "t": 1.0, "v": -28, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } },
+              { "t": 2.0, "v": 0, "easing": { "type": "hold" } }
+            ] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "noise",
+      "name": "Noise effect",
+      "type": "rect",
+      "base": {
+        "x": 380, "y": 180, "width": 100, "height": 100,
+        "anchor": { "x": 0.5, "y": 0.5 },
+        "cornerRadius": [16, 16, 16, 16],
+        "fill": { "type": "solid", "color": "#3B0764FF" },
+        "shader": { "kind": "noise" }
+      },
+      "tracks": []
+    }
+  ]
+}

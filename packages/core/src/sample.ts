@@ -12,24 +12,62 @@ import type {
   MotionDoc,
   RenderNode,
   RenderTree,
+  ResolvedEffect,
   ResolvedPaint,
   Stage,
 } from "./types.js";
 import { parseColor } from "./color.js";
-import { computeLayer } from "./compose.js";
+import { computeLayer, type LayerState } from "./compose.js";
 import { resolveEffects, resolvePaint, resolveStroke, resolveText } from "./paint.js";
-import { polygonVertices, starVertices } from "./shapes.js";
+import { arcVertices, polygonVertices, starVertices } from "./shapes.js";
 
 const DEFAULT_STAGE: Stage = { width: 300, height: 300, background: "#00000000" };
+
+/** Apply animated gradient-stop overrides (color/pos) to a resolved gradient fill. */
+function applyStopOverrides(fill: ResolvedPaint, s: LayerState): ResolvedPaint {
+  if (fill.type === "solid" || fill.type === "image") return fill;
+  const overrides = s.fillStopOverrides;
+  if (!Object.keys(overrides).length) return fill;
+  const stops = fill.stops.map((st, i) => {
+    const o = overrides[i];
+    if (!o) return st;
+    return { pos: o.pos != null ? o.pos : st.pos, color: o.color != null ? parseColor(o.color) : st.color };
+  });
+  return { ...fill, stops };
+}
+
+/** Apply animated effect-property overrides (offset/radius/spread/color) per index. */
+function applyEffectOverrides(effects: ResolvedEffect[], s: LayerState): ResolvedEffect[] {
+  if (!Object.keys(s.effectOverrides).length) return effects;
+  return effects.map((e, i) => {
+    const o = s.effectOverrides[i];
+    if (!o) return e;
+    if (e.type === "drop" || e.type === "inner") {
+      return {
+        ...e,
+        x: o.offsetX != null ? o.offsetX : e.x,
+        y: o.offsetY != null ? o.offsetY : e.y,
+        radius: o.radius != null ? o.radius : e.radius,
+        spread: o.spread != null ? o.spread : e.spread,
+        color: o.color != null ? parseColor(o.color) : e.color,
+      };
+    }
+    if ("radius" in e && o.radius != null) return { ...e, radius: o.radius };
+    return e;
+  });
+}
 
 function resolveNode(layer: Layer, t: number): RenderNode {
   const base = layer.base || {};
   const s = computeLayer(layer, t);
   const anchor = base.anchor || { x: 0.5, y: 0.5 };
 
-  // fill, with an animated solid-color override applied for non-text layers
+  // fill: solid-color override for solid/empty fills; stop overrides for gradients
   let fill: ResolvedPaint | null = resolvePaint(base.fill);
-  if (s.fillColorOverride != null && layer.type !== "text") {
+  if (fill && (fill.type === "linear" || fill.type === "radial" || fill.type === "angular" || fill.type === "diamond")) {
+    fill = applyStopOverrides(fill, s);
+  }
+  if (s.fillColorOverride != null && layer.type !== "text" && (!fill || fill.type === "solid")) {
     fill = { type: "solid", color: parseColor(s.fillColorOverride) };
   }
 
@@ -48,13 +86,22 @@ function resolveNode(layer: Layer, t: number): RenderNode {
     clipShape = { kind: "polygon", vertices: polygonVertices(count ?? shape.points, shape.rot || 0) };
   } else if (shape && shape.kind === "star") {
     clipShape = { kind: "polygon", vertices: starVertices(count ?? shape.points, shape.ratio, shape.rot || 0) };
+  } else if (shape && shape.kind === "arc") {
+    clipShape = { kind: "polygon", vertices: arcVertices(shape.startAngle, shape.endAngle, shape.innerRadius) };
   } else if (layer.type === "ellipse") {
     clipShape = { kind: "ellipse" };
   } else {
     clipShape = { kind: "rect", cornerRadius: s.cornerRadius };
   }
 
-  const baseStroke = resolveStroke(base.stroke);
+  // stroke: animated weight + per-side borders + color override
+  const stroke = resolveStroke(base.stroke, s.borderWeights);
+  if (stroke) {
+    if (!s.borderWeights) stroke.weight = base.stroke ? s.strokeWeight : stroke.weight;
+    if (s.strokeColorOverride != null) stroke.color = parseColor(s.strokeColorOverride);
+  }
+
+  const effects = applyEffectOverrides(resolveEffects(base.effects), s);
 
   return {
     id: layer.id,
@@ -72,9 +119,10 @@ function resolveNode(layer: Layer, t: number): RenderNode {
     scaleY: s.scaleY,
     opacity: s.opacity,
     fill,
-    stroke: baseStroke ? { color: baseStroke.color, weight: s.strokeWeight } : null,
+    stroke,
     cornerRadius: s.cornerRadius,
-    effects: resolveEffects(base.effects),
+    effects,
+    blendMode: base.blendMode || "normal",
     clip: !!base.clip,
     clipShape,
     text,

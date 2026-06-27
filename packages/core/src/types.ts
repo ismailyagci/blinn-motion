@@ -60,7 +60,14 @@ export interface Track {
   keys: Keyframe[];
 }
 
-/** Normalized property names (see SCHEMA.md for the Figma mapping). */
+/**
+ * Normalized property names (see SCHEMA.md for the Figma mapping).
+ *
+ * Besides the named members below, indexed tracks use a `collection:index:field`
+ * convention so animations can target a specific effect / gradient stop:
+ *   - `effect:<i>:offsetX|offsetY|radius|spread|color`  (animated shadows/effects)
+ *   - `fillStop:<i>:color|pos`                          (animated gradient stops)
+ */
 export type PropertyName =
   | "translateX"
   | "translateY"
@@ -77,17 +84,39 @@ export type PropertyName =
   | "cornerRadiusBR"
   | "cornerRadiusBL"
   | "strokeWeight"
+  | "strokeColor"
+  | "borderTopWeight"
+  | "borderRightWeight"
+  | "borderBottomWeight"
+  | "borderLeftWeight"
   | "polygonCount"
   | "fillColor"
   | "trimStart"
   | "trimEnd"
+  // auto-layout / grid (data-preserved; renderers may reflow)
+  | "stackSpacing"
+  | "stackPaddingTop"
+  | "stackPaddingRight"
+  | "stackPaddingBottom"
+  | "stackPaddingLeft"
+  | "stackCounterSpacing"
+  | "gridRowGap"
+  | "gridColumnGap"
   | (string & {});
+
+/** A gradient kind. `linear` = along an axis, `radial`/`diamond` = from a center, `angular` = conic sweep. */
+export type GradientKind = "linear" | "radial" | "angular" | "diamond";
 
 export type Paint =
   | { type: "solid"; color: string | RGBA }
   | {
-      type: "linear";
+      type: GradientKind;
+      /** Linear/conic angle in degrees. */
       angle?: number;
+      /** Center for radial/angular/diamond, 0..1 of the box. */
+      center?: { x: number; y: number };
+      /** Outer radius for radial/diamond, 0..1 of the box (1 = half the box). */
+      radius?: number;
       stops: Array<{ pos: number; color: string | RGBA }>;
     }
   | { type: "image"; src: string; fit?: "cover" | "contain" | "fill" };
@@ -101,7 +130,32 @@ export type Effect =
   | { type: "drop"; x?: number; y?: number; radius?: number; spread?: number; color?: string | RGBA; visible?: boolean }
   | { type: "inner"; x?: number; y?: number; radius?: number; spread?: number; color?: string | RGBA; visible?: boolean }
   | { type: "blur"; radius?: number; visible?: boolean }
-  | { type: "bgblur"; radius?: number; visible?: boolean };
+  | { type: "bgblur"; radius?: number; visible?: boolean }
+  /** Glass / liquid refraction (approximated as a tinted backdrop blur). */
+  | { type: "glass"; radius?: number; color?: string | RGBA; visible?: boolean }
+  /** Procedural monochrome noise overlay. */
+  | { type: "noise"; size?: number; density?: number; color?: string | RGBA; visible?: boolean }
+  /** Texture overlay (approximated as noise). */
+  | { type: "texture"; size?: number; visible?: boolean };
+
+/** CSS / canvas blend modes (a subset of Figma's BlendMode). */
+export type BlendMode =
+  | "normal"
+  | "multiply"
+  | "screen"
+  | "overlay"
+  | "darken"
+  | "lighten"
+  | "color-dodge"
+  | "color-burn"
+  | "hard-light"
+  | "soft-light"
+  | "difference"
+  | "exclusion"
+  | "hue"
+  | "saturation"
+  | "color"
+  | "luminosity";
 
 export interface TextStyle {
   characters: string;
@@ -117,6 +171,8 @@ export interface TextStyle {
 export type Shape =
   | { kind: "polygon"; points: number; rot?: number }
   | { kind: "star"; points: number; ratio?: number; rot?: number }
+  /** Ellipse arc / pie / donut (Figma arcData). Angles in degrees, innerRadius 0..1. */
+  | { kind: "arc"; startAngle?: number; endAngle?: number; innerRadius?: number }
   | {
       kind: "path";
       vw?: number;
@@ -154,12 +210,16 @@ export interface LayerBase {
   cornerRadius?: Corners;
   fill?: Paint | null;
   stroke?: Stroke | null;
+  /** Per-side border weights [top, right, bottom, left]; overrides stroke.weight when set. */
+  borderWeights?: Corners;
   text?: TextStyle | null;
   image?: string | null;
   shape?: Shape | null;
   effects?: Effect[];
-  /** Procedural fill (e.g. `{ kind: "caustics" }`). */
+  /** Procedural fill (e.g. `{ kind: "caustics" }` or `{ kind: "noise" }`). */
   shader?: { kind: string } | null;
+  /** Layer blend mode. */
+  blendMode?: BlendMode;
   clip?: boolean;
 }
 
@@ -196,17 +256,27 @@ export interface MotionDoc {
 
 export type ResolvedPaint =
   | { type: "solid"; color: RGBA }
-  | { type: "linear"; angle: number; stops: Array<{ pos: number; color: RGBA }> }
+  | {
+      type: GradientKind;
+      angle: number;
+      center: { x: number; y: number };
+      radius: number;
+      stops: Array<{ pos: number; color: RGBA }>;
+    }
   | { type: "image"; src: string; fit: "cover" | "contain" | "fill" };
 
 export interface ResolvedStroke {
   color: RGBA;
   weight: number;
+  /** Per-side weights [top, right, bottom, left] when borders differ; else null. */
+  sides: Corners | null;
 }
 
 export type ResolvedEffect =
   | { type: "drop" | "inner"; x: number; y: number; radius: number; spread: number; color: RGBA }
-  | { type: "blur" | "bgblur"; radius: number };
+  | { type: "blur" | "bgblur"; radius: number }
+  | { type: "glass"; radius: number; color: RGBA }
+  | { type: "noise" | "texture"; size: number; density: number; color: RGBA };
 
 export interface ResolvedText extends Omit<TextStyle, "color"> {
   color: RGBA;
@@ -248,6 +318,7 @@ export interface RenderNode {
   stroke: ResolvedStroke | null;
   cornerRadius: Corners;
   effects: ResolvedEffect[];
+  blendMode: BlendMode;
   clip: boolean;
   clipShape: ClipShape;
 
