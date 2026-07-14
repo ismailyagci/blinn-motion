@@ -2,7 +2,7 @@
 # Production: https://blinnmotion.com
 #
 # Required GitHub secrets (repo Settings → Secrets and variables → Actions):
-#   CLOUDFLARE_API_TOKEN   — Pages:Edit + Account:Read
+#   CLOUDFLARE_API_TOKEN   — Account → Cloudflare Pages → Edit (+ Account Read)
 #   CLOUDFLARE_ACCOUNT_ID  — Cloudflare dashboard → right sidebar
 #
 # First deploy creates the Pages project if missing (project name below).
@@ -30,7 +30,6 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: read
-      deployments: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,6 +42,29 @@ jobs:
           cache: npm
           cache-dependency-path: site/package-lock.json
 
+      - name: Verify Cloudflare secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          missing=0
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::Secret CLOUDFLARE_API_TOKEN is empty or not set."
+            echo "Create a token at https://dash.cloudflare.com/profile/api-tokens"
+            echo "Permissions: Account → Cloudflare Pages → Edit, Account → Account Settings → Read"
+            missing=1
+          else
+            echo "CLOUDFLARE_API_TOKEN is set (length ${#CLOUDFLARE_API_TOKEN})"
+          fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Secret CLOUDFLARE_ACCOUNT_ID is empty or not set."
+            echo "Find it in Cloudflare dashboard → Workers & Pages (right sidebar) or any domain overview."
+            missing=1
+          else
+            echo "CLOUDFLARE_ACCOUNT_ID is set (length ${#CLOUDFLARE_ACCOUNT_ID})"
+          fi
+          exit $missing
+
       - name: Install dependencies
         working-directory: site
         run: npm ci
@@ -51,12 +73,18 @@ jobs:
         working-directory: site
         run: npm run build
 
+      - name: List build output
+        working-directory: site
+        run: ls -la dist && test -f dist/index.html
+
       - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          # project-name is the Cloudflare Pages project id (not the domain)
-          command: pages deploy dist --project-name=blinn-motion --branch=main --commit-dirty=true
-          workingDirectory: site
-          packageManager: npm
+        working-directory: site
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        # Direct wrangler (not wrangler-action) so auth/API errors print clearly.
+        run: |
+          npx --yes wrangler@4 pages deploy dist \
+            --project-name=blinn-motion \
+            --branch=main \
+            --commit-dirty=true
