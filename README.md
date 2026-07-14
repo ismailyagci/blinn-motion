@@ -25,6 +25,10 @@
   <img alt="platforms" src="https://img.shields.io/badge/DOM%20·%20Canvas%20·%20React%20·%20RN-111827?style=flat-square" />
 </p>
 
+<p align="center">
+  <img src="media/blinn-motion-pipeline.gif" alt="Figma Motion becomes code — card travels Figma → MotionDoc → your app" width="900" />
+</p>
+
 ---
 
 Figma’s Motion timeline is data — keyframes, easings, springs.  
