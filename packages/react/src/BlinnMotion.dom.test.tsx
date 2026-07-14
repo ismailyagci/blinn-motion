@@ -50,14 +50,27 @@ describe("<BlinnMotion/> (dom backend)", () => {
     act(() => ref.current!.seekFraction(1));
     const card = document.querySelector('[data-id="card"]') as HTMLElement;
     expect(card.style.transform).toContain("scale(1,1)");
-    // play/pause/stop/setRate are callable without throwing
+    // play/pause/stop/setRate/setProgress are callable without throwing
     act(() => {
       ref.current!.play();
       ref.current!.pause();
       ref.current!.setRate(2);
+      ref.current!.setProgress(0.5);
       ref.current!.stop();
     });
     expect(ref.current!.player).not.toBeNull();
+  });
+
+  it("controlled progress prop scrubs without autoplay", () => {
+    const { rerender } = render(
+      <BlinnMotion doc={doc} renderer="dom" progress={0} />,
+    );
+    const card0 = document.querySelector('[data-id="card"]') as HTMLElement;
+    const t0 = card0.style.transform;
+    rerender(<BlinnMotion doc={doc} renderer="dom" progress={1} />);
+    const card1 = document.querySelector('[data-id="card"]') as HTMLElement;
+    expect(card1.style.transform).not.toBe(t0);
+    expect(card1.style.transform).toContain("scale(1,1)");
   });
 
   it("forwards className and style to the host", () => {

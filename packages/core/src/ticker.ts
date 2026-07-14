@@ -73,6 +73,21 @@ export class Ticker {
     this.seek(f * this.duration);
   }
 
+  /**
+   * Drive the timeline from an external 0..1 progress signal (scroll, gesture,
+   * scrubber). Alias of {@link seekFraction} with progress semantics — does not
+   * start playback; pauses nothing; just samples that frame.
+   */
+  setProgress(progress: number): void {
+    const p = Number.isNaN(progress) ? 0 : Math.max(0, Math.min(1, progress));
+    this.seekFraction(p);
+  }
+
+  /** Current progress 0..1 (time / duration). */
+  get progress(): number {
+    return this.duration ? this.time / this.duration : 0;
+  }
+
   play(): void {
     if (this.playing) return;
     this.playing = true;

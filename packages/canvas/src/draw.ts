@@ -15,6 +15,7 @@ import {
   type Vec2,
 } from "@blinn-motion/core";
 import { paintShader } from "./shaders.js";
+import { trimmedPath2D } from "./path-trim.js";
 
 /** Image cache so fills don't reload every frame. */
 const imageCache = new Map<string, HTMLImageElement>();
@@ -207,7 +208,7 @@ function paintText(ctx: CanvasRenderingContext2D, node: RenderNode): void {
   ctx.fillText(t.characters || "", x, node.height / 2);
 }
 
-// A reusable hidden SVG <path> for measuring/sampling path geometry (PATH_TRIM).
+// Optional SVG measurer (more accurate for complex arcs); pure-JS flatten is the default.
 let svgMeasure: SVGPathElement | null = null;
 function measurer(): SVGPathElement | null {
   if (svgMeasure) return svgMeasure;
@@ -221,10 +222,13 @@ function measurer(): SVGPathElement | null {
 }
 
 /**
- * Build a polyline Path2D covering only [a, b] (0..1) of `d`'s length, by sampling
- * an SVG path's getPointAtLength. Returns null if measuring isn't available.
+ * PATH_TRIM stroke geometry for [a, b] of path `d`.
+ * Prefer pure-JS flatten (works in Node / no DOM); fall back to SVG getPointAtLength.
  */
 function trimmedStrokePath(d: string, a: number, b: number): Path2D | null {
+  const pure = trimmedPath2D(d, a, b);
+  if (pure) return pure;
+
   const m = measurer();
   if (!m || typeof (m as any).getTotalLength !== "function") return null;
   try {
@@ -269,7 +273,7 @@ function paintVectorPath(ctx: CanvasRenderingContext2D, node: RenderNode): void 
       ctx.lineWidth = pd.strokeWidth != null ? pd.strokeWidth : node.stroke ? node.stroke.weight : 1;
       ctx.lineCap = (pd.cap as CanvasLineCap) || "butt";
       ctx.lineJoin = "round";
-      // trim the stroked outline (fall back to the full path if measuring is unavailable)
+      // trim the stroked outline (fall back to the full path if trim fails)
       const strokePath = trimmed ? trimmedStrokePath(pd.d || "", node.trimStart, node.trimEnd) : null;
       ctx.stroke(strokePath || p);
     }

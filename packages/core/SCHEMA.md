@@ -1,9 +1,8 @@
 # MotionDoc — our engine format (v1.0)
 
-A Lottie-like, but **own**, animation document. It is produced by the Figma plugin
-(converting Figma Motion → MotionDoc) and consumed by `motion-engine.js`, a pure
-HTML/CSS/JS player. The format is intentionally small, time-based (seconds), and
-renderer-agnostic.
+Blinn’s open animation document. It is produced by the Figma plugin (converting Figma
+Motion → MotionDoc) and consumed by the pure-JS render engine. The format is intentionally
+small, time-based (seconds), and renderer-agnostic.
 
 > Design goal: anything our `motion-engine.js` can play, the Figma converter can
 > emit, and the format is human-readable & hand-authorable for tests.
@@ -28,7 +27,7 @@ renderer-agnostic.
 
 Layers nest: a layer's `base` position is **relative to its parent layer's box**
 (top-level layers are relative to the stage). Children inherit the parent's animated
-transform — exactly like Lottie / DOM. This is why we nest instead of flattening.
+transform — the same nesting model as the DOM. This is why we nest instead of flattening.
 
 ```jsonc
 {

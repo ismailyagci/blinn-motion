@@ -1,6 +1,6 @@
 /**
  * The DOM Player. Builds nested absolutely-positioned `<div>`s (children nest in
- * parents so transforms inherit, like Lottie), then per frame samples each layer
+ * parents so transforms inherit like the DOM), then per frame samples each layer
  * with @blinn-motion/core's `computeLayer` and writes CSS transforms/styles. Masks,
  * SVG vector paths and procedural shaders are handled as DOM enhancements.
  */
@@ -400,6 +400,14 @@ export class DomPlayer {
   seekFraction(f: number): this {
     this.ticker.seekFraction(f);
     return this;
+  }
+  /** Drive from an external 0..1 signal (scroll, gesture, scrubber). */
+  setProgress(progress: number): this {
+    this.ticker.setProgress(progress);
+    return this;
+  }
+  get progress(): number {
+    return this.ticker.progress;
   }
   setRate(r: number): this {
     this.ticker.setRate(r);

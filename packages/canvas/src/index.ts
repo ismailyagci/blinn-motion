@@ -9,3 +9,9 @@
  */
 export { CanvasPlayer, create, type CanvasPlayerOptions } from "./player.js";
 export { drawTree } from "./draw.js";
+export {
+  flattenPath,
+  slicePolyline,
+  trimmedPath2D,
+  type Pt,
+} from "./path-trim.js";

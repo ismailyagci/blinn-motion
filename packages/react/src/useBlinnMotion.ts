@@ -9,6 +9,8 @@ export interface UseBlinnMotionOptions {
   loop?: boolean;
   autoplay?: boolean;
   rate?: number;
+  /** Controlled 0..1 progress — disables autoplay while set. */
+  progress?: number;
   onFrame?: (time: number, fraction: number) => void;
 }
 
@@ -27,7 +29,9 @@ export function useBlinnMotion(
   doc: MotionDoc,
   options: UseBlinnMotionOptions = {},
 ): BlinnMotionPlayer | null {
-  const { renderer = "dom", loop = true, autoplay = true, rate = 1, onFrame } = options;
+  const { renderer = "dom", loop = true, rate = 1, progress, onFrame } = options;
+  const controlled = progress != null;
+  const autoplay = controlled ? false : options.autoplay !== false;
   const [player, setPlayer] = useState<BlinnMotionPlayer | null>(null);
   const onFrameRef = useRef(onFrame);
   onFrameRef.current = onFrame;
@@ -43,6 +47,7 @@ export function useBlinnMotion(
     };
     const p: DomPlayer | CanvasPlayer =
       renderer === "canvas" ? createCanvas(host, doc, opts) : createDom(host, doc, opts);
+    if (controlled) p.setProgress(progress!);
     setPlayer(p);
     return () => {
       p.pause();
@@ -51,6 +56,11 @@ export function useBlinnMotion(
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [doc, renderer, loop, rate, autoplay]);
+
+  useEffect(() => {
+    if (progress == null || !player) return;
+    player.setProgress(progress);
+  }, [progress, player]);
 
   return player;
 }

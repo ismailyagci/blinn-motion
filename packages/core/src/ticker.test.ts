@@ -58,6 +58,16 @@ describe("Ticker basics", () => {
     h.ticker.seekFraction(0.25);
     expect(h.ticker.time).toBe(1);
   });
+  it("setProgress is progress-driven seek + reports progress", () => {
+    const h = harness({ duration: 4 });
+    h.ticker.setProgress(0.25);
+    expect(h.ticker.time).toBe(1);
+    expect(h.ticker.progress).toBeCloseTo(0.25, 5);
+    h.ticker.setProgress(2);
+    expect(h.ticker.progress).toBe(1);
+    h.ticker.setProgress(Number.NaN);
+    expect(h.ticker.progress).toBe(0);
+  });
   it("duration defaults to 1 when 0/missing", () => {
     expect(new Ticker({ duration: 0, onframe: () => {} }).duration).toBe(1);
   });

@@ -229,11 +229,17 @@ describe("@blinn-motion/canvas drawTree", () => {
     expect(m.calls.fill).toBeGreaterThanOrEqual(1);
   });
 
-  it("strokes a PATH_TRIM vector node (full-path fallback when no SVG measurer)", () => {
-    // Node env has no document → the SVG measurer is null, so the trimmed path
-    // falls back to the full Path2D. Provide a Path2D stub so paintVectorPath runs.
+  it("strokes a PATH_TRIM vector node via pure-JS path flatten (no SVG)", () => {
+    // Node env has no document → pure-JS trimmedPath2D builds the visible subpath.
+    const moves: number[] = [];
     const hadPath2D = "Path2D" in globalThis;
-    if (!hadPath2D) (globalThis as any).Path2D = class { constructor(_d?: string) {} };
+    (globalThis as any).Path2D = class {
+      constructor(_d?: string) {}
+      moveTo(x: number, _y: number) {
+        moves.push(x);
+      }
+      lineTo(_x: number, _y: number) {}
+    };
     try {
       const m = mockCtx();
       const n = node({
@@ -249,6 +255,8 @@ describe("@blinn-motion/canvas drawTree", () => {
       });
       expect(() => drawTree(m.ctx, tree([n]), 1)).not.toThrow();
       expect(m.calls.stroke).toBeGreaterThanOrEqual(1);
+      // trimmed polyline should start at the path origin
+      expect(moves[0]).toBeCloseTo(18, 5);
     } finally {
       if (!hadPath2D) delete (globalThis as any).Path2D;
     }

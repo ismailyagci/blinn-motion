@@ -15,14 +15,14 @@ function icon(name: string): string {
 }
 
 const features = [
-  { i: "chip", c: "var(--blue)", t: "var(--blue-t)", h: "Pure-JS render core", d: "The maths is DOM-free and unit-tested. Only the adapters touch a platform — the engine runs anywhere JS does." },
+  { i: "plug", c: "var(--violet)", t: "var(--violet-t)", h: "Figma is the source of truth", d: "Select a Motion timeline, preview live, download MotionDoc — no rebuild in CSS, no After Effects detour." },
+  { i: "chip", c: "var(--blue)", t: "var(--blue-t)", h: "Pure-JS render core", d: "sample(doc, t) is DOM-free and unit-tested. Only adapters touch a platform — the engine runs anywhere JS does." },
   { i: "spring", c: "var(--coral)", t: "var(--coral-t)", h: "Springs & curves, solved", d: "Linear, hold, cubic-bezier (Newton-Raphson) and damped springs — sampled per frame, not pre-baked." },
-  { i: "doc", c: "var(--violet)", t: "var(--violet-t)", h: "MotionDoc — open format", d: "A small, readable JSON document you own. Inspectable, diffable, versionable — no proprietary blob." },
+  { i: "doc", c: "var(--violet)", t: "var(--violet-t)", h: "MotionDoc you can own", d: "Small, readable JSON. Inspectable, git-diffable, versionable — designed for product handoff, not a black box." },
   { i: "sync", c: "var(--mint)", t: "var(--mint-t)", h: "Identical timing everywhere", d: "Same resolved tree, same shared clock. An animation times the same on DOM, Canvas, React & Native." },
-  { i: "scrub", c: "var(--cyan)", t: "var(--cyan-t)", h: "Scrub · seek · loop · speed", d: "Drive playback frame-accurately: seek(s), seekFraction(0…1), loop and variable speed — all from the core." },
-  { i: "layers", c: "var(--blue)", t: "var(--blue-t)", h: "Gradients, masks, shaders", d: "Nested transforms, linear & radial gradients, SVG vector paths, clip-path stars, masks and procedural shaders." },
+  { i: "scrub", c: "var(--cyan)", t: "var(--cyan-t)", h: "Clock or progress-driven", d: "Play on a shared clock — or drive with setProgress(0…1) / a React progress prop for scroll- and gesture-linked motion." },
+  { i: "layers", c: "var(--blue)", t: "var(--blue-t)", h: "Built for product UI motion", d: "Nested transforms, gradients, vectors, masks, path trim, shaders — real Figma frames, not only illustration loops." },
   { i: "feather", c: "var(--coral)", t: "var(--coral-t)", h: "Tiny & framework-agnostic", d: "No runtime dependencies in the core. Drop it into vanilla JS, React or React Native without ceremony." },
-  { i: "plug", c: "var(--violet)", t: "var(--violet-t)", h: "First-class Figma plugin", d: "Select an animated frame, preview it live, and download the MotionDoc — straight from the Motion timeline." },
 ];
 ---
 
@@ -30,9 +30,9 @@ const features = [
   <div class="container">
     <div class="section-head center" data-reveal>
       <span class="eyebrow"><span class="kf"></span> Why Blinn Motion</span>
-      <h2 class="title">Everything the render engine gives you</h2>
-      <p class="lead">A small core with a sharp focus: resolve motion to numbers, then paint it the same way
-        on every surface you ship to.</p>
+      <h2 class="title">Figma Motion, shipped as code</h2>
+      <p class="lead">Keep motion where product teams already work — then resolve it to numbers and paint it
+        the same way on every surface you ship to.</p>
     </div>
 
     <div class="feature-grid">

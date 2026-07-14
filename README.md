@@ -7,8 +7,8 @@
 
 <p align="center">
   <strong>Figma Motion → real code.</strong><br />
-  Your own document format. Your own runtime.<br />
-  Lottie, but not Lottie.
+  The runtime for Figma Motion.<br />
+  Designers animate. Engineers ship the same file.
 </p>
 
 <p align="center">
@@ -31,14 +31,14 @@
 
 ---
 
-Figma’s Motion timeline is data — keyframes, easings, springs.  
-**Blinn Motion** reads that data, turns it into a small open format (**MotionDoc**), and plays it with a **pure-JS render engine**. Same tree, same timing, every platform.
+Most product motion already lives in **Figma**.  
+**Blinn Motion** reads the Motion timeline, turns it into a small open format (**MotionDoc**), and plays it with a **pure-JS render engine**. Same tree, same timing — DOM, Canvas, React, React Native.
 
 ```
 Figma Motion  →  MotionDoc JSON  →  sample(doc, t)  →  DOM · Canvas · React · React Native
 ```
 
-No rasterized video. No After Effects detour. Designers ship motion; engineers ship the same file everywhere.
+No rasterized video. No After Effects detour. No “rebuilt in CSS from a handoff.” Designers ship motion; engineers ship the same file.
 
 ---
 
@@ -46,11 +46,23 @@ No rasterized video. No After Effects detour. Designers ship motion; engineers s
 
 | | |
 |--|--|
-| **Own format** | `MotionDoc` is small, versioned, and yours — not locked to a black-box player. |
-| **One render method** | `sample(doc, t)` is pure and DOM-free. Every adapter paints the *same* resolved tree. |
-| **Real Figma Motion** | Keyframes, cubic-bezier, springs, gradients, borders, masks, path trim, shaders… |
+| **Figma as source of truth** | Keyframes, cubic-bezier, springs — from the Motion timeline, not re-authored in code. |
+| **One pure render method** | `sample(doc, t)` is DOM-free. Every adapter paints the *same* resolved tree. |
+| **Product UI, not only illustration** | Real frames: transforms, gradients, borders, masks, path trim, shaders… |
 | **Thin adapters** | DOM/CSS, Canvas 2D, React, React Native — pick the backend, keep the animation. |
 | **Predictable playback** | Shared `Ticker`: play, pause, seek, loop, rate — identical across platforms. |
+
+---
+
+## When to use Blinn
+
+| You want… | Blinn |
+|-----------|--------|
+| Motion that already lives in **Figma** to ship in the app | ✅ Primary fit |
+| Interactive playback (seek, scrub, rate) on web / RN | ✅ |
+| A diffable JSON artifact in git / PRs | ✅ MotionDoc |
+| Pixel video / GIF for social only | Use export — not Blinn’s job |
+| Motion authored only in After Effects | Different pipeline (not our focus) |
 
 ---
 
@@ -68,7 +80,8 @@ import { create } from "@blinn-motion/dom";
 
 const player = create(document.getElementById("stage")!, doc, { loop: true });
 player.play();
-// player.pause() · seek(1.2) · seekFraction(0.5) · setRate(2)
+// player.pause() · seek(1.2) · setProgress(0.5) · setRate(2)
+// setProgress(0…1) — scroll / gesture / any external signal
 ```
 
 ### React
@@ -76,7 +89,11 @@ player.play();
 ```tsx
 import { BlinnMotion } from "@blinn-motion/react";
 
+// clock-driven
 <BlinnMotion doc={doc} renderer="canvas" loop autoplay />
+
+// progress-driven (scroll, drag, state)
+<BlinnMotion doc={doc} progress={scrollP} />
 ```
 
 ### Canvas

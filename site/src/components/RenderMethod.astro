@@ -8,6 +8,7 @@ const easings = [
 
 const points = [
   { t: "Time-based, in seconds", d: "The core speaks one language: <code class='inline'>t</code> in seconds. The playback clock is shared, so play / pause / seek / loop behave the same everywhere." },
+  { t: "Progress-driven, too", d: "Map any 0…1 signal — scroll, drag, state — with <code class='inline'>setProgress</code> or <code class='inline'>sample(doc, progress × duration)</code>. No black-box player required." },
   { t: "Composes stacked tracks", d: "Multiple tracks per property compose over the base value — <code class='inline'>set</code> replaces, <code class='inline'>offset</code> adds — so springs and curves layer cleanly." },
   { t: "Returns final numbers", d: "Every transform, RGBA color and shape vertex comes out resolved. Adapters never re-interpret intent; they just paint." },
 ];

@@ -336,6 +336,7 @@ export interface Player {
   pause(): void;
   toggle(): void;
   seekFraction(f: number): void;
+  setProgress(p: number): void;
   setSpeed(s: number): void;
   readonly playing: boolean;
   readonly duration: number;
@@ -420,6 +421,9 @@ export function mount(container: HTMLElement, doc: MotionDoc): Player {
     seekFraction(f: number) {
       t = clamp(f, 0, 1) * doc.duration;
       render();
+    },
+    setProgress(p: number) {
+      this.seekFraction(p);
     },
     setSpeed(s: number) {
       speed = s;

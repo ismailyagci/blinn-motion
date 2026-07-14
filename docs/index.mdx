@@ -1,12 +1,12 @@
 ---
 title: "Introduction"
-description: "Blinn Motion — Figma Motion → MotionDoc → a pure-JS render engine. Lottie, but not Lottie."
+description: "Blinn Motion — the runtime for Figma Motion. MotionDoc → pure-JS engine → every platform."
 ---
 
-**Blinn Motion** exports a [Figma Motion](https://www.figma.com/) animation as JSON — *not* an
-image — converts it into a small, own format called **MotionDoc**, and plays it with a
-**pure-JS render engine** that has adapters for the **DOM**, **Canvas**, **React** and
-**React Native**.
+**Blinn Motion** is the runtime for [Figma Motion](https://www.figma.com/). It exports a Motion
+timeline as JSON — *not* an image — converts it into a small format called **MotionDoc**, and
+plays it with a **pure-JS render engine** with adapters for the **DOM**, **Canvas**, **React**
+and **React Native**.
 
 The render engine is the core. Every adapter paints the *same* resolved render tree, so an
 animation looks and **times identically** across platforms.
@@ -46,24 +46,33 @@ Figma Motion  (node.animations / timelines)
 ## Why Blinn Motion
 
 <CardGroup cols={2}>
-  <Card title="Open format you own" icon="lock-open">
-    MotionDoc is small, readable JSON — inspectable, diffable, versionable. No proprietary
-    blob.
+  <Card title="Figma as source of truth" icon="figma">
+    Keyframes, springs and curves come from the Motion timeline — no hand rebuild in CSS,
+    no After Effects detour for product UI motion.
   </Card>
   <Card title="Identical timing everywhere" icon="arrows-rotate">
     Same resolved tree, same shared clock. An animation times the same on every adapter.
   </Card>
-  <Card title="Springs & curves, solved" icon="wave-square">
-    Linear, hold, cubic-bézier (Newton–Raphson) and damped springs — sampled per frame,
-    never pre-baked.
+  <Card title="Open format you can own" icon="lock-open">
+    MotionDoc is small, readable JSON — inspectable, git-diffable, versionable.
   </Card>
-  <Card title="Tiny & framework-agnostic" icon="feather">
-    No runtime dependencies in the core. Drop it into vanilla JS, React or React Native.
+  <Card title="Built for product UI" icon="layer-group">
+    Real frames and transforms, not only illustration loops. Drop into vanilla JS, React or
+    React Native with a thin adapter.
   </Card>
 </CardGroup>
 
+## When to use Blinn
+
+| Fit | Use Blinn when… |
+|-----|-----------------|
+| ✅ Primary | Motion already lives in **Figma** and should ship in the app |
+| ✅ | You need seek / scrub / shared timing across web and native |
+| ✅ | You want a diffable motion artifact in git |
+| — | You only need a one-shot video or GIF for social |
+| — | Motion is authored only outside Figma (different pipeline) |
+
 <Note>
-  Blinn Motion is an independent, MIT-licensed project. *Lottie* is a trademark of its respective
-  owners; Blinn Motion is not affiliated with it — it's just a kindred idea (ship motion as data,
-  not video) built for the Figma Motion era.
+  Blinn Motion is an independent, MIT-licensed project — the runtime for Figma Motion, not a
+  wrapper around another motion ecosystem.
 </Note>

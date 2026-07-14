@@ -20,10 +20,10 @@ function highlight(code: string): string {
 }
 
 const tabs = [
-  { id: "dom", label: "DOM", code: `import { create } from "@blinn-motion/dom";\nimport doc from "./card.motion.json";\n\nconst player = create(\n  document.getElementById("stage")!,\n  doc,\n  { loop: true }\n);\n\nplayer.play();          // pause(), toggle()\nplayer.seek(0.8);       // seconds\nplayer.seekFraction(0.5); // 0…1` },
-  { id: "canvas", label: "Canvas", code: `import { create } from "@blinn-motion/canvas";\nimport doc from "./card.motion.json";\n\n// same call, a pure-JS 2D painter\nconst player = create(canvasHost, doc, {\n  loop: true,\n});\n\nplayer.play();` },
-  { id: "react", label: "React", code: `import { BlinnMotion } from "@blinn-motion/react";\nimport doc from "./card.motion.json";\n\nexport default function Hero() {\n  return (\n    <BlinnMotion\n      doc={doc}\n      renderer="canvas"  // or "dom"\n      loop\n      autoplay\n    />\n  );\n}` },
-  { id: "rn", label: "React Native", code: `import { BlinnMotionView } from "@blinn-motion/react-native";\nimport doc from "./card.motion.json";\n\nexport function Splash() {\n  return <BlinnMotionView doc={doc} loop autoplay />;\n}` },
+  { id: "dom", label: "DOM", code: `import { create } from "@blinn-motion/dom";\nimport doc from "./card.motion.json";\n\nconst player = create(\n  document.getElementById("stage")!,\n  doc,\n  { loop: true }\n);\n\nplayer.play();\nplayer.seek(0.8);          // seconds\nplayer.setProgress(0.5);   // 0…1 — scroll / gesture` },
+  { id: "canvas", label: "Canvas", code: `import { create } from "@blinn-motion/canvas";\nimport doc from "./card.motion.json";\n\nconst player = create(canvasHost, doc, { loop: true });\nplayer.play();\n// drive from scroll instead of the clock:\n// player.setProgress(scrollY / range);` },
+  { id: "react", label: "React", code: `import { BlinnMotion } from "@blinn-motion/react";\nimport doc from "./card.motion.json";\n\n// clock-driven\n<BlinnMotion doc={doc} renderer="canvas" loop autoplay />\n\n// progress-driven (scroll, drag, state)\n<BlinnMotion doc={doc} progress={scrollP} />` },
+  { id: "rn", label: "React Native", code: `import { BlinnMotionView } from "@blinn-motion/react-native";\nimport doc from "./card.motion.json";\n\n// clock\n<BlinnMotionView doc={doc} loop autoplay />\n\n// or progress-driven\n<BlinnMotionView doc={doc} progress={gestureP} />` },
 ];
 ---
 
@@ -33,7 +33,7 @@ const tabs = [
       <div class="code-intro" data-reveal>
         <span class="eyebrow"><span class="kf"></span> Use it in code</span>
         <h2 class="title">Three lines to motion</h2>
-        <p class="lead">Hand the engine a <code class="inline">MotionDoc</code> and a host element. Pick a renderer, press play. The control surface — <code class="inline">play</code>, <code class="inline">pause</code>, <code class="inline">seek</code>, <code class="inline">seekFraction</code>, <code class="inline">loop</code> — is identical across every adapter.</p>
+        <p class="lead">Hand the engine a <code class="inline">MotionDoc</code> and a host element. Play on a clock, or drive with <code class="inline">setProgress(0…1)</code> / a React <code class="inline">progress</code> prop for scroll- and gesture-linked motion. Same surface on every adapter.</p>
 
         <div class="install" data-reveal>
           <span class="install-label mono">install</span>

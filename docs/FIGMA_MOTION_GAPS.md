@@ -14,8 +14,8 @@ Legend: ✅ supported · ⚠️ partial/approximate · ❌ missing
 Across `@blinn-motion/core`, `@blinn-motion/dom`, `@blinn-motion/canvas`, `@blinn-motion/react-native` and the
 converter (`code.ts`):
 
-- **PATH_TRIM** rendering — DOM via `stroke-dasharray/offset` (canvas TODO: needs path
-  sampling).
+- **PATH_TRIM** rendering — DOM via `stroke-dasharray/offset`; canvas via pure-JS path
+  flatten (+ optional SVG getPointAtLength).
 - **Radial / angular (conic) / diamond gradients** — static + animated stops, with
   center/radius/angle. (diamond ≈ radial.)
 - **Animated gradient stops** — `fillStop:<i>:color|pos` tracks (COLOR_POINT conversion).
@@ -62,10 +62,8 @@ below is kept for reference (items above are now ✅/⚠️).
 
 ## B. Properties we MAP but never RENDER (looks supported, isn't)
 
-- **`PATH_TRIM_START` / `PATH_TRIM_END`** ⚠️→❌ — sampled into `trimStart/trimEnd` on the
-  render node, but **no adapter draws it**. The "line draws itself / stroke reveal"
-  animation does nothing. (Needs SVG `stroke-dasharray/offset` in DOM, `setLineDash` in
-  canvas.)
+- **`PATH_TRIM_START` / `PATH_TRIM_END`** ✅ — sampled + rendered (DOM dasharray; canvas
+  pure-JS path slice).
 
 ## C. Effect-property animation — entirely missing
 
@@ -129,10 +127,10 @@ only** and the `effects` keyframe collection is skipped in `code.ts`:
 
 ## Suggested priority (visual impact ÷ effort)
 
-1. **`PATH_TRIM`** rendering — already half-wired; high payoff (stroke-draw is common) ★
+1. **Auto-layout (`STACK_*`) animation** — needed for real UI motion ★
 2. **Radial / angular gradients** (static + animated) — very common fills ★
 3. **Animated shadows** (`OFFSET/RADIUS/COLOR`) — common, maps cleanly to CSS/canvas ★
 4. **Stroke color animation** — small converter fix
 5. **Blend modes** — cheap in DOM/canvas, big fidelity win
-6. **Auto-layout (`STACK_*`) animation** — needed for real UI motion
-7. Glass / noise / texture effects, gradient-stop animation, real masks — larger efforts
+6. Glass / noise / texture effects, gradient-stop animation, real masks — larger efforts
+7. ~~**`PATH_TRIM`** rendering~~ — ✅ DOM + canvas

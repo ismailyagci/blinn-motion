@@ -22,9 +22,44 @@ player.toggle();   // flip whichever state you're in
 ```ts
 player.seek(0.8);          // jump to 0.8 seconds
 player.seekFraction(0.5);  // jump to the middle (0..1 of duration)
+player.setProgress(0.5);   // same as seekFraction — progress semantics
 ```
 
 Seeking works whether or not the player is running — it resamples and repaints a single frame.
+
+## Progress-driven (scroll · gesture · state)
+
+When motion should follow an external signal instead of the wall clock, drive
+`setProgress(0…1)`. Helpers live in `@blinn-motion/core`:
+
+```ts
+import { scrollProgress, viewportProgress, sample, progressToTime } from "@blinn-motion/core";
+
+// Scroll container
+window.addEventListener("scroll", () => {
+  player.pause();
+  player.setProgress(scrollProgress(document.documentElement));
+}, { passive: true });
+
+// Or sample yourself — no player needed
+const tree = sample(doc, progressToTime(doc.duration, p));
+```
+
+### React controlled prop
+
+```tsx
+import { BlinnMotion } from "@blinn-motion/react";
+
+// When `progress` is set, autoplay is forced off
+<BlinnMotion doc={doc} progress={scrollP} />
+```
+
+```tsx
+import { useMotionProgress } from "@blinn-motion/react";
+
+// Just the resolved tree — paint it yourself
+const tree = useMotionProgress(doc, scrollP);
+```
 
 ## Looping
 

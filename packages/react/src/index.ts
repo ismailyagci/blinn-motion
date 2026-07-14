@@ -9,3 +9,4 @@
 export { BlinnMotion } from "./BlinnMotion.js";
 export type { BlinnMotionProps, BlinnMotionHandle, BlinnMotionRenderer, BlinnMotionPlayer } from "./BlinnMotion.js";
 export { useBlinnMotion, type UseBlinnMotionOptions } from "./useBlinnMotion.js";
+export { useMotionProgress } from "./useMotionProgress.js";

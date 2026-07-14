@@ -100,6 +100,14 @@ export class CanvasPlayer {
     this.ticker.seekFraction(f);
     return this;
   }
+  /** Drive from an external 0..1 signal (scroll, gesture, scrubber). */
+  setProgress(progress: number): this {
+    this.ticker.setProgress(progress);
+    return this;
+  }
+  get progress(): number {
+    return this.ticker.progress;
+  }
   setRate(r: number): this {
     this.ticker.setRate(r);
     return this;

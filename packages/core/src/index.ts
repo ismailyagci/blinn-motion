@@ -19,6 +19,13 @@ export { polygonVertices, starVertices, arcVertices, verticesToClipPath } from "
 export { resolvePaint, resolveStroke, resolveEffects, resolveText } from "./paint.js";
 export { sample, walk, findNode } from "./sample.js";
 export { Ticker, type TickerOptions } from "./ticker.js";
+export {
+  clampProgress,
+  progressToTime,
+  timeToProgress,
+  scrollProgress,
+  viewportProgress,
+} from "./progress.js";
 
 /** Library version. */
 export const VERSION = "0.1.0";

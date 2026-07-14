@@ -1,7 +1,7 @@
 // Central place for links + copy used across the landing page.
 export const site = {
   name: "Blinn Motion",
-  tagline: "Figma Motion → real code",
+  tagline: "The runtime for Figma Motion",
   repo: "https://github.com/ismailyagci/blinn-motion",
   npm: "https://www.npmjs.com/org/blinn-motion",
   // The Mintlify docs app. Production default; for local dev the docs run at

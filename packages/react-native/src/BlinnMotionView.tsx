@@ -71,10 +71,10 @@ function renderNode(node: RenderNode): ReactElement {
 }
 
 export const BlinnMotionView = forwardRef<BlinnMotionHandle, BlinnMotionViewProps>(function BlinnMotionView(
-  { doc, loop, autoplay, rate, onFrame, style },
+  { doc, loop, autoplay, rate, progress, onFrame, style },
   ref,
 ) {
-  const { tree, controls } = usePlayer(doc, { loop, autoplay, rate, onFrame });
+  const { tree, controls } = usePlayer(doc, { loop, autoplay, rate, progress, onFrame });
 
   useImperativeHandle(ref, () => controls, [controls]);
 

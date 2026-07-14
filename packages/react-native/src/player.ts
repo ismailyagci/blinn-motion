@@ -18,6 +18,8 @@ export interface BlinnMotionControls {
   toggle(): void;
   seek(time: number): void;
   seekFraction(fraction: number): void;
+  /** Drive from an external 0..1 signal (scroll, gesture, scrubber). */
+  setProgress(progress: number): void;
   setRate(rate: number): void;
 }
 
@@ -25,10 +27,15 @@ export interface BlinnMotionControls {
 export interface BlinnMotionPlaybackOptions {
   /** Loop at the end of the timeline (default true). */
   loop?: boolean;
-  /** Start playing on mount (default true). */
+  /** Start playing on mount (default true). When `progress` is set, autoplay is forced off. */
   autoplay?: boolean;
   /** Playback rate multiplier (default 1). */
   rate?: number;
+  /**
+   * Controlled progress 0..1. When provided, the player is scrubbed to that
+   * frame each render and does not autoplay.
+   */
+  progress?: number;
   /** Called every frame with time (s) and fraction (0..1). */
   onFrame?: (time: number, fraction: number) => void;
 }
@@ -42,7 +49,9 @@ export interface BlinnMotionPlayback {
 }
 
 export function usePlayer(doc: MotionDoc, options: BlinnMotionPlaybackOptions = {}): BlinnMotionPlayback {
-  const { loop = true, autoplay = true, rate = 1, onFrame } = options;
+  const { loop = true, rate = 1, onFrame, progress } = options;
+  const controlled = progress != null;
+  const autoplay = controlled ? false : options.autoplay !== false;
 
   // Seed with the first frame so the very first render already has content.
   const [tree, setTree] = useState<RenderTree>(() => sample(doc, 0));
@@ -66,6 +75,7 @@ export function usePlayer(doc: MotionDoc, options: BlinnMotionPlaybackOptions = 
     tickerRef.current = ticker;
 
     if (autoplay) ticker.play();
+    else if (controlled) ticker.setProgress(progress!);
     else ticker.renderAt(0); // paint a static first frame (and refresh on doc change)
 
     return () => {
@@ -73,6 +83,12 @@ export function usePlayer(doc: MotionDoc, options: BlinnMotionPlaybackOptions = 
       tickerRef.current = null;
     };
   }, [doc, loop, rate, autoplay]);
+
+  // Controlled progress: scrub without rebuilding the ticker.
+  useEffect(() => {
+    if (progress == null) return;
+    tickerRef.current?.setProgress(progress);
+  }, [progress]);
 
   // Stable controls that proxy to whatever ticker is current.
   const controls = useMemo<BlinnMotionControls>(
@@ -83,6 +99,7 @@ export function usePlayer(doc: MotionDoc, options: BlinnMotionPlaybackOptions = 
       toggle: () => tickerRef.current?.toggle(),
       seek: (t) => tickerRef.current?.seek(t),
       seekFraction: (f) => tickerRef.current?.seekFraction(f),
+      setProgress: (p) => tickerRef.current?.setProgress(p),
       setRate: (r) => tickerRef.current?.setRate(r),
     }),
     [],

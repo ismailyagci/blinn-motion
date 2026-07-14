@@ -1,6 +1,6 @@
 # @blinn-motion/site
 
-The marketing landing page for **Blinn Motion** — _Lottie, but not Lottie_ — built with [Astro](https://astro.build).
+The marketing landing page for **Blinn Motion** — *the runtime for Figma Motion* — built with [Astro](https://astro.build).
 
 It's intentionally a **standalone** project (its own `node_modules`, **not** part of the
 root npm workspaces) so the heavy Astro/Vite dependency tree never interferes with building
@@ -48,7 +48,7 @@ src/
     RenderMethod.astro      sample(doc, t) explainer
     Features.astro          feature grid
     Usage.astro             tabbed code examples
-    Comparison.astro        Lottie vs Blinn Motion (tasteful)
+    Comparison.astro        workflow: hand CSS · video · Blinn
     CTA.astro · Footer.astro
   scripts/blinn-motion-mini.ts    compact pure-JS sampler + DOM adapter
   data/card.ts              the card MotionDoc
@@ -61,5 +61,4 @@ each own a concept (DOM `#2F6BFF`, Canvas `#07C0DC`, React `#7A5CFF`, Native `#F
 ink type — **Space Grotesk** (display) · **Inter** (body) · **JetBrains Mono** (timecodes & data).
 The signature is a **keyframe timeline** — a hairline track with rotated-square diamonds at the
 card's real keyframe times and a moving playhead — which recurs as the hero scrubber, the section
-eyebrows, and the CTA rule. No glows, no glassmorphism, no gradients. Inspired by LottieFiles'
-light, motion-first feel.
+eyebrows, and the CTA rule. No glows, no glassmorphism, no gradients.
