@@ -1,136 +1,156 @@
-# Blinn Motion
+<p align="center">
+  <img src="docs/logo/light.svg" alt="Blinn Motion" width="72" height="72" />
+</p>
 
-> Think **Lottie, but not Lottie** — our own document format and our own runtime, fed
-> directly from Figma's new Motion timeline.
+<h1 align="center">Blinn Motion</h1>
 
-Blinn Motion exports a **Figma Motion** animation as JSON (not an image), converts it into a
-small **own** format (`MotionDoc`), and plays it with a **pure-JS render engine** that
-has adapters for the **DOM**, **Canvas**, **React** and **React Native**.
+<p align="center">
+  <strong>Figma Motion → real code.</strong><br />
+  Your own document format. Your own runtime.<br />
+  Lottie, but not Lottie.
+</p>
 
-The render engine is the core. Every adapter paints the *same* resolved render tree, so
-an animation looks and times identically across platforms.
+<p align="center">
+  <a href="https://blinnmotion.com">Website</a> ·
+  <a href="https://docs.blinnmotion.com">Docs</a> ·
+  <a href="https://blinnmotion.com">Live demo</a> ·
+  <a href="packages/core/SCHEMA.md">MotionDoc schema</a>
+</p>
+
+<p align="center">
+  <img alt="license" src="https://img.shields.io/badge/license-MIT-0E1116?style=flat-square" />
+  <img alt="typescript" src="https://img.shields.io/badge/TypeScript-strict-2F6BFF?style=flat-square" />
+  <img alt="runtime" src="https://img.shields.io/badge/runtime-pure%20JS-8B5CF6?style=flat-square" />
+  <img alt="platforms" src="https://img.shields.io/badge/DOM%20·%20Canvas%20·%20React%20·%20RN-111827?style=flat-square" />
+</p>
+
+---
+
+Figma’s Motion timeline is data — keyframes, easings, springs.  
+**Blinn Motion** reads that data, turns it into a small open format (**MotionDoc**), and plays it with a **pure-JS render engine**. Same tree, same timing, every platform.
 
 ```
-Figma Motion (node.animations / node.timelines)
-        │  read keyframes, easing, springs — raw data, no rasterization
-        ▼
-   @blinn-motion/figma-plugin  ──►  MotionDoc JSON   (our format, packages/core/SCHEMA.md)
-        │  sample(doc, t)  — THE render method (pure, DOM-free)
-        ▼
-   @blinn-motion/core  ──►  resolved RenderNode tree
-        │
-        ├─► @blinn-motion/dom            (nested divs + CSS, SVG paths, masks, shaders)
-        ├─► @blinn-motion/canvas         (2D canvas)
-        ├─► @blinn-motion/react          (<BlinnMotion doc renderer="dom|canvas" />)
-        └─► @blinn-motion/react-native   (native <View>/<Text>)
+Figma Motion  →  MotionDoc JSON  →  sample(doc, t)  →  DOM · Canvas · React · React Native
 ```
 
-## Monorepo layout
+No rasterized video. No After Effects detour. Designers ship motion; engineers ship the same file everywhere.
 
-```
-packages/
-  core/            @blinn-motion/core           pure render engine — sample(doc,t), easing,
-                                          interpolation, color, shapes, Ticker
-  dom/             @blinn-motion/dom            DOM/CSS adapter (full fidelity)
-  canvas/          @blinn-motion/canvas         pure-JS 2D canvas adapter
-  react/           @blinn-motion/react          React component + hook
-  react-native/    @blinn-motion/react-native   React Native adapter
-  figma-plugin/    @blinn-motion/figma-plugin   the Figma plugin (exports MotionDoc, previews
-                                          with the inlined @blinn-motion/dom bundle)
+---
 
-examples/
-  vanilla/         DOM + Canvas side by side (Vite)
-  react/           <BlinnMotion/> with both backends (Vite + React)
-  react-native/    Expo app using <BlinnMotionView/>
+## Why Blinn Motion?
 
-fixtures/
-  card.motion.json shared hand-authored MotionDoc used by tests + every example
-```
+| | |
+|--|--|
+| **Own format** | `MotionDoc` is small, versioned, and yours — not locked to a black-box player. |
+| **One render method** | `sample(doc, t)` is pure and DOM-free. Every adapter paints the *same* resolved tree. |
+| **Real Figma Motion** | Keyframes, cubic-bezier, springs, gradients, borders, masks, path trim, shaders… |
+| **Thin adapters** | DOM/CSS, Canvas 2D, React, React Native — pick the backend, keep the animation. |
+| **Predictable playback** | Shared `Ticker`: play, pause, seek, loop, rate — identical across platforms. |
 
-## The architecture in one paragraph
+---
 
-`@blinn-motion/core` is time-based (seconds) and DOM-free. `sample(doc, t)` walks the document,
-samples every track at time `t` (easing: `linear` / `hold` / `cubicBezier` solved with
-Newton-Raphson + bisection / `spring` damped approximation), composes stacked tracks per
-property over the base value, and returns a **resolved render tree** — every transform,
-color (RGBA) and shape vertex is a final number. The adapters are thin: each one walks
-that tree and paints it for its backend. The maths is unit-tested; only the adapters
-touch a platform. The playback clock (`Ticker`) is shared too, so play/pause/seek/loop
-behave the same everywhere.
-
-See **`packages/core/SCHEMA.md`** for the MotionDoc format and the full Figma → MotionDoc
-mapping.
-
-## Develop
+## Quick start
 
 ```bash
-npm install          # one install for the whole workspace (+ sets up husky git hooks)
-npm run build        # build every library package (tsup → ESM + CJS + d.ts)
-npm test             # vitest across all packages
-npm run test:coverage
-npm run typecheck    # tsc --noEmit per package
+npm install @blinn-motion/dom
+# or: @blinn-motion/canvas  @blinn-motion/react  @blinn-motion/react-native
 ```
 
-### Git hooks (husky)
-
-On `npm install`, husky installs a **pre-commit** hook that runs `npm test` and
-`npm run typecheck`. Commits are blocked if either fails. To skip in an emergency:
-
-```bash
-git commit --no-verify
-```
-
-### Deploy (GitHub Actions + Cloudflare)
-
-| Site | URL | Host | Workflow |
-|------|-----|------|----------|
-| Landing | https://blinnmotion.com | Cloudflare Pages | `.github/workflows/deploy-site.yml` |
-| Docs | https://docs.blinnmotion.com | Cloudflare Pages (`mint export` → static) | `.github/workflows/deploy-docs.yml` |
-
-**Shared secrets** (both deploys):
-
-1. `CLOUDFLARE_API_TOKEN` — **Account → Cloudflare Pages → Edit**
-2. `CLOUDFLARE_ACCOUNT_ID` — Cloudflare account id
-
-- Landing setup: [`site/DEPLOY.md`](site/DEPLOY.md)  
-- Docs setup (export + Pages + `docs.blinnmotion.com`): [`docs/DEPLOY.md`](docs/DEPLOY.md)
-
-CI (tests + typecheck) runs on every PR/push via `.github/workflows/ci.yml`.
-
-### Run an example
-
-```bash
-npm run dev -w @blinn-motion/example-vanilla   # http://localhost:5173  (DOM + Canvas)
-npm run dev -w @blinn-motion/example-react     # http://localhost:5174  (React)
-# react-native: see examples/react-native/README.md (Expo)
-```
-
-### Build & use the Figma plugin
-
-```bash
-npm run build -w @blinn-motion/dom             # produces the inlined browser bundle
-npm run build -w @blinn-motion/figma-plugin    # tsc → dist/code.js, inline → ui.html
-```
-
-Then in Figma → Plugins → Development → **Import plugin from manifest…** → pick
-`packages/figma-plugin/manifest.json`. Select an animated frame (one with a Motion
-timeline) and run the plugin: the left pane previews it with `@blinn-motion/dom`, the right
-pane shows the **MotionDoc** and the raw Figma JSON. Hit **Download .json** — the file
-plays anywhere with any Blinn Motion adapter.
-
-## Use it in code
+### DOM
 
 ```ts
-import { create } from "@blinn-motion/dom";      // or @blinn-motion/canvas
+import { create } from "@blinn-motion/dom";
+
 const player = create(document.getElementById("stage")!, doc, { loop: true });
-player.play();                              // pause(), seek(s), seekFraction(0..1), toggle()
+player.play();
+// player.pause() · seek(1.2) · seekFraction(0.5) · setRate(2)
 ```
+
+### React
 
 ```tsx
 import { BlinnMotion } from "@blinn-motion/react";
+
 <BlinnMotion doc={doc} renderer="canvas" loop autoplay />
 ```
 
+### Canvas
+
+```ts
+import { create } from "@blinn-motion/canvas";
+
+create(document.querySelector("canvas")!, doc, { autoplay: true, dpr: 2 });
+```
+
+A MotionDoc is plain JSON. Export one from the **Figma plugin**, or start from [`fixtures/card.motion.json`](fixtures/card.motion.json).
+
+---
+
+## Platforms
+
+| Package | Role |
+|---------|------|
+| [`@blinn-motion/core`](packages/core) | Render engine — `sample`, easing, interpolation, `Ticker` |
+| [`@blinn-motion/dom`](packages/dom) | Full-fidelity DOM / CSS / SVG |
+| [`@blinn-motion/canvas`](packages/canvas) | Pure 2D canvas |
+| [`@blinn-motion/react`](packages/react) | `<BlinnMotion />` + `useBlinnMotion` |
+| [`@blinn-motion/react-native`](packages/react-native) | `<BlinnMotionView />` |
+| [`@blinn-motion/figma-plugin`](packages/figma-plugin) | Export MotionDoc + live preview |
+
+---
+
+## How it works
+
+```
+┌─────────────────┐     ┌──────────────┐     ┌────────────────────┐
+│  Figma Motion   │────▶│  MotionDoc   │────▶│  sample(doc, t)    │
+│  timelines      │     │  (JSON)      │     │  pure, DOM-free    │
+└─────────────────┘     └──────────────┘     └─────────┬──────────┘
+                                                       │
+                         resolved RenderNode tree ─────┤
+                                                       ▼
+                              ┌────────┬────────┬────────┬──────────┐
+                              │  DOM   │ Canvas │ React  │    RN    │
+                              └────────┴────────┴────────┴──────────┘
+```
+
+The maths lives in **core**. Adapters only paint.  
+Full format: [**MotionDoc schema**](packages/core/SCHEMA.md) · walkthrough: [**docs**](https://docs.blinnmotion.com).
+
+---
+
+## From Figma
+
+1. Install the Blinn Motion plugin (import [`packages/figma-plugin/manifest.json`](packages/figma-plugin/manifest.json) in Figma → Plugins → Development).
+2. Select a frame with a Motion timeline → run the plugin.
+3. Preview live, inspect the MotionDoc, **Download .json**.
+4. Drop that file into any adapter above.
+
+---
+
+## Links
+
+| | |
+|--|--|
+| 🌐 Site | [blinnmotion.com](https://blinnmotion.com) |
+| 📚 Docs | [docs.blinnmotion.com](https://docs.blinnmotion.com) |
+| 🧪 Schema | [`packages/core/SCHEMA.md`](packages/core/SCHEMA.md) |
+| 🎞 Fixture | [`fixtures/card.motion.json`](fixtures/card.motion.json) |
+
+---
+
+## Contributing
+
+Issues and PRs welcome. Library packages live under `packages/*`; marketing site under `site/`; docs under `docs/`.
+
+```bash
+npm install
+npm test
+npm run build
+```
+
+---
+
 ## License
 
-MIT
+[MIT](LICENSE) © Blinn Motion
