@@ -1,5 +1,6 @@
 <p align="center">
-  <img src="docs/logo/light.svg" alt="Blinn Motion" width="72" height="72" />
+  <!-- Square mark (not the wide wordmark) — keeps the B icon crisp on GitHub -->
+  <img src="site/public/favicon.svg" alt="Blinn Motion" width="128" height="128" />
 </p>
 
 <h1 align="center">Blinn Motion</h1>
