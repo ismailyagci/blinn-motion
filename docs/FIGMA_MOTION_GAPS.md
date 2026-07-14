@@ -1,7 +1,7 @@
-# Figma Motion → Fottie — feature gap analysis
+# Figma Motion → Blinn Motion — feature gap analysis
 
-What Figma's Motion API can express vs. what Fottie currently converts (`code.ts`) and
-renders (`@fottie/core` + adapters). Source of truth: `@figma/plugin-typings`
+What Figma's Motion API can express vs. what Blinn Motion currently converts (`code.ts`) and
+renders (`@blinn-motion/core` + adapters). Source of truth: `@figma/plugin-typings`
 (`KeyframePropertyFieldName`, `EffectKeyframeFieldName`, `KeyframeValue`, `MotionEasing`,
 `Effect`, `Paint`, `BlendMode`).
 
@@ -11,7 +11,7 @@ Legend: ✅ supported · ⚠️ partial/approximate · ❌ missing
 
 ## ✅ Implemented in the "add everything" pass (2026-06-28)
 
-Across `@fottie/core`, `@fottie/dom`, `@fottie/canvas`, `@fottie/react-native` and the
+Across `@blinn-motion/core`, `@blinn-motion/dom`, `@blinn-motion/canvas`, `@blinn-motion/react-native` and the
 converter (`code.ts`):
 
 - **PATH_TRIM** rendering — DOM via `stroke-dasharray/offset` (canvas TODO: needs path

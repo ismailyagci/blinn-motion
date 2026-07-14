@@ -1,5 +1,5 @@
-// Metro config for running this Expo app inside the Fottie monorepo.
-// It watches the repo root so Metro can resolve the symlinked @fottie/* workspace
+// Metro config for running this Expo app inside the BlinnMotion monorepo.
+// It watches the repo root so Metro can resolve the symlinked @blinn-motion/* workspace
 // packages and the shared /fixtures folder.
 const { getDefaultConfig } = require("expo/metro-config");
 const path = require("path");

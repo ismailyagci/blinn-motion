@@ -1,0 +1,72 @@
+---
+const rows = [
+  { a: "Authoring source", l: "After Effects (Bodymovin)", f: "Figma Motion timeline" },
+  { a: "Document format", l: "Lottie JSON", f: "MotionDoc — small, readable, yours" },
+  { a: "Render engine", l: "Mature, feature-rich runtime", f: "Pure-JS core, DOM-free maths" },
+  { a: "Adapters", l: "SVG · Canvas · HTML players", f: "DOM · Canvas · React · React Native" },
+  { a: "Cross-platform timing", l: "Per-player", f: "One shared clock & resolved tree" },
+  { a: "Springs", l: "Via AE expressions", f: "First-class spring easing" },
+];
+---
+
+<section class="section section-alt" id="compare">
+  <div class="container">
+    <div class="section-head center" data-reveal>
+      <span class="eyebrow"><span class="kf"></span> Lottie, but not Lottie</span>
+      <h2 class="title">Inspired by Lottie.<br />Built differently.</h2>
+      <p class="lead">Lottie proved the idea: ship motion as data, not video. Blinn Motion takes that idea to the
+        Figma Motion era with its own format and its own runtime — so you own the whole pipeline.</p>
+    </div>
+
+    <div class="compare card" data-reveal>
+      <div class="compare-head">
+        <span class="ch-aspect"></span>
+        <span class="ch-lottie mono">Lottie</span>
+        <span class="ch-blinn-motion">
+          <span class="ch-logo" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="17" height="17"><rect x="6" y="6" width="52" height="52" rx="15" fill="#11141A"/><g fill="none" stroke="#fff" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 18 V46"/><path d="M24 18 H32.5 C38.6 18 38.6 32 32.5 32 H24"/><path d="M24 32 H34.5 C41.2 32 41.2 46 34.5 46 H24"/></g><rect x="43.6" y="43.6" width="7.6" height="7.6" rx="1.5" transform="rotate(45 47.4 47.4)" fill="#2F6BFF"/></svg>
+          </span>
+          Blinn Motion
+        </span>
+      </div>
+      {rows.map((r, i) => (
+        <div class="compare-row" data-reveal style={`--reveal-delay:${i * 45}ms`}>
+          <span class="cr-aspect">{r.a}</span>
+          <span class="cr-lottie">{r.l}</span>
+          <span class="cr-blinn-motion">
+            <svg class="cr-check" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+            {r.f}
+          </span>
+        </div>
+      ))}
+    </div>
+
+    <p class="compare-note" data-reveal>Lottie is a trademark of its respective owners. Blinn Motion is an independent, MIT-licensed project — not affiliated.</p>
+  </div>
+</section>
+
+<style>
+  .compare { padding: 0; overflow: hidden; }
+  .compare-head, .compare-row { display: grid; grid-template-columns: 1.1fr 1.3fr 1.5fr; align-items: center; gap: 16px; padding: 15px 24px; }
+  .compare-head { background: var(--paper-2); border-bottom: 1px solid var(--line); font-size: 13px; font-weight: 600; }
+  .ch-lottie { color: var(--ink-3); font-weight: 500; }
+  .ch-blinn-motion { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); font-family: var(--display); }
+  .ch-logo { display: grid; place-items: center; }
+
+  .compare-row { border-bottom: 1px solid var(--line); font-size: 14.5px; }
+  .compare-row:last-child { border-bottom: 0; }
+  .cr-aspect { color: var(--ink); font-weight: 600; }
+  .cr-lottie { color: var(--ink-3); }
+  .cr-blinn-motion { display: inline-flex; align-items: center; gap: 9px; color: var(--ink); font-weight: 500; padding: 8px 14px; margin: -8px -8px -8px 0; border-radius: 10px; background: var(--blue-t); }
+  .cr-check { flex: none; color: #0a8a5f; }
+
+  .compare-note { text-align: center; color: var(--ink-3); font-size: 12.5px; margin-top: 20px; }
+
+  @media (max-width: 700px) {
+    .compare-head { display: none; }
+    .compare-row { grid-template-columns: 1fr; gap: 6px; padding: 15px 18px; }
+    .cr-aspect { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--ink-3); font-weight: 500; }
+    .cr-lottie::before { content: "Lottie — "; color: var(--line-2); }
+    .cr-blinn-motion { margin: 4px 0 0; }
+  }
+</style>

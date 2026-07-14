@@ -1,0 +1,147 @@
+---
+title: "The MotionDoc format"
+description: "A small, time-based, renderer-agnostic document that holds your whole animation."
+---
+
+A **MotionDoc** is a Lottie-like — but **own** — animation document. It is produced by the
+Figma plugin (Figma Motion → MotionDoc) and consumed by `@blinn-motion/core`. The format is
+intentionally small, **time-based** (seconds), renderer-agnostic, and human-readable enough
+to hand-author for tests.
+
+<Note>
+  Design goal: anything the engine can play, the Figma converter can emit — and the format
+  stays readable. See the [full schema](/reference/motiondoc-schema) for every field.
+</Note>
+
+## Top level
+
+```jsonc
+{
+  "format": "motion-engine",
+  "version": "1.0",
+  "meta":   { "name": "Card intro", "source": "figma" },
+  "duration": 1.2,                                  // timeline length, SECONDS
+  "fps": 60,                                         // suggested sampling fps
+  "stage":  { "width": 375, "height": 600, "background": "#0E1116FF" },
+  "layers": [ /* Layer[], painted back-to-front */ ]
+}
+```
+
+## Layers nest
+
+A layer's `base` position is **relative to its parent's box** (top-level layers are relative
+to the stage). Children inherit the parent's animated transform — exactly like the DOM. That
+nesting is why a card can move and its badge moves with it.
+
+```jsonc
+{
+  "id": "card",
+  "name": "Card",
+  "type": "rect",                       // rect | ellipse | text | image | vector | group
+  "base": {
+    "x": 44, "y": 200, "width": 287, "height": 200,
+    "opacity": 1, "rotation": 0, "scaleX": 1, "scaleY": 1,
+    "anchor": { "x": 0.5, "y": 0.5 },   // transform-origin, 0..1 of the box
+    "cornerRadius": [24, 24, 24, 24],   // [tl, tr, br, bl]
+    "fill": { "type": "linear", "angle": 135, "stops": [
+      { "pos": 0, "color": "#3B82F6FF" },
+      { "pos": 1, "color": "#8B5CF6FF" }
+    ] }
+  },
+  "tracks": [ /* Track[] */ ],
+  "children": [ /* nested Layer[] */ ]
+}
+```
+
+## Tracks animate one property
+
+Each track drives a single normalized property over the base value. The `op` decides how the
+sampled value combines with the base:
+
+| `op`     | result        | meaning      |
+| -------- | ------------- | ------------ |
+| `set`    | `v`           | absolute     |
+| `offset` | `base + v`    | additive     |
+| `scale`  | `base * v`    | multiplier   |
+
+```jsonc
+{
+  "property": "translateY",   // see the property table in the schema reference
+  "op": "offset",
+  "unit": "px",
+  "base": 0,
+  "keys": [
+    { "t": 0.0, "v": 80, "easing": { "type": "spring", "bounce": 0.45 } },
+    { "t": 0.8, "v": 0,  "easing": { "type": "hold" } }
+  ]
+}
+```
+
+Multiple tracks can target the **same property** — they compose in order over the base. That's
+how a spring entrance and a hover offset can stack cleanly.
+
+## Keyframes hold a value at a time
+
+```jsonc
+{ "t": 0.0, "v": 120, "easing": { "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] } }
+```
+
+- `t` is **absolute** time on the timeline, in seconds.
+- `v` is a `number`, a `[x, y]` vector, a `"#RRGGBBAA"` color, a boolean, or a string.
+- `easing` governs interpolation **from this keyframe to the next** (out-interpolation, like
+  CSS `transition-timing-function`). The last keyframe's easing is ignored.
+
+<Tip>
+  Before the first keyframe the value is held; after the last keyframe it is held. So a track
+  only needs keyframes where something actually changes.
+</Tip>
+
+## A complete tiny example
+
+This is a real, playable MotionDoc — a card that springs up and fades in while a badge spins.
+
+```jsonc card.motion.json
+{
+  "format": "motion-engine",
+  "version": "1.0",
+  "duration": 1.6,
+  "fps": 60,
+  "stage": { "width": 375, "height": 600, "background": "#0E1116FF" },
+  "layers": [
+    {
+      "id": "card", "name": "Card", "type": "rect",
+      "base": {
+        "x": 44, "y": 200, "width": 287, "height": 200,
+        "anchor": { "x": 0.5, "y": 0.5 }, "cornerRadius": [24, 24, 24, 24],
+        "fill": { "type": "solid", "color": "#2F6BFFFF" }
+      },
+      "tracks": [
+        { "property": "opacity", "op": "set", "unit": "none", "base": 1, "keys": [
+          { "t": 0.0, "v": 0, "easing": { "type": "cubicBezier", "p": [0, 0, 0.58, 1] } },
+          { "t": 0.45, "v": 1, "easing": { "type": "hold" } }
+        ] },
+        { "property": "translateY", "op": "offset", "unit": "px", "base": 0, "keys": [
+          { "t": 0.0, "v": 80, "easing": { "type": "spring", "bounce": 0.45 } },
+          { "t": 0.8, "v": 0, "easing": { "type": "hold" } }
+        ] }
+      ],
+      "children": [
+        {
+          "id": "badge", "name": "Badge", "type": "ellipse",
+          "base": {
+            "x": 24, "y": 24, "width": 56, "height": 56,
+            "anchor": { "x": 0.5, "y": 0.5 },
+            "fill": { "type": "solid", "color": "#FFBE16FF" }
+          },
+          "tracks": [
+            { "property": "rotation", "op": "offset", "unit": "deg", "base": 0, "keys": [
+              { "t": 0.0, "v": 0, "easing": { "type": "linear" } },
+              { "t": 1.6, "v": 360, "easing": { "type": "hold" } }
+            ] }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 140 32" fill="none">
+  <g transform="translate(0,2.3) scale(0.4375)">
+    <rect x="6" y="6" width="52" height="52" rx="15" fill="#ffffff"/>
+    <g fill="none" stroke="#11141A" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M24 18 V46"/>
+      <path d="M24 18 H32.5 C38.6 18 38.6 32 32.5 32 H24"/>
+      <path d="M24 32 H34.5 C41.2 32 41.2 46 34.5 46 H24"/>
+    </g>
+    <rect x="43.6" y="43.6" width="7.6" height="7.6" rx="1.5" transform="rotate(45 47.4 47.4)" fill="#2F6BFF"/>
+  </g>
+  <text x="34" y="21.5" font-family="'Space Grotesk', Inter, system-ui, sans-serif" font-size="15" font-weight="700" letter-spacing="-0.3" fill="#ffffff">Blinn Motion</text>
+</svg>

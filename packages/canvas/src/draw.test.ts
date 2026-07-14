@@ -8,7 +8,7 @@ import {
   type MotionDoc,
   type RenderNode,
   type RenderTree,
-} from "@fottie/core";
+} from "@blinn-motion/core";
 import { drawTree } from "./index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -85,7 +85,7 @@ function tree(nodes: RenderNode[]): RenderTree {
   return { duration: 1, stage: { width: 200, height: 200 }, time: 0, nodes };
 }
 
-describe("@fottie/canvas drawTree", () => {
+describe("@blinn-motion/canvas drawTree", () => {
   it("paints the sample tree without throwing and clears + fills", () => {
     const m = mockCtx();
     expect(() => drawTree(m.ctx, sample(doc, 0.4), 2)).not.toThrow();
@@ -252,6 +252,19 @@ describe("@fottie/canvas drawTree", () => {
     } finally {
       if (!hadPath2D) delete (globalThis as any).Path2D;
     }
+  });
+
+  it("clips and invokes the shader path when node.shader is set", () => {
+    const m = mockCtx();
+    const n = node({
+      fill: { type: "solid", color: { r: 0, g: 0, b: 0, a: 1 } },
+      shader: { kind: "noise" },
+    });
+    // node env has no document → paintShader early-returns, but the clip path
+    // around the shader overlay must still run (save / box / clip / restore).
+    expect(() => drawTree(m.ctx, tree([n]), 1)).not.toThrow();
+    expect(m.calls.clip).toBeGreaterThanOrEqual(1);
+    expect(m.calls.save).toBe(m.calls.restore);
   });
 
   it("clips to the node box when clip is set", () => {

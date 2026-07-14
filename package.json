@@ -1,8 +1,8 @@
 {
-  "name": "fottie",
+  "name": "blinn-motion",
   "version": "0.1.0",
   "private": true,
-  "description": "Fottie — Figma Motion → own document format (MotionDoc) → pure-JS render engine with DOM / Canvas / React / React Native adapters.",
+  "description": "Blinn Motion — Figma Motion → own document format (MotionDoc) → pure-JS render engine with DOM / Canvas / React / React Native adapters.",
   "license": "MIT",
   "type": "module",
   "workspaces": [
@@ -10,13 +10,14 @@
     "examples/*"
   ],
   "scripts": {
-    "build": "npm run build --workspace @fottie/core && npm run build --workspace @fottie/dom --workspace @fottie/canvas --workspace @fottie/react --workspace @fottie/react-native",
+    "build": "npm run build --workspace @blinn-motion/core && npm run build --workspace @blinn-motion/dom --workspace @blinn-motion/canvas --workspace @blinn-motion/react --workspace @blinn-motion/react-native",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
-    "clean": "rimraf 'packages/*/dist' 'examples/*/dist'"
+    "clean": "rimraf 'packages/*/dist' 'examples/*/dist'",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.1",
@@ -24,6 +25,7 @@
     "@types/node": "^22.10.0",
     "@vitejs/plugin-react": "^4.3.4",
     "@vitest/coverage-v8": "^2.1.9",
+    "husky": "^9.1.7",
     "jsdom": "^25.0.1",
     "react-dom": "^18.3.1",
     "rimraf": "^6.0.1",

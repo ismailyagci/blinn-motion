@@ -1,15 +1,15 @@
-# @fottie/react-native
+# @blinn-motion/react-native
 
-React Native adapter for **Fottie**. It plays a `MotionDoc` (the Figma-Motion →
+React Native adapter for **Blinn Motion**. It plays a `MotionDoc` (the Figma-Motion →
 MotionDoc → render-engine format) using native `View` / `Text` / `Image` nodes.
-Every frame it samples the doc with [`@fottie/core`](../core) and maps the
+Every frame it samples the doc with [`@blinn-motion/core`](../core) and maps the
 resolved render tree onto RN styles — the exact same render method the DOM,
 Canvas and React adapters use, so the animation is identical across platforms.
 
 ## Install
 
 ```sh
-npm install @fottie/react-native @fottie/core
+npm install @blinn-motion/react-native @blinn-motion/core
 # peers (provided by your app):
 npm install react react-native
 ```
@@ -17,11 +17,11 @@ npm install react react-native
 ## Usage
 
 ```tsx
-import { FottieView } from "@fottie/react-native";
+import { BlinnMotionView } from "@blinn-motion/react-native";
 import doc from "./card.motion.json";
 
 export default function Screen() {
-  return <FottieView doc={doc} loop autoplay />;
+  return <BlinnMotionView doc={doc} loop autoplay />;
 }
 ```
 
@@ -29,10 +29,10 @@ export default function Screen() {
 
 ```tsx
 import { useRef } from "react";
-import { FottieView, type FottieHandle } from "@fottie/react-native";
+import { BlinnMotionView, type BlinnMotionHandle } from "@blinn-motion/react-native";
 
-const ref = useRef<FottieHandle>(null);
-<FottieView ref={ref} doc={doc} autoplay={false} />;
+const ref = useRef<BlinnMotionHandle>(null);
+<BlinnMotionView ref={ref} doc={doc} autoplay={false} />;
 // ref.current?.play() / pause() / stop() / toggle() / seek(t) / seekFraction(f) / setRate(r)
 ```
 
@@ -41,16 +41,16 @@ const ref = useRef<FottieHandle>(null);
 Render the tree yourself, or drive playback from your own UI:
 
 ```tsx
-import { useFottie } from "@fottie/react-native";
+import { useBlinnMotion } from "@blinn-motion/react-native";
 
-const { tree, controls } = useFottie(doc, { autoplay: true });
+const { tree, controls } = useBlinnMotion(doc, { autoplay: true });
 // `tree` is the resolved RenderTree for the current frame; `controls` is stable.
 ```
 
 The pure mapping is also exported for custom renderers:
 
 ```ts
-import { nodeToTransform } from "@fottie/react-native";
+import { nodeToTransform } from "@blinn-motion/react-native";
 const style = nodeToTransform(renderNode); // → React Native ViewStyle
 ```
 

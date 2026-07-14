@@ -1,0 +1,94 @@
+---
+import { site } from "../data/site";
+import StageDemo from "./StageDemo.astro";
+
+const adapters = [
+  { k: "DOM", c: "var(--blue)" },
+  { k: "Canvas", c: "var(--cyan)" },
+  { k: "React", c: "var(--violet)" },
+  { k: "React Native", c: "var(--coral)" },
+];
+---
+
+<section class="hero" id="hero">
+  <div class="container hero-grid">
+    <div class="hero-copy">
+      <span class="eyebrow hero-eyebrow" data-reveal>
+        <span class="kf"></span> Figma&nbsp;Motion → real&nbsp;code
+      </span>
+
+      <h1 class="hero-title" data-reveal style="--reveal-delay:50ms">
+        Animate in Figma.<br />Ship&nbsp;it <span class="mark-violet">everywhere</span>.
+      </h1>
+
+      <p class="hero-lead" data-reveal style="--reveal-delay:110ms">
+        Blinn Motion turns a <strong>Figma Motion</strong> timeline into a tiny
+        <code class="inline">MotionDoc</code> and plays it with a pure-JS engine — the same
+        motion, frame for frame, on every platform.
+      </p>
+
+      <div class="hero-actions" data-reveal style="--reveal-delay:170ms">
+        <a class="btn btn-primary" href={site.repo} target="_blank" rel="noopener">
+          Get started
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </a>
+        <a class="btn btn-ghost" href="#code">See the code</a>
+      </div>
+
+      <div class="trust" data-reveal style="--reveal-delay:230ms">
+        <span class="trust-label mono">renders identically on</span>
+        <div class="trust-chips">
+          {adapters.map((a) => (
+            <span class="tchip"><i style={`--kc:${a.c}`}></i>{a.k}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-stage">
+      <StageDemo />
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero { padding-top: clamp(36px, 5vw, 72px); padding-bottom: clamp(48px, 7vw, 96px); }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.02fr 0.98fr;
+    align-items: center;
+    gap: clamp(32px, 5vw, 72px);
+  }
+  .hero-eyebrow .kf { background: var(--blue); }
+  .hero-title {
+    font-size: clamp(38px, 5.4vw, 64px);
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    font-weight: 700;
+    margin-top: 22px;
+  }
+  .hero-lead { color: var(--ink-2); font-size: clamp(16px, 1.45vw, 19px); line-height: 1.6; margin-top: 22px; max-width: 500px; }
+
+  .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+
+  .trust { margin-top: 40px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .trust-label { display: block; font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 13px; }
+  .trust-chips { display: flex; flex-wrap: wrap; gap: 9px; }
+  .tchip {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 13.5px; font-weight: 500; color: var(--ink);
+    padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper);
+  }
+  .tchip i { width: 8px; height: 8px; background: var(--kc); transform: rotate(45deg); border-radius: 1.5px; }
+
+  .hero-stage { min-width: 0; }
+
+  @media (max-width: 920px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 44px; }
+    .hero-copy { text-align: center; }
+    .hero-actions, .trust-chips { justify-content: center; }
+    .hero-lead { margin-inline: auto; }
+    .trust { display: inline-block; }
+    .hero-stage { order: -1; }
+  }
+</style>

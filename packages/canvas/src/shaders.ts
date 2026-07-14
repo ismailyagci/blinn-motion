@@ -1,6 +1,6 @@
 /**
  * Procedural shader fills (Figma SHADER/NOISE/"Water caustic") for the canvas
- * backend. Mirrors @fottie/dom's caustics/noise so a `node.shader` overlay looks
+ * backend. Mirrors @blinn-motion/dom's caustics/noise so a `node.shader` overlay looks
  * the same on both adapters. Rendered into a small cached offscreen image, then
  * drawn (clipped) over the node box.
  */

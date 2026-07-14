@@ -17,8 +17,8 @@ export default defineConfig({
         // Figma-runtime (uses the `figma` global; verified live in Figma, not unit-tested)
         "packages/figma-plugin/**",
         // React Native runtime components (need an RN test renderer)
-        "packages/react-native/src/FottieView.tsx",
-        "packages/react-native/src/useFottie.ts",
+        "packages/react-native/src/BlinnMotionView.tsx",
+        "packages/react-native/src/useBlinnMotion.ts",
         "packages/react-native/src/player.ts",
       ],
       thresholds: {

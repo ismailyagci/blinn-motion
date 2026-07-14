@@ -1,7 +1,7 @@
 {
-  "name": "@fottie/react-native",
+  "name": "@blinn-motion/react-native",
   "version": "0.1.0",
-  "description": "Fottie React Native adapter — a <FottieView/> component and useFottie() hook that play a MotionDoc with native Views.",
+  "description": "Blinn Motion React Native adapter — a <BlinnMotionView/> component and useBlinnMotion() hook that play a MotionDoc with native Views.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -26,7 +26,7 @@
     "react-native": ">=0.70"
   },
   "dependencies": {
-    "@fottie/core": "^0.1.0"
+    "@blinn-motion/core": "^0.1.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

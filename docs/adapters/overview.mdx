@@ -1,0 +1,50 @@
+---
+title: "Adapters overview"
+description: "One resolved tree, four thin painters — DOM, Canvas, React and React Native."
+---
+
+The core resolves a MotionDoc to a tree of final numbers. An **adapter** is a thin painter
+that walks that tree and draws it for one backend. Because they all paint the *same* tree, an
+animation looks and **times identically** wherever it runs.
+
+<CardGroup cols={2}>
+  <Card title="@blinn-motion/dom" icon="code" href="/adapters/dom">
+    Full-fidelity CSS: nested divs, gradients, SVG vector paths, masks and shaders.
+  </Card>
+  <Card title="@blinn-motion/canvas" icon="image" href="/adapters/canvas">
+    A pure-JS 2D canvas painter — one immediate-mode draw per frame, zero DOM nodes.
+  </Card>
+  <Card title="@blinn-motion/react" icon="react" href="/adapters/react">
+    A declarative `<BlinnMotion />` component with a swappable renderer.
+  </Card>
+  <Card title="@blinn-motion/react-native" icon="mobile" href="/adapters/react-native">
+    The same timing on native `<View>` / `<Text>` — no native module.
+  </Card>
+</CardGroup>
+
+## Same control surface
+
+Every adapter exposes the same playback API, because they all build on the core's
+[`Ticker`](/reference/core-api#ticker):
+
+| Method | Does |
+| --- | --- |
+| `play()` / `pause()` / `toggle()` | start, stop, flip playback |
+| `seek(t)` | jump to `t` seconds |
+| `seekFraction(f)` | jump to `0..1` of the duration |
+| `loop` | get/set looping |
+
+## Fidelity at a glance
+
+| Feature | DOM | Canvas | React | React Native |
+| --- | :-: | :-: | :-: | :-: |
+| Transforms & opacity | ✅ | ✅ | ✅ | ✅ |
+| Gradients | ✅ | ✅ | ✅ | ⚠️ |
+| SVG vector paths + arrowheads | ✅ | ⚠️ | ✅ | ❌ |
+| Masks / clip shapes | ✅ | ⚠️ | ✅ | ⚠️ |
+| Procedural shaders | ✅ | ⚠️ | ✅ | ❌ |
+
+<Note>
+  The DOM adapter is the fidelity reference — it implements the widest set of paint features.
+  Canvas and React Native trade some of the rarer effects for portability.
+</Note>

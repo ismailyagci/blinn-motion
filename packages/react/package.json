@@ -1,7 +1,7 @@
 {
-  "name": "@fottie/react",
+  "name": "@blinn-motion/react",
   "version": "0.1.0",
-  "description": "Fottie React adapter — a <Fottie/> component and useFottie() hook that play a MotionDoc via the DOM or Canvas backend.",
+  "description": "Blinn Motion React adapter — a <BlinnMotion/> component and useBlinnMotion() hook that play a MotionDoc via the DOM or Canvas backend.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -25,9 +25,9 @@
     "react": ">=17"
   },
   "dependencies": {
-    "@fottie/core": "^0.1.0",
-    "@fottie/dom": "^0.1.0",
-    "@fottie/canvas": "^0.1.0"
+    "@blinn-motion/core": "^0.1.0",
+    "@blinn-motion/dom": "^0.1.0",
+    "@blinn-motion/canvas": "^0.1.0"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

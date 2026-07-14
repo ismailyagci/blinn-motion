@@ -1,9 +1,9 @@
 // @vitest-environment jsdom
 import { describe, it, expect } from "vitest";
-import type { LayerBase } from "@fottie/core";
+import type { LayerBase } from "@blinn-motion/core";
 import { buildPathSvg, type SvgEl } from "./svg.js";
 
-describe("@fottie/dom buildPathSvg", () => {
+describe("@blinn-motion/dom buildPathSvg", () => {
   it("builds an <svg> with a stroked <path> and an arrow <marker>/<defs>", () => {
     const el = document.createElement("div") as SvgEl;
     const b = {

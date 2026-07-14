@@ -1,0 +1,69 @@
+---
+title: "Easing"
+description: "The four easing shapes the engine understands, and how Figma presets map to them."
+---
+
+The engine understands exactly **four** easing shapes. Every Figma easing preset is resolved
+to one of them at export time, so the runtime stays small and deterministic.
+
+## The four shapes
+
+<CardGroup cols={2}>
+  <Card title="linear" icon="minus">
+    Constant rate. No acceleration.
+  </Card>
+  <Card title="hold" icon="stairs">
+    A step. Keep the value until the next keyframe — no tween.
+  </Card>
+  <Card title="cubicBezier" icon="bezier-curve">
+    A cubic-bézier curve `p = [x1, y1, x2, y2]`. Solved per frame with Newton–Raphson and a
+    bisection fallback. `y` may exceed `0..1` for overshoot / anticipation.
+  </Card>
+  <Card title="spring" icon="wave-square">
+    A damped physical spring. `bounce` runs `0` (no overshoot) → `1` (very bouncy).
+  </Card>
+</CardGroup>
+
+```jsonc
+{ "type": "linear" }
+{ "type": "hold" }
+{ "type": "cubicBezier", "p": [0.42, 0, 0.58, 1] }
+{ "type": "spring", "bounce": 0.45 }
+```
+
+## Segment convention
+
+A keyframe's easing governs interpolation **from that keyframe to the next** — out-interpolation,
+like CSS `transition-timing-function`. So you set the curve on the keyframe you're leaving:
+
+```jsonc
+"keys": [
+  { "t": 0.0, "v": 0, "easing": { "type": "spring", "bounce": 0.5 } },  // 0.0 → 0.8 uses the spring
+  { "t": 0.8, "v": 1, "easing": { "type": "hold" } }                    // ignored (last key)
+]
+```
+
+The last keyframe's easing is ignored. Before the first key and after the last, the value is
+held.
+
+## How Figma presets map
+
+The converter resolves every Figma `MotionEasing` to one of the four shapes:
+
+| Figma preset | Blinn Motion easing |
+| --- | --- |
+| `LINEAR` | `linear` |
+| `HOLD` | `hold` |
+| `EASE_IN` | `cubicBezier [0.41, 0, 1, 1]` |
+| `EASE_OUT` | `cubicBezier [0, 0, 0.59, 1]` |
+| `EASE_IN_AND_OUT` | `cubicBezier [0.41, 0, 0.59, 1]` |
+| `EASE_OUT_BACK` | `cubicBezier [0.34, 1.56, 0.64, 1]` |
+| `CUSTOM_CUBIC_BEZIER` | `cubicBezier` from `{x1,y1,x2,y2}` |
+| `CUSTOM_SPRING` | `spring { bounce }` |
+| `GENTLE` / `QUICK` / `BOUNCY` / `SLOW` | `spring { bounce: 0.2 / 0.1 / 0.6 / 0.05 }` (approx) |
+
+<Note>
+  Springs are a perceptual `bounce` approximation (ζ = 1 − bounce), not a re-solve of Figma's
+  physical `mass / stiffness / damping`. The motion reads the same; the exact overshoot can
+  differ slightly. See [Figma Motion coverage](/reference/figma-coverage).
+</Note>

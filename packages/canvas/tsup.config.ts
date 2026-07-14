@@ -8,7 +8,7 @@ export default defineConfig({
   sourcemap: true,
   treeshake: true,
   target: "es2020",
-  external: ["@fottie/core"],
+  external: ["@blinn-motion/core"],
   outExtension({ format }) {
     return { js: format === "cjs" ? ".cjs" : ".js" };
   },

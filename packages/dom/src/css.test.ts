@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import type { Paint, Effect, Shape } from "@fottie/core";
+import type { Paint, Effect, Shape } from "@blinn-motion/core";
 import { colorCss, paintToCss, effectsToCss, shapeClipCss, fillWithStops } from "./css.js";
 
 /** Split a `polygon(a% b%, c% d%, ...)` clip-path into its vertex tokens. */
@@ -8,7 +8,7 @@ function polyPoints(cp: string): string[] {
   return m ? m[1]!.split(", ") : [];
 }
 
-describe("@fottie/dom css.colorCss", () => {
+describe("@blinn-motion/dom css.colorCss", () => {
   it("converts hex (with alpha) to rgba()", () => {
     expect(colorCss("#3B82F6FF")).toBe("rgba(59,130,246,1)");
   });
@@ -32,7 +32,7 @@ describe("@fottie/dom css.colorCss", () => {
   });
 });
 
-describe("@fottie/dom css.paintToCss", () => {
+describe("@blinn-motion/dom css.paintToCss", () => {
   it("returns transparent for null/undefined", () => {
     expect(paintToCss(null)).toBe("transparent");
     expect(paintToCss(undefined)).toBe("transparent");
@@ -114,7 +114,7 @@ describe("@fottie/dom css.paintToCss", () => {
   });
 });
 
-describe("@fottie/dom css.effectsToCss", () => {
+describe("@blinn-motion/dom css.effectsToCss", () => {
   it("is empty for no effects", () => {
     expect(effectsToCss(undefined)).toEqual({ boxShadow: "", filter: "", backdrop: "" });
   });
@@ -167,7 +167,7 @@ describe("@fottie/dom css.effectsToCss", () => {
   });
 });
 
-describe("@fottie/dom css.shapeClipCss", () => {
+describe("@blinn-motion/dom css.shapeClipCss", () => {
   it("returns '' for null/undefined", () => {
     expect(shapeClipCss(null)).toBe("");
     expect(shapeClipCss(undefined)).toBe("");
@@ -201,7 +201,7 @@ describe("@fottie/dom css.shapeClipCss", () => {
   });
 });
 
-describe("@fottie/dom css.fillWithStops", () => {
+describe("@blinn-motion/dom css.fillWithStops", () => {
   const linear: Paint = {
     type: "linear",
     angle: 90,

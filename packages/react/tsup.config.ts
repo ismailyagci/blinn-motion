@@ -8,7 +8,7 @@ export default defineConfig({
   sourcemap: true,
   treeshake: true,
   target: "es2020",
-  external: ["react", "react-dom", "@fottie/core", "@fottie/dom", "@fottie/canvas"],
+  external: ["react", "react-dom", "@blinn-motion/core", "@blinn-motion/dom", "@blinn-motion/canvas"],
   esbuildOptions(options) {
     options.jsx = "automatic";
   },

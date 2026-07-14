@@ -10,7 +10,7 @@ function fakeEntry(kind: "caustics" | "noise" | undefined, w = 8, h = 8) {
   return { ent, put, createImageData };
 }
 
-describe("@fottie/dom caustics.drawNoise", () => {
+describe("@blinn-motion/dom caustics.drawNoise", () => {
   it("writes RGBA grain (alpha always > 0) and flushes via putImageData", () => {
     const { ent, put } = fakeEntry("noise", 8, 8);
     drawNoise(ent, 0);
@@ -43,7 +43,7 @@ describe("@fottie/dom caustics.drawNoise", () => {
   });
 });
 
-describe("@fottie/dom caustics.drawCaustics", () => {
+describe("@blinn-motion/dom caustics.drawCaustics", () => {
   it("fills fully-opaque blue-ish pixels and flushes via putImageData", () => {
     const { ent, put } = fakeEntry("caustics", 6, 6);
     drawCaustics(ent, 0.5);
@@ -56,7 +56,7 @@ describe("@fottie/dom caustics.drawCaustics", () => {
   });
 });
 
-describe("@fottie/dom caustics.drawShader", () => {
+describe("@blinn-motion/dom caustics.drawShader", () => {
   it("dispatches to noise for kind:'noise' (semi-transparent grain)", () => {
     const { ent, put } = fakeEntry("noise", 4, 4);
     drawShader(ent, 0);

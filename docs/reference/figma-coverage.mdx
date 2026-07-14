@@ -1,0 +1,61 @@
+---
+title: "Figma Motion coverage"
+description: "What Figma Motion can express vs. what Blinn Motion currently converts and renders."
+---
+
+Figma's Motion API is broad. This page is the honest map of what Blinn Motion converts and renders
+today, so you know what will survive the trip from Figma to a MotionDoc.
+
+<Info>
+  Legend — ✅ supported · ⚠️ partial / approximate · ❌ not yet
+</Info>
+
+## Solid ground
+
+These convert and render across the DOM, Canvas and React Native adapters:
+
+- **Transforms** — `translateX/Y/XY`, `rotation` (Figma CCW → CSS CW handled), `scaleX/Y/XY` ✅
+- **Opacity**, **width**, **height** ✅
+- **Corner radius** — uniform and all four corners ✅
+- **Stroke weight** ✅ · **polygon / star morph** (`polygonCount`) ✅
+- **Easing** — every Figma preset (`LINEAR/HOLD`, `EASE_*`, `EASE_*_BACK`,
+  `GENTLE/QUICK/BOUNCY/SLOW`, custom bézier, custom spring) ✅
+- **Keyframe ops** `SET / OFFSET / SCALE`, stacked tracks per property ✅
+- **Fill color animation** ✅
+- **Static** solid + linear gradient, drop / inner shadow, layer & background blur, vector
+  paths + arrowheads, polygon / star ✅
+
+## Approximate
+
+| Area | Status | Note |
+| --- | :-: | --- |
+| Radial / angular / diamond gradients | ⚠️ | Native + animated stops; diamond ≈ radial |
+| `PATH_TRIM` (stroke-draw) | ⚠️ | DOM via `stroke-dasharray`; Canvas pending |
+| Springs | ⚠️ | Perceptual `bounce` (ζ = 1 − bounce), not a physical re-solve |
+| Masks | ⚠️ | Rectangular reveal + shape clip; alpha / luminance masks approximate |
+| Variable blur | ⚠️ | Uniform CSS blur only |
+| Image fills | ⚠️ | Static raster snapshot, no `object-fit` variants |
+| Anchor / pivot | ⚠️ | Defaults to `{0.5, 0.5}` if Figma's origin isn't read |
+
+## Out of scope (for now)
+
+- **Auto-layout / grid** animation — `STACK_*`, `GRID_*` gaps & padding (mapped, reflow lost)
+- **Per-side border weights** — only a single uniform `strokeWeight`
+- **Effect sub-field animation** — animated shadow offset / radius / color, glass, noise
+- **Gradient stop / handle animation** beyond color
+- **Blend modes**, **pattern** & **video** paints
+- **Rotated-parent compensation** for animated child coordinates
+
+## Broader Figma motion (architecturally separate)
+
+These live outside the in-frame Motion timeline, so Blinn Motion doesn't read them:
+
+- Prototype **Smart Animate** transitions between frames / variants
+- Interactive components & variant state changes
+- Variable bindings driving animated values
+- Text motion — typewriter, per-character, text-on-path
+
+<Tip>
+  Hitting one of the ⚠️ / ❌ rows? Open an issue on
+  [GitHub](https://github.com/blinn-motion/blinn-motion) — this list is a roadmap as much as a status.
+</Tip>

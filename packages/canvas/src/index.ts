@@ -1,7 +1,7 @@
 /**
- * @fottie/canvas — pure-JS 2D canvas adapter for Fottie.
+ * @blinn-motion/canvas — pure-JS 2D canvas adapter for BlinnMotion.
  *
- * `create(canvasOrEl, doc, opts)` samples the MotionDoc with @fottie/core and
+ * `create(canvasOrEl, doc, opts)` samples the MotionDoc with @blinn-motion/core and
  * repaints a canvas each frame. Supports transforms, solid/linear/radial/angular
  * (diamond ≈ radial)/image fills, rounded rects, ellipses, polygons/stars/arcs,
  * text, vector paths, uniform + per-side strokes, blend modes, drop/inner shadows,

@@ -9,7 +9,7 @@ export default defineConfig({
   treeshake: true,
   target: "es2020",
   // The host app supplies react / react-native; core is a workspace dep.
-  external: ["react", "react-native", "@fottie/core"],
+  external: ["react", "react-native", "@blinn-motion/core"],
   esbuildOptions(options) {
     options.jsx = "automatic";
   },

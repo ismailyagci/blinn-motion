@@ -1,9 +1,9 @@
 /**
- * The Canvas Player: drives @fottie/core's Ticker, samples the doc each frame
+ * The Canvas Player: drives @blinn-motion/core's Ticker, samples the doc each frame
  * and repaints a 2D canvas via {@link drawTree}. Same render method as the DOM
  * adapter, different backend.
  */
-import { sample, Ticker, type MotionDoc, type RenderTree } from "@fottie/core";
+import { sample, Ticker, type MotionDoc, type RenderTree } from "@blinn-motion/core";
 import { drawTree } from "./draw.js";
 
 export interface CanvasPlayerOptions {

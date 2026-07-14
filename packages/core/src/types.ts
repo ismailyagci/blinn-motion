@@ -1,5 +1,5 @@
 /**
- * Fottie type model.
+ * BlinnMotion type model.
  *
  * Two halves live here:
  *   1. The **MotionDoc** — the on-disk document the Figma plugin emits and the

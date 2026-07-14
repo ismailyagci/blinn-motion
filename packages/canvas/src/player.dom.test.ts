@@ -3,7 +3,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import type { MotionDoc } from "@fottie/core";
+import type { MotionDoc } from "@blinn-motion/core";
 import { create, CanvasPlayer } from "./index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -57,7 +57,7 @@ afterEach(() => {
   HTMLCanvasElement.prototype.getContext = origGetContext;
 });
 
-describe("@fottie/canvas player", () => {
+describe("@blinn-motion/canvas player", () => {
   it("creates a canvas sized to stage * dpr and styled to CSS px", () => {
     const host = document.createElement("div");
     const player = create(host, doc, { autoplay: false, dpr: 2 });
@@ -106,5 +106,46 @@ describe("@fottie/canvas player", () => {
     }).not.toThrow();
     expect(player.isPlaying).toBe(false);
     expect(player instanceof CanvasPlayer).toBe(true);
+  });
+
+  it("accepts an HTMLCanvasElement directly (no host wrapper)", () => {
+    const canvas = document.createElement("canvas");
+    const player = create(canvas, doc, { autoplay: false, dpr: 1 });
+    expect(player.canvas).toBe(canvas);
+    expect(player.duration).toBe(doc.duration);
+  });
+
+  it("toggle flips isPlaying; seekFraction updates time", () => {
+    const host = document.createElement("div");
+    const player = create(host, doc, { autoplay: false, dpr: 1 });
+    expect(player.isPlaying).toBe(false);
+    player.toggle();
+    expect(player.isPlaying).toBe(true);
+    player.toggle();
+    expect(player.isPlaying).toBe(false);
+
+    player.seekFraction(0.5);
+    expect(player.time).toBeCloseTo(doc.duration! * 0.5, 5);
+    // loop defaults to true when omitted from opts
+    expect(player.loop).toBe(true);
+    player.loop = false;
+    expect(player.loop).toBe(false);
+  });
+
+  it("fires onframe on seek and autoplay starts playing", () => {
+    const host = document.createElement("div");
+    let frames = 0;
+    const player = create(host, doc, {
+      autoplay: true,
+      dpr: 1,
+      onframe: () => {
+        frames++;
+      },
+    });
+    expect(player.isPlaying).toBe(true);
+    const before = frames;
+    player.seek(0.25);
+    expect(frames).toBeGreaterThan(before);
+    player.pause();
   });
 });

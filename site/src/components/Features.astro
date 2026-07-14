@@ -1,0 +1,59 @@
+---
+function icon(name: string): string {
+  const s = 'fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"';
+  const m: Record<string, string> = {
+    chip: `<svg viewBox="0 0 24 24" ${s}><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>`,
+    spring: `<svg viewBox="0 0 24 24" ${s}><path d="M3 18c2-5 4 5 6 0s4-11 6-6 4 6 6 1"/></svg>`,
+    doc: `<svg viewBox="0 0 24 24" ${s}><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>`,
+    sync: `<svg viewBox="0 0 24 24" ${s}><path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 12a9 9 0 0 1 15-6.7L21 8M3 21v-5h5M21 3v5h-5"/></svg>`,
+    scrub: `<svg viewBox="0 0 24 24" ${s}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`,
+    layers: `<svg viewBox="0 0 24 24" ${s}><path d="m12 2 9 5-9 5-9-5 9-5zM3 12l9 5 9-5M3 17l9 5 9-5"/></svg>`,
+    feather: `<svg viewBox="0 0 24 24" ${s}><path d="M20 4a7 7 0 0 0-10 0L4 10v10h10l6-6a7 7 0 0 0 0-4M16 8 4 20M16 8h-4M16 8v4"/></svg>`,
+    plug: `<svg viewBox="0 0 24 24" ${s}><path d="M9 2v6M15 2v6M7 8h10v3a5 5 0 0 1-10 0zM12 16v6"/></svg>`,
+  };
+  return m[name] ?? "";
+}
+
+const features = [
+  { i: "chip", c: "var(--blue)", t: "var(--blue-t)", h: "Pure-JS render core", d: "The maths is DOM-free and unit-tested. Only the adapters touch a platform — the engine runs anywhere JS does." },
+  { i: "spring", c: "var(--coral)", t: "var(--coral-t)", h: "Springs & curves, solved", d: "Linear, hold, cubic-bezier (Newton-Raphson) and damped springs — sampled per frame, not pre-baked." },
+  { i: "doc", c: "var(--violet)", t: "var(--violet-t)", h: "MotionDoc — open format", d: "A small, readable JSON document you own. Inspectable, diffable, versionable — no proprietary blob." },
+  { i: "sync", c: "var(--mint)", t: "var(--mint-t)", h: "Identical timing everywhere", d: "Same resolved tree, same shared clock. An animation times the same on DOM, Canvas, React & Native." },
+  { i: "scrub", c: "var(--cyan)", t: "var(--cyan-t)", h: "Scrub · seek · loop · speed", d: "Drive playback frame-accurately: seek(s), seekFraction(0…1), loop and variable speed — all from the core." },
+  { i: "layers", c: "var(--blue)", t: "var(--blue-t)", h: "Gradients, masks, shaders", d: "Nested transforms, linear & radial gradients, SVG vector paths, clip-path stars, masks and procedural shaders." },
+  { i: "feather", c: "var(--coral)", t: "var(--coral-t)", h: "Tiny & framework-agnostic", d: "No runtime dependencies in the core. Drop it into vanilla JS, React or React Native without ceremony." },
+  { i: "plug", c: "var(--violet)", t: "var(--violet-t)", h: "First-class Figma plugin", d: "Select an animated frame, preview it live, and download the MotionDoc — straight from the Motion timeline." },
+];
+---
+
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head center" data-reveal>
+      <span class="eyebrow"><span class="kf"></span> Why Blinn Motion</span>
+      <h2 class="title">Everything the render engine gives you</h2>
+      <p class="lead">A small core with a sharp focus: resolve motion to numbers, then paint it the same way
+        on every surface you ship to.</p>
+    </div>
+
+    <div class="feature-grid">
+      {features.map((f, i) => (
+        <article class="card feature" data-reveal style={`--reveal-delay:${(i % 4) * 60}ms; --c:${f.c}; --t:${f.t}`}>
+          <span class="feature-icon" set:html={icon(f.i)} />
+          <h3 class="feature-title">{f.h}</h3>
+          <p class="feature-desc">{f.d}</p>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .feature-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .feature { padding: 22px; }
+  .feature-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 11px; margin-bottom: 15px; color: var(--c); background: var(--t); }
+  .feature-title { font-size: 16px; letter-spacing: -0.01em; margin-bottom: 8px; }
+  .feature-desc { color: var(--ink-2); font-size: 13.8px; line-height: 1.55; margin: 0; }
+
+  @media (max-width: 1000px) { .feature-grid { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 540px) { .feature-grid { grid-template-columns: 1fr; } }
+</style>

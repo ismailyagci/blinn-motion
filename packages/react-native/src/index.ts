@@ -1,18 +1,18 @@
 /**
- * @fottie/react-native — React Native bindings for Fottie.
+ * @blinn-motion/react-native — React Native bindings for BlinnMotion.
  *
- * - `<FottieView doc={...} />` — drop-in component that plays a MotionDoc with
+ * - `<BlinnMotionView doc={...} />` — drop-in component that plays a MotionDoc with
  *   native <View>/<Text>/<Image> nodes.
- * - `useFottie(doc, opts)` — hook returning `{ tree, controls }` for manual rendering.
+ * - `useBlinnMotion(doc, opts)` — hook returning `{ tree, controls }` for manual rendering.
  * - `nodeToTransform(node)` — the pure RenderNode → RN style mapping.
  *
- * Shares @fottie/core's render method with every other adapter, so the animation
+ * Shares @blinn-motion/core's render method with every other adapter, so the animation
  * is identical across DOM, Canvas, React and React Native.
  */
-export { FottieView } from "./FottieView.js";
-export type { FottieViewProps, FottieHandle } from "./FottieView.js";
-export { useFottie } from "./useFottie.js";
-export type { UseFottieOptions, UseFottieResult } from "./useFottie.js";
+export { BlinnMotionView } from "./BlinnMotionView.js";
+export type { BlinnMotionViewProps, BlinnMotionHandle } from "./BlinnMotionView.js";
+export { useBlinnMotion } from "./useBlinnMotion.js";
+export type { UseBlinnMotionOptions, UseBlinnMotionResult } from "./useBlinnMotion.js";
 export { nodeToTransform } from "./style.js";
-export type { FottieNodeStyle } from "./style.js";
-export type { FottieControls, FottiePlaybackOptions, FottiePlayback } from "./player.js";
+export type { BlinnMotionNodeStyle } from "./style.js";
+export type { BlinnMotionControls, BlinnMotionPlaybackOptions, BlinnMotionPlayback } from "./player.js";

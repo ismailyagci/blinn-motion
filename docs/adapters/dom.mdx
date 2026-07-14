@@ -1,0 +1,64 @@
+---
+title: "DOM adapter"
+description: "@blinn-motion/dom — the full-fidelity CSS adapter."
+---
+
+`@blinn-motion/dom` builds nested DOM layers and plays a MotionDoc using `@blinn-motion/core`'s render
+math. It's the **fidelity reference**: transforms, gradients, SVG vector paths with
+arrowheads, clip-path polygons & stars, masks, and procedural shaders.
+
+## Install
+
+```bash
+npm i @blinn-motion/dom
+```
+
+## Create a player
+
+```ts
+import { create } from "@blinn-motion/dom";
+import doc from "./card.motion.json";
+
+const player = create(
+  document.getElementById("stage")!,  // host element
+  doc,                                 // a MotionDoc
+  { loop: true, autoplay: true }       // options
+);
+```
+
+`create(container, doc, opts)` returns a `DomPlayer`. It mounts a sized stage inside your
+container and starts the shared clock.
+
+## Options
+
+<ParamField path="loop" type="boolean" default="false">
+  Restart from the beginning when the timeline ends.
+</ParamField>
+<ParamField path="autoplay" type="boolean" default="false">
+  Begin playing as soon as the player mounts.
+</ParamField>
+<ParamField path="rate" type="number" default="1">
+  Playback speed multiplier — `0.5` is half speed, `2` is double.
+</ParamField>
+<ParamField path="onframe" type="(t: number, fraction: number) => void">
+  Called every frame with the current time (seconds) and progress (`0..1`). Use it to drive a
+  scrubber or a timecode readout.
+</ParamField>
+
+## Control playback
+
+```ts
+player.play();
+player.pause();
+player.toggle();
+
+player.seek(0.8);          // seconds
+player.seekFraction(0.5);  // 0..1 of the duration
+
+player.loop = false;       // get/set looping at runtime
+```
+
+<Tip>
+  Building a scrubber? Pass an `onframe` callback to keep your slider in sync, and call
+  `seekFraction` on input. See [Controlling playback](/guides/playback).
+</Tip>

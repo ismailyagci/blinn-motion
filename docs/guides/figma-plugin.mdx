@@ -1,0 +1,50 @@
+---
+title: "Export from Figma"
+description: "Turn a Figma Motion timeline into a downloadable MotionDoc with the Blinn Motion plugin."
+---
+
+The `@blinn-motion/figma-plugin` reads a Figma **Motion** timeline and emits a MotionDoc — no PNGs,
+no video, just your keyframes, easing and springs as data.
+
+## Build the plugin
+
+The plugin previews animations with an inlined `@blinn-motion/dom` bundle, so build that first.
+
+```bash
+npm run build -w @blinn-motion/dom          # produces the inlined browser bundle
+npm run build -w @blinn-motion/figma-plugin # tsc → dist/code.js, inlines → ui.html
+```
+
+## Load it into Figma
+
+<Steps>
+  <Step title="Import the manifest">
+    In Figma: **Plugins → Development → Import plugin from manifest…** and pick
+    `packages/figma-plugin/manifest.json`.
+  </Step>
+  <Step title="Select an animated frame">
+    Choose a frame that has a Motion timeline (one with keyframes on the timeline panel).
+  </Step>
+  <Step title="Run the plugin">
+    The left pane previews the animation with `@blinn-motion/dom`. The right pane shows the
+    **MotionDoc** and the raw Figma JSON side by side.
+  </Step>
+  <Step title="Download the MotionDoc">
+    Hit **Download .json**. The file plays anywhere, with any Blinn Motion adapter.
+  </Step>
+</Steps>
+
+## Then play it
+
+```ts
+import { create } from "@blinn-motion/dom";
+import doc from "./downloaded.motion.json";
+
+create(document.getElementById("stage")!, doc, { loop: true }).play();
+```
+
+<Note>
+  Not everything in Figma Motion converts one-to-one. Before relying on a specific effect,
+  skim [Figma Motion coverage](/reference/figma-coverage) to see what's supported, approximate,
+  or out of scope.
+</Note>

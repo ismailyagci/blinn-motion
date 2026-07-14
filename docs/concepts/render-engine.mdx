@@ -1,0 +1,86 @@
+---
+title: "The render engine"
+description: "One pure, DOM-free method — sample(doc, t) — resolves a MotionDoc to a tree of final numbers."
+---
+
+`@blinn-motion/core` is **time-based** (seconds) and **DOM-free**. The whole engine hangs off a
+single deterministic function; every adapter is a thin painter on top of it.
+
+## sample(doc, t)
+
+`sample` walks the document, samples every track at time `t`, composes stacked tracks per
+property over the base value, and returns a **resolved render tree** — every transform, RGBA
+color and shape vertex is a final number.
+
+```ts
+import { sample } from "@blinn-motion/core";
+
+const tree = sample(doc, 0.8); // resolve the whole doc at t = 0.8s
+// tree is a backend-agnostic RenderNode[] — no DOM, no canvas, just numbers
+```
+
+Because it's pure, the same `t` always yields the same tree. That determinism is what makes an
+animation **time identically** on the DOM, on a canvas, and on native views.
+
+<Steps>
+  <Step title="Walk">
+    Recurse the layer tree. Children resolve relative to their parent's animated box.
+  </Step>
+  <Step title="Sample">
+    For each track, find the active keyframe segment at `t`, ease the local progress, and
+    interpolate the value.
+  </Step>
+  <Step title="Compose">
+    Combine each track's value with the base via its `op` (`set` / `offset` / `scale`).
+    Stacked tracks apply in order.
+  </Step>
+  <Step title="Resolve">
+    Emit a `RenderNode` with final transforms, colors, vertices and effects.
+  </Step>
+</Steps>
+
+## Composition
+
+A property can be driven by several tracks. They fold over the base value left to right:
+
+```ts
+// base = 0, then two tracks on translateY:
+// track A (offset): +80 → 0   (spring entrance)
+// track B (offset): hover nudge -6
+// resolved = base + A + B
+```
+
+- `set` replaces the running value.
+- `offset` adds to it.
+- `scale` multiplies it.
+
+This is why springs, curves and interaction offsets layer without fighting each other.
+
+## The shared clock: Ticker
+
+Adapters don't run their own timers. They build a [`Ticker`](/reference/core-api#ticker) — the
+shared playback clock — and call `sample` on each frame. The Ticker owns time, `loop`, `rate`
+(speed) and the `onframe` callback, so `play` / `pause` / `seek` / `seekFraction` behave the
+same everywhere.
+
+```ts
+import { Ticker, sample } from "@blinn-motion/core";
+
+const ticker = new Ticker({
+  duration: doc.duration,
+  loop: true,
+  onframe: (t, fraction) => paint(sample(doc, t)),
+});
+
+ticker.play();
+```
+
+## What the core exports
+
+`sample` is the headline, but the core is a toolkit of pure helpers — easing solvers, color
+interpolation, shape vertex math, paint resolution. See the [core API
+reference](/reference/core-api) for the full surface.
+
+<Card title="Core API reference" icon="cpu" href="/reference/core-api">
+  sample, computeLayer, Ticker, and the easing / color / shape / paint helpers.
+</Card>

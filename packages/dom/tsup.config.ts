@@ -10,24 +10,24 @@ export default defineConfig([
     sourcemap: true,
     treeshake: true,
     target: "es2020",
-    external: ["@fottie/core"],
+    external: ["@blinn-motion/core"],
     outExtension({ format }) {
       return { js: format === "cjs" ? ".cjs" : ".js" };
     },
   },
-  // Self-contained browser global: bundles @fottie/core inline and exposes
-  // `window.Fottie`. Used by the Figma plugin UI, which must be a single file
+  // Self-contained browser global: bundles @blinn-motion/core inline and exposes
+  // `window.BlinnMotion`. Used by the Figma plugin UI, which must be a single file
   // with no module loading / CDN (networkAccess: none).
   {
-    entry: { fottie: "src/index.ts" },
+    entry: { "blinn-motion": "src/index.ts" },
     format: ["iife"],
-    globalName: "Fottie",
+    globalName: "BlinnMotion",
     dts: false,
     clean: false,
     minify: true,
     sourcemap: false,
     target: "es2017",
     // do NOT externalize core here — bundle it so the file stands alone
-    noExternal: ["@fottie/core"],
+    noExternal: ["@blinn-motion/core"],
   },
 ]);

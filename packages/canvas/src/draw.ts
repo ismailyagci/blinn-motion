@@ -1,5 +1,5 @@
 /**
- * Canvas painter for a @fottie/core {@link RenderTree}. Walks the resolved node
+ * Canvas painter for a @blinn-motion/core {@link RenderTree}. Walks the resolved node
  * tree, replicating the DOM transform model on a 2D context:
  *   position at (x,y) → CSS translate → rotate/scale around the anchor → draw box
  * Children inherit the parent transform and opacity, exactly like nested DOM.
@@ -13,7 +13,7 @@ import {
   type ResolvedPaint,
   type RGBA,
   type Vec2,
-} from "@fottie/core";
+} from "@blinn-motion/core";
 import { paintShader } from "./shaders.js";
 
 /** Image cache so fills don't reload every frame. */
@@ -53,7 +53,7 @@ function appendBoxPath(ctx: CanvasRenderingContext2D, node: RenderNode): void {
     return;
   }
   if (clip.kind === "polygon") {
-    // Arc shapes arrive here too: @fottie/core converts arc → polygon vertices,
+    // Arc shapes arrive here too: @blinn-motion/core converts arc → polygon vertices,
     // so the generic polygon path covers pie/donut/arc with no special-casing.
     polyPath(ctx, clip.vertices, w, h);
     return;
@@ -355,7 +355,7 @@ function paintInnerShadow(ctx: CanvasRenderingContext2D, node: RenderNode, eff: 
 /**
  * Procedural monochrome noise overlay clipped to the box. Pseudo-randomness comes
  * from a sine hash of the cell coordinates (no Math.random dependency), in the
- * spirit of @fottie/dom's caustics. `density` drives both coverage and alpha.
+ * spirit of @blinn-motion/dom's caustics. `density` drives both coverage and alpha.
  */
 function paintNoise(ctx: CanvasRenderingContext2D, node: RenderNode, eff: NoiseEffect): void {
   const w = Math.abs(node.width);

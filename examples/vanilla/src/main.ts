@@ -1,6 +1,6 @@
-import { create as createDom, type DomPlayer } from "@fottie/dom";
-import { create as createCanvas, type CanvasPlayer } from "@fottie/canvas";
-import type { MotionDoc } from "@fottie/core";
+import { create as createDom, type DomPlayer } from "@blinn-motion/dom";
+import { create as createCanvas, type CanvasPlayer } from "@blinn-motion/canvas";
+import type { MotionDoc } from "@blinn-motion/core";
 import card from "../../../fixtures/card.motion.json";
 import showcase from "../../../fixtures/showcase.motion.json";
 

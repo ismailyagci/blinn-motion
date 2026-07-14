@@ -1,0 +1,96 @@
+---
+title: "@blinn-motion/core API"
+description: "The pure, DOM-free render engine — public exports."
+---
+
+`@blinn-motion/core` is the engine every adapter shares. It's pure and DOM-free; you only need it
+directly when writing your own adapter or tooling.
+
+## Render
+
+### `sample(doc, t)`
+
+Resolve a whole MotionDoc at time `t` (seconds) into a backend-agnostic `RenderNode[]` — every
+transform, color and vertex is a final number.
+
+```ts
+import { sample } from "@blinn-motion/core";
+
+const tree = sample(doc, 0.8);
+```
+
+### `computeLayer(layer, t)`
+
+Resolve a single layer's animated state at `t` → a `LayerState`. `sample` is built on this.
+
+### `walk(tree, fn)` · `findNode(tree, id)`
+
+Traverse or look up resolved nodes.
+
+```ts
+import { walk, findNode } from "@blinn-motion/core";
+
+walk(tree, (node) => { /* visit every resolved node */ });
+const badge = findNode(tree, "badge");
+```
+
+## Ticker
+
+The shared playback clock that adapters build their player on. It owns time, looping, rate and
+the per-frame callback.
+
+```ts
+import { Ticker, sample } from "@blinn-motion/core";
+
+const ticker = new Ticker({
+  duration: doc.duration,  // seconds
+  loop: true,
+  rate: 1,                 // speed multiplier
+  onframe: (t, fraction) => paint(sample(doc, t)),
+});
+
+ticker.play();
+ticker.pause();
+ticker.toggle();
+ticker.seek(0.8);
+ticker.seekFraction(0.5);
+ticker.loop = false;
+```
+
+<ParamField path="duration" type="number" required>
+  Timeline length in seconds.
+</ParamField>
+<ParamField path="loop" type="boolean" default="false">
+  Restart at the end.
+</ParamField>
+<ParamField path="rate" type="number" default="1">
+  Playback speed multiplier.
+</ParamField>
+<ParamField path="onframe" type="(t: number, fraction: number) => void">
+  Called every frame with current time and progress.
+</ParamField>
+
+## Helpers
+
+The core also exports the pure math the engine runs on:
+
+| Group | Exports |
+| --- | --- |
+| Easing | `cubicBezier`, `springFn`, `makeEasing`, `EasingFn` |
+| Color | `parseColor`, `rgbaToCss`, `rgbaToHex`, `lerpRgba`, `lerpColor`, `clamp` |
+| Interpolation | `valueKind`, `interp`, `applyOp`, `interpKeys`, `evalTrack` |
+| Shapes | `polygonVertices`, `starVertices`, `arcVertices`, `verticesToClipPath` |
+| Paint | `resolvePaint`, `resolveStroke`, `resolveEffects`, `resolveText` |
+
+```ts
+import { cubicBezier, lerpColor, VERSION } from "@blinn-motion/core";
+
+cubicBezier([0.42, 0, 0.58, 1], 0.5);        // eased progress
+lerpColor("#3B82F6FF", "#8B5CF6FF", 0.5);    // midpoint color
+VERSION;                                      // "0.1.0"
+```
+
+<Note>
+  Writing a new adapter? You only need `sample` (or `computeLayer`) and `Ticker`. Everything
+  else is there so you don't reimplement easing, color or shape math.
+</Note>

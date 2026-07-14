@@ -1,0 +1,17 @@
+{
+  "name": "@blinn-motion/site",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Marketing landing page for Blinn Motion — built with Astro.",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^7.0.0"
+  }
+}

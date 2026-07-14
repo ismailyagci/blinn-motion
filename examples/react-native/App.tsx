@@ -1,27 +1,27 @@
 import { useRef, useState } from "react";
 import { View, Text, Pressable, StyleSheet, SafeAreaView } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { FottieView, type FottieHandle } from "@fottie/react-native";
-import type { MotionDoc } from "@fottie/core";
+import { BlinnMotionView, type BlinnMotionHandle } from "@blinn-motion/react-native";
+import type { MotionDoc } from "@blinn-motion/core";
 import doc from "../../fixtures/card.motion.json";
 
 const motionDoc = doc as MotionDoc;
 
 export default function App() {
-  const ref = useRef<FottieHandle>(null);
+  const ref = useRef<BlinnMotionHandle>(null);
   const [playing, setPlaying] = useState(true);
 
   return (
     <SafeAreaView style={styles.screen}>
       <StatusBar style="light" />
-      <Text style={styles.title}>Fottie · React Native</Text>
+      <Text style={styles.title}>BlinnMotion · React Native</Text>
       <Text style={styles.sub}>
-        The same MotionDoc, rendered to native Views by @fottie/react-native —
-        driven by @fottie/core's render method.
+        The same MotionDoc, rendered to native Views by @blinn-motion/react-native —
+        driven by @blinn-motion/core's render method.
       </Text>
 
       <View style={styles.stageWrap}>
-        <FottieView ref={ref} doc={motionDoc} loop autoplay />
+        <BlinnMotionView ref={ref} doc={motionDoc} loop autoplay />
       </View>
 
       <View style={styles.controls}>

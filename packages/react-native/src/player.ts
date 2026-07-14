@@ -1,17 +1,17 @@
 /**
- * Shared playback hook for the React Native adapter. Both <FottieView/> and
- * useFottie() build on this.
+ * Shared playback hook for the React Native adapter. Both <BlinnMotionView/> and
+ * useBlinnMotion() build on this.
  *
- * It owns a @fottie/core {@link Ticker} (which uses RN's requestAnimationFrame),
+ * It owns a @blinn-motion/core {@link Ticker} (which uses RN's requestAnimationFrame),
  * samples the doc into a {@link RenderTree} on every frame, stores that tree in
  * React state, and exposes a stable `controls` object. Same render method as the
  * DOM / Canvas / React adapters — only the backend differs.
  */
 import { useEffect, useMemo, useRef, useState } from "react";
-import { sample, Ticker, type MotionDoc, type RenderTree } from "@fottie/core";
+import { sample, Ticker, type MotionDoc, type RenderTree } from "@blinn-motion/core";
 
 /** Imperative playback controls. */
-export interface FottieControls {
+export interface BlinnMotionControls {
   play(): void;
   pause(): void;
   stop(): void;
@@ -22,7 +22,7 @@ export interface FottieControls {
 }
 
 /** Options shared by the component and the hook. */
-export interface FottiePlaybackOptions {
+export interface BlinnMotionPlaybackOptions {
   /** Loop at the end of the timeline (default true). */
   loop?: boolean;
   /** Start playing on mount (default true). */
@@ -33,15 +33,15 @@ export interface FottiePlaybackOptions {
   onFrame?: (time: number, fraction: number) => void;
 }
 
-/** What {@link usePlayer} / {@link useFottie} return. */
-export interface FottiePlayback {
+/** What {@link usePlayer} / {@link useBlinnMotion} return. */
+export interface BlinnMotionPlayback {
   /** The latest resolved render tree (re-rendered each frame). */
   tree: RenderTree;
   /** Stable play/pause/seek controls. */
-  controls: FottieControls;
+  controls: BlinnMotionControls;
 }
 
-export function usePlayer(doc: MotionDoc, options: FottiePlaybackOptions = {}): FottiePlayback {
+export function usePlayer(doc: MotionDoc, options: BlinnMotionPlaybackOptions = {}): BlinnMotionPlayback {
   const { loop = true, autoplay = true, rate = 1, onFrame } = options;
 
   // Seed with the first frame so the very first render already has content.
@@ -75,7 +75,7 @@ export function usePlayer(doc: MotionDoc, options: FottiePlaybackOptions = {}): 
   }, [doc, loop, rate, autoplay]);
 
   // Stable controls that proxy to whatever ticker is current.
-  const controls = useMemo<FottieControls>(
+  const controls = useMemo<BlinnMotionControls>(
     () => ({
       play: () => tickerRef.current?.play(),
       pause: () => tickerRef.current?.pause(),

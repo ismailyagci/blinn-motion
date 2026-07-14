@@ -1,0 +1,106 @@
+---
+const easings = [
+  { k: "linear", d: "constant rate", c: "var(--blue)" },
+  { k: "hold", d: "step / no tween", c: "var(--ink-3)" },
+  { k: "cubicBezier", d: "Newton-Raphson", c: "var(--violet)" },
+  { k: "spring", d: "damped approx.", c: "var(--coral)" },
+];
+
+const points = [
+  { t: "Time-based, in seconds", d: "The core speaks one language: <code class='inline'>t</code> in seconds. The playback clock is shared, so play / pause / seek / loop behave the same everywhere." },
+  { t: "Composes stacked tracks", d: "Multiple tracks per property compose over the base value — <code class='inline'>set</code> replaces, <code class='inline'>offset</code> adds — so springs and curves layer cleanly." },
+  { t: "Returns final numbers", d: "Every transform, RGBA color and shape vertex comes out resolved. Adapters never re-interpret intent; they just paint." },
+];
+---
+
+<section class="section" id="engine">
+  <div class="container">
+    <div class="section-head center" data-reveal>
+      <span class="eyebrow"><span class="kf"></span> The render engine</span>
+      <h2 class="title">One pure method does the work</h2>
+      <p class="lead"><code class="inline">@blinn-motion/core</code> is time-based and DOM-free. The whole engine
+        hangs off a single deterministic function — everything else is a thin painter.</p>
+    </div>
+
+    <div class="engine-grid">
+      <div class="engine-code card" data-reveal>
+        <div class="code-bar">
+          <span class="kf-mark"></span>
+          <span class="code-file mono">core/sample.ts</span>
+        </div>
+        <pre class="code mono"><code><span class="cm">// THE render method — pure, DOM-free</span>
+<span class="kw">export function</span> <span class="fn">sample</span>(doc: <span class="ty">MotionDoc</span>, t: <span class="ty">number</span>) {
+  <span class="kw">return</span> doc.layers.<span class="fn">map</span>((layer) =&gt;
+    <span class="fn">resolve</span>(layer, t)   <span class="cm">// walk + sample every track</span>
+  );
+}
+
+<span class="cm">// each track, eased + composed over the base</span>
+<span class="kw">const</span> v = <span class="fn">ease</span>(key.easing, local);
+node[p] = op === <span class="st">"offset"</span>
+  ? base + <span class="fn">lerp</span>(a, b, v)   <span class="cm">// additive</span>
+  : <span class="fn">lerp</span>(a, b, v);          <span class="cm">// replace</span>
+
+<span class="cm">// → resolved RenderNode tree (final numbers)</span></code></pre>
+      </div>
+
+      <div class="engine-side">
+        <div class="easings" data-reveal>
+          <span class="easings-label mono">easing solvers</span>
+          <div class="easing-list">
+            {easings.map((e) => (
+              <div class="easing" style={`--c:${e.c}`}>
+                <span class="easing-mark"></span>
+                <span class="easing-k mono">{e.k}</span>
+                <span class="easing-d">{e.d}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {points.map((p, i) => (
+          <div class="point" data-reveal style={`--reveal-delay:${i * 70}ms`}>
+            <span class="point-check">
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+            </span>
+            <div>
+              <strong>{p.t}</strong>
+              <p set:html={p.d}></p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .engine-grid { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 26px; align-items: start; }
+  .engine-code { padding: 0; overflow: hidden; }
+  .code-bar { display: flex; align-items: center; gap: 9px; padding: 13px 16px; border-bottom: 1px solid var(--line); }
+  .kf-mark { width: 9px; height: 9px; background: var(--blue); transform: rotate(45deg); border-radius: 1.5px; }
+  .code-file { font-size: 12px; color: var(--ink-3); }
+  .code { margin: 0; padding: 20px 20px 22px; font-size: 12.5px; line-height: 1.75; overflow-x: auto; color: var(--ink-2); background: var(--paper-2); }
+  .code .cm { color: var(--ink-3); font-style: italic; }
+  .code .kw { color: var(--violet); }
+  .code .fn { color: var(--blue); }
+  .code .ty { color: #b07512; }
+  .code .st { color: #0a8a5f; }
+
+  .engine-side { display: flex; flex-direction: column; gap: 14px; }
+  .easings { padding: 18px 20px; border-radius: var(--r-lg); border: 1px solid var(--line); background: var(--paper); }
+  .easings-label { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 14px; }
+  .easing-list { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .easing { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border-radius: 10px; background: var(--paper-2); border: 1px solid var(--line); }
+  .easing-mark { width: 7px; height: 7px; background: var(--c); transform: rotate(45deg); border-radius: 1px; flex: none; }
+  .easing-k { font-size: 12.5px; font-weight: 500; color: var(--ink); }
+  .easing-d { font-size: 11px; color: var(--ink-3); margin-left: auto; }
+
+  .point { display: flex; gap: 13px; padding: 3px 2px; }
+  .point-check { flex: none; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; margin-top: 2px; color: #0a8a5f; background: var(--mint-t); }
+  .point strong { font-size: 15px; font-weight: 600; font-family: var(--display); letter-spacing: -0.01em; }
+  .point p { margin: 4px 0 0; color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+
+  @media (max-width: 900px) { .engine-grid { grid-template-columns: 1fr; } }
+  @media (max-width: 460px) { .easing-list { grid-template-columns: 1fr; } }
+</style>

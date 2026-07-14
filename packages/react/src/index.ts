@@ -1,11 +1,11 @@
 /**
- * @fottie/react — React bindings for Fottie.
+ * @blinn-motion/react — React bindings for BlinnMotion.
  *
- * - `<Fottie doc={...} renderer="dom|canvas" />` — drop-in component
- * - `useFottie(ref, doc, opts)` — hook for manual control
+ * - `<BlinnMotion doc={...} renderer="dom|canvas" />` — drop-in component
+ * - `useBlinnMotion(ref, doc, opts)` — hook for manual control
  *
- * Both backends share @fottie/core's render method.
+ * Both backends share @blinn-motion/core's render method.
  */
-export { Fottie } from "./Fottie.js";
-export type { FottieProps, FottieHandle, FottieRenderer, FottiePlayer } from "./Fottie.js";
-export { useFottie, type UseFottieOptions } from "./useFottie.js";
+export { BlinnMotion } from "./BlinnMotion.js";
+export type { BlinnMotionProps, BlinnMotionHandle, BlinnMotionRenderer, BlinnMotionPlayer } from "./BlinnMotion.js";
+export { useBlinnMotion, type UseBlinnMotionOptions } from "./useBlinnMotion.js";

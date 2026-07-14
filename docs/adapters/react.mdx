@@ -1,0 +1,75 @@
+---
+title: "React adapter"
+description: "@blinn-motion/react — a declarative Blinn Motion component with a swappable renderer."
+---
+
+`@blinn-motion/react` wraps the engine in a component and a hook. Pick the paint backend with one
+prop; drive playback through a ref.
+
+## Install
+
+```bash
+npm i @blinn-motion/react
+```
+
+## The component
+
+```tsx
+import { BlinnMotion } from "@blinn-motion/react";
+import doc from "./card.motion.json";
+
+export default function Hero() {
+  return (
+    <BlinnMotion
+      doc={doc}
+      renderer="canvas"   // or "dom"
+      loop
+      autoplay
+    />
+  );
+}
+```
+
+## Props
+
+<ParamField path="doc" type="MotionDoc" required>
+  The animation document to play.
+</ParamField>
+<ParamField path="renderer" type='"dom" | "canvas"' default='"dom"'>
+  Which adapter paints the resolved tree.
+</ParamField>
+<ParamField path="loop" type="boolean" default="false">
+  Restart when the timeline ends.
+</ParamField>
+<ParamField path="autoplay" type="boolean" default="false">
+  Start playing on mount.
+</ParamField>
+<ParamField path="onFrame" type="(t: number, fraction: number) => void">
+  Per-frame callback for scrubbers and timecode readouts.
+</ParamField>
+
+## Driving playback with a ref
+
+```tsx
+import { useRef } from "react";
+import { Blinn Motion, type BlinnMotionHandle } from "@blinn-motion/react";
+
+function Controlled({ doc }) {
+  const ref = useRef<BlinnMotionHandle>(null);
+  return (
+    <>
+      <BlinnMotion ref={ref} doc={doc} renderer="dom" />
+      <button onClick={() => ref.current?.toggle()}>Play / pause</button>
+      <input
+        type="range" min={0} max={1} step={0.001}
+        onChange={(e) => ref.current?.seekFraction(Number(e.target.value))}
+      />
+    </>
+  );
+}
+```
+
+<Note>
+  The ref exposes the same surface as every adapter: `play`, `pause`, `toggle`, `seek`,
+  `seekFraction` and `loop`.
+</Note>

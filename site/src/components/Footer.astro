@@ -1,0 +1,81 @@
+---
+import { site } from "../data/site";
+
+const cols = [
+  { title: "Packages", links: [
+    { label: "@blinn-motion/core", href: site.repo }, { label: "@blinn-motion/dom", href: site.repo },
+    { label: "@blinn-motion/canvas", href: site.repo }, { label: "@blinn-motion/react", href: site.repo },
+    { label: "@blinn-motion/react-native", href: site.repo },
+  ] },
+  { title: "Documentation", links: [
+    { label: "Quickstart", href: `${site.docs}/quickstart` },
+    { label: "The MotionDoc format", href: `${site.docs}/concepts/motiondoc` },
+    { label: "Adapters", href: `${site.docs}/adapters/overview` },
+    { label: "API reference", href: `${site.docs}/reference/core-api` },
+  ] },
+  { title: "Project", links: [
+    { label: "GitHub", href: site.repo }, { label: "Figma plugin", href: `${site.docs}/guides/figma-plugin` },
+    { label: "MotionDoc schema", href: `${site.docs}/reference/motiondoc-schema` }, { label: "MIT License", href: site.repo },
+  ] },
+];
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="brand" href="#top">
+          <span class="logo">
+            <svg viewBox="0 0 64 64" width="28" height="28"><rect x="6" y="6" width="52" height="52" rx="15" fill="#11141A"/><g fill="none" stroke="#fff" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 18 V46"/><path d="M24 18 H32.5 C38.6 18 38.6 32 32.5 32 H24"/><path d="M24 32 H34.5 C41.2 32 41.2 46 34.5 46 H24"/></g><rect x="43.6" y="43.6" width="7.6" height="7.6" rx="1.5" transform="rotate(45 47.4 47.4)" fill="#2F6BFF"/></svg>
+          </span>
+          <span class="brand-name">Blinn Motion</span>
+        </a>
+        <p class="footer-tag">Figma Motion → MotionDoc → a pure-JS render engine. Lottie, but not Lottie.</p>
+        <a class="footer-gh" href={site.repo} target="_blank" rel="noopener">
+          <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49l-.01-1.9c-2.78.62-3.37-1.2-3.37-1.2-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.9 1.56 2.36 1.11 2.94.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.7 0 0 .84-.27 2.75 1.05A9.4 9.4 0 0 1 12 6.84c.85 0 1.71.12 2.51.34 1.91-1.32 2.75-1.05 2.75-1.05.55 1.4.2 2.44.1 2.7.64.72 1.03 1.63 1.03 2.75 0 3.93-2.35 4.8-4.58 5.05.36.32.68.94.68 1.9l-.01 2.82c0 .27.18.6.69.49A10.26 10.26 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+          Star on GitHub
+        </a>
+      </div>
+
+      <div class="footer-cols">
+        {cols.map((c) => (
+          <div class="footer-col">
+            <h4 class="mono">{c.title}</h4>
+            {c.links.map((l) => (
+              <a href={l.href} class="mono" target={l.href.startsWith("#") ? undefined : "_blank"} rel={l.href.startsWith("#") ? undefined : "noopener"}>{l.label}</a>
+            ))}
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="footer-bottom">
+      <span>© {new Date().getFullYear()} Blinn Motion · MIT License</span>
+      <span class="footer-made">Built with <strong>Figma Motion</strong> &amp; Astro</span>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer { padding-top: 60px; padding-bottom: 36px; border-top: 1px solid var(--line); background: var(--paper-2); }
+  .footer-top { display: grid; grid-template-columns: 1.3fr 2fr; gap: 48px; padding-bottom: 44px; }
+  .footer-brand .brand { display: inline-flex; align-items: center; gap: 9px; }
+  .footer-brand .logo { display: grid; place-items: center; }
+  .footer-brand .brand-name { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: -0.03em; }
+  .footer-tag { color: var(--ink-2); font-size: 14px; line-height: 1.55; margin: 15px 0 18px; max-width: 320px; }
+  .footer-gh { display: inline-flex; align-items: center; gap: 8px; font-size: 13.5px; font-weight: 500; color: var(--ink); padding: 9px 14px; border-radius: 10px; border: 1px solid var(--line-2); background: var(--paper); transition: border-color 0.18s; }
+  .footer-gh:hover { border-color: var(--ink); }
+
+  .footer-cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+  .footer-col h4 { font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin: 0 0 14px; }
+  .footer-col a { display: block; color: var(--ink-2); font-size: 13px; padding: 5px 0; transition: color 0.16s; }
+  .footer-col a:hover { color: var(--blue); }
+
+  .footer-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; padding-top: 26px; color: var(--ink-3); font-size: 13px; }
+  .footer-made strong { color: var(--ink-2); font-weight: 600; }
+
+  @media (max-width: 800px) { .footer-top { grid-template-columns: 1fr; gap: 34px; } }
+  @media (max-width: 520px) { .footer-cols { grid-template-columns: 1fr 1fr; } }
+</style>

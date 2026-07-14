@@ -1,0 +1,141 @@
+---
+// Tiny, dependency-free highlighter for these controlled snippets.
+function esc(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+function highlight(code: string): string {
+  const KW = /\b(import|from|export|default|const|let|return|function|new)\b/g;
+  const re = /(\/\/[^\n]*)|("(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`|'(?:[^'\\]|\\.)*')/g;
+  let out = "";
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(code))) {
+    out += esc(code.slice(last, m.index)).replace(KW, '<span class="kw">$1</span>');
+    if (m[1]) out += `<span class="cm">${esc(m[1])}</span>`;
+    else out += `<span class="st">${esc(m[2])}</span>`;
+    last = re.lastIndex;
+  }
+  out += esc(code.slice(last)).replace(KW, '<span class="kw">$1</span>');
+  return out;
+}
+
+const tabs = [
+  { id: "dom", label: "DOM", code: `import { create } from "@blinn-motion/dom";\nimport doc from "./card.motion.json";\n\nconst player = create(\n  document.getElementById("stage")!,\n  doc,\n  { loop: true }\n);\n\nplayer.play();          // pause(), toggle()\nplayer.seek(0.8);       // seconds\nplayer.seekFraction(0.5); // 0…1` },
+  { id: "canvas", label: "Canvas", code: `import { create } from "@blinn-motion/canvas";\nimport doc from "./card.motion.json";\n\n// same call, a pure-JS 2D painter\nconst player = create(canvasHost, doc, {\n  loop: true,\n});\n\nplayer.play();` },
+  { id: "react", label: "React", code: `import { BlinnMotion } from "@blinn-motion/react";\nimport doc from "./card.motion.json";\n\nexport default function Hero() {\n  return (\n    <BlinnMotion\n      doc={doc}\n      renderer="canvas"  // or "dom"\n      loop\n      autoplay\n    />\n  );\n}` },
+  { id: "rn", label: "React Native", code: `import { BlinnMotionView } from "@blinn-motion/react-native";\nimport doc from "./card.motion.json";\n\nexport function Splash() {\n  return <BlinnMotionView doc={doc} loop autoplay />;\n}` },
+];
+---
+
+<section class="section" id="code">
+  <div class="container">
+    <div class="code-layout">
+      <div class="code-intro" data-reveal>
+        <span class="eyebrow"><span class="kf"></span> Use it in code</span>
+        <h2 class="title">Three lines to motion</h2>
+        <p class="lead">Hand the engine a <code class="inline">MotionDoc</code> and a host element. Pick a renderer, press play. The control surface — <code class="inline">play</code>, <code class="inline">pause</code>, <code class="inline">seek</code>, <code class="inline">seekFraction</code>, <code class="inline">loop</code> — is identical across every adapter.</p>
+
+        <div class="install" data-reveal>
+          <span class="install-label mono">install</span>
+          <div class="install-row">
+            <code class="mono">npm i @blinn-motion/dom</code>
+            <button class="copy" data-copy="npm i @blinn-motion/dom" aria-label="Copy install command">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="code-card card" data-reveal>
+        <div class="code-tabs" role="tablist">
+          {tabs.map((t, i) => (
+            <button class={`code-tab${i === 0 ? " on" : ""}`} data-tab={t.id} role="tab" aria-selected={i === 0 ? "true" : "false"}>{t.label}</button>
+          ))}
+          <button class="copy copy-code" data-copy-active aria-label="Copy code">
+            <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          </button>
+        </div>
+        {tabs.map((t, i) => (
+          <pre class={`code-panel mono${i === 0 ? " on" : ""}`} data-panel={t.id} data-raw={t.code}><code set:html={highlight(t.code)} /></pre>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  const root = document.getElementById("code")!;
+  const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>(".code-tab"));
+  const panels = Array.from(root.querySelectorAll<HTMLElement>(".code-panel"));
+
+  tabs.forEach((tab) =>
+    tab.addEventListener("click", () => {
+      const id = tab.dataset.tab;
+      tabs.forEach((t) => {
+        const on = t === tab;
+        t.classList.toggle("on", on);
+        t.setAttribute("aria-selected", String(on));
+      });
+      panels.forEach((p) => p.classList.toggle("on", p.dataset.panel === id));
+    })
+  );
+
+  const flash = (btn: HTMLElement) => {
+    btn.classList.add("done");
+    setTimeout(() => btn.classList.remove("done"), 1100);
+  };
+
+  root.querySelectorAll<HTMLButtonElement>(".copy").forEach((btn) =>
+    btn.addEventListener("click", async () => {
+      let text = btn.dataset.copy ?? "";
+      if (btn.hasAttribute("data-copy-active")) {
+        const active = panels.find((p) => p.classList.contains("on"));
+        text = active?.dataset.raw ?? "";
+      }
+      try { await navigator.clipboard.writeText(text); flash(btn); } catch {}
+    })
+  );
+</script>
+
+<style>
+  .code-layout { display: grid; grid-template-columns: 0.82fr 1.18fr; gap: clamp(28px, 4vw, 56px); align-items: center; }
+  .code-intro .lead { max-width: 440px; }
+
+  .install { margin-top: 26px; max-width: 320px; }
+  .install-label { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
+  .install-row { display: flex; align-items: center; gap: 10px; padding: 11px 11px 11px 15px; border-radius: var(--r); border: 1px solid var(--line); background: var(--paper-2); }
+  .install-row code { font-size: 13.5px; color: var(--ink); flex: 1; }
+
+  .copy {
+    flex: none; display: grid; place-items: center; width: 31px; height: 31px; border-radius: 8px;
+    color: var(--ink-3); cursor: pointer; background: var(--paper); border: 1px solid var(--line);
+    transition: color 0.16s, border-color 0.16s; position: relative;
+  }
+  .copy:hover { color: var(--ink); border-color: var(--line-2); }
+  .copy.done { color: #0a8a5f; border-color: #bfe9d8; }
+  .copy.done::after {
+    content: "copied"; position: absolute; right: 0; bottom: calc(100% + 6px);
+    font-family: var(--mono); font-size: 10.5px; font-weight: 500; color: #0a8a5f;
+    background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; white-space: nowrap;
+  }
+
+  .code-card { padding: 0; overflow: hidden; }
+  .code-tabs { display: flex; align-items: center; gap: 2px; padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--paper-2); }
+  .code-tab {
+    border: 0; background: transparent; color: var(--ink-3);
+    font-family: var(--mono); font-size: 12.5px; font-weight: 500; padding: 7px 13px; border-radius: 8px; cursor: pointer;
+    transition: color 0.16s, background 0.16s;
+  }
+  .code-tab:hover { color: var(--ink-2); }
+  .code-tab.on { color: var(--ink); background: var(--paper); box-shadow: var(--shadow-sm); }
+  .copy-code { margin-left: auto; }
+
+  .code-panel { display: none; margin: 0; padding: 20px 20px 22px; font-size: 12.5px; line-height: 1.75; overflow-x: auto; background: var(--paper); color: var(--ink-2); }
+  .code-panel.on { display: block; }
+  .code-panel :global(.cm) { color: var(--ink-3); font-style: italic; }
+  .code-panel :global(.kw) { color: var(--violet); }
+  .code-panel :global(.fn) { color: var(--blue); }
+  .code-panel :global(.st) { color: #0a8a5f; }
+
+  @media (max-width: 880px) { .code-layout { grid-template-columns: 1fr; } }
+</style>

@@ -1,5 +1,5 @@
 {
-  "name": "@fottie/example-vanilla",
+  "name": "@blinn-motion/example-vanilla",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,9 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@fottie/core": "^0.1.0",
-    "@fottie/dom": "^0.1.0",
-    "@fottie/canvas": "^0.1.0"
+    "@blinn-motion/core": "^0.1.0",
+    "@blinn-motion/dom": "^0.1.0",
+    "@blinn-motion/canvas": "^0.1.0"
   },
   "devDependencies": {
     "vite": "^5.4.11"

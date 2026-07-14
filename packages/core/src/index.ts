@@ -1,5 +1,5 @@
 /**
- * @fottie/core — the pure, DOM-free render engine.
+ * @blinn-motion/core — the pure, DOM-free render engine.
  *
  * Public surface:
  *   - {@link sample}    resolve a MotionDoc at time `t` → a backend-agnostic tree

@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+# Run unit tests + typecheck before every commit.
+# Skip with: git commit --no-verify
+
+npm test
+npm run typecheck

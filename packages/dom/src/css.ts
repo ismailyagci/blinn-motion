@@ -1,4 +1,4 @@
-/** CSS string helpers for the DOM adapter, built on @fottie/core color/shape math. */
+/** CSS string helpers for the DOM adapter, built on @blinn-motion/core color/shape math. */
 import {
   parseColor,
   rgbaToCss,
@@ -11,7 +11,7 @@ import {
   type Shape,
   type RGBA,
   type StopOverride,
-} from "@fottie/core";
+} from "@blinn-motion/core";
 
 /** Any accepted color form → CSS `rgba()`. */
 export function colorCss(c: string | RGBA | null | undefined): string {

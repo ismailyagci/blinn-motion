@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Fottie RN Example",
-    "slug": "fottie-rn-example",
+    "name": "Blinn Motion RN Example",
+    "slug": "blinn-motion-rn-example",
     "version": "1.0.0",
     "orientation": "portrait",
     "userInterfaceStyle": "dark",

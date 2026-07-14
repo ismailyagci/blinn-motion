@@ -1,0 +1,71 @@
+---
+title: "Controlling playback"
+description: "Play, pause, seek, loop, change speed, and build a scrubber."
+---
+
+Every adapter shares one playback surface, built on the core's
+[`Ticker`](/reference/core-api#ticker). The examples below use `@blinn-motion/dom`, but the API is
+identical for Canvas, React (via a ref) and React Native.
+
+## Play, pause, toggle
+
+```ts
+const player = create(stage, doc, { autoplay: false });
+
+player.play();
+player.pause();
+player.toggle();   // flip whichever state you're in
+```
+
+## Seeking
+
+```ts
+player.seek(0.8);          // jump to 0.8 seconds
+player.seekFraction(0.5);  // jump to the middle (0..1 of duration)
+```
+
+Seeking works whether or not the player is running — it resamples and repaints a single frame.
+
+## Looping
+
+```ts
+const player = create(stage, doc, { loop: true });
+
+player.loop = false;  // stop looping at runtime
+player.loop = true;   // resume looping
+```
+
+## Speed
+
+Set the playback rate with the `rate` option (a multiplier on real time):
+
+```ts
+create(stage, doc, { rate: 0.5 }); // half speed
+create(stage, doc, { rate: 2 });   // double speed
+```
+
+## Build a scrubber
+
+Use `onframe` to keep a slider and timecode in sync, and `seekFraction` on input. Pause while
+the user drags, so playback doesn't fight the scrub.
+
+```ts
+const player = create(stage, doc, {
+  loop: true,
+  autoplay: true,
+  onframe: (t, fraction) => {
+    if (!dragging) slider.value = String(fraction);
+    timecode.textContent = t.toFixed(2) + "s";
+  },
+});
+
+let dragging = false;
+slider.addEventListener("pointerdown", () => { dragging = true; player.pause(); });
+slider.addEventListener("pointerup",   () => { dragging = false; });
+slider.addEventListener("input", () => player.seekFraction(Number(slider.value)));
+```
+
+<Tip>
+  This is exactly how the live demo on the [Blinn Motion site](https://blinnmotion.dev) drives its
+  keyframe timeline — `onframe` moves the playhead, and dragging it calls `seekFraction`.
+</Tip>

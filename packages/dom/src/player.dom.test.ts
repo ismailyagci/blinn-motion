@@ -3,7 +3,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import type { MotionDoc } from "@fottie/core";
+import type { MotionDoc } from "@blinn-motion/core";
 import { create } from "./index.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -12,7 +12,7 @@ const showcase = JSON.parse(
   readFileSync(join(here, "../../../fixtures/showcase.motion.json"), "utf8"),
 ) as MotionDoc;
 
-describe("@fottie/dom player", () => {
+describe("@blinn-motion/dom player", () => {
   it("mounts a stage sized to the doc and one node per layer", () => {
     const host = document.createElement("div");
     create(host, doc);
@@ -43,7 +43,7 @@ describe("@fottie/dom player", () => {
   });
 });
 
-describe("@fottie/dom player — showcase feature reflection", () => {
+describe("@blinn-motion/dom player — showcase feature reflection", () => {
   const sel = (host: HTMLElement, id: string) => host.querySelector(`[data-id="${id}"]`) as HTMLElement;
 
   // jsdom has no real 2D context (no `canvas` pkg). Stub a minimal one so the
@@ -117,5 +117,404 @@ describe("@fottie/dom player — showcase feature reflection", () => {
     const c1 = sel(host, "border").style.borderColor;
     expect(c0).not.toBe("");
     expect(c1).not.toBe(c0);
+  });
+
+  it("animates drop-shadow boxShadow between t=0 and t=1", () => {
+    const host = document.createElement("div");
+    const player = create(host, showcase);
+    player.seek(0);
+    const s0 = sel(host, "shadow").style.boxShadow;
+    player.seek(1);
+    const s1 = sel(host, "shadow").style.boxShadow;
+    expect(s0).not.toBe("");
+    expect(s1).not.toBe(s0);
+  });
+
+  it("mounts a noise shader as a child <canvas> under the noise layer", () => {
+    const host = document.createElement("div");
+    create(host, showcase);
+    const noise = sel(host, "noise");
+    expect(noise.querySelector("canvas")).not.toBeNull();
+  });
+
+  it("play / pause / stop / toggle / setRate / loop / time work", () => {
+    const host = document.createElement("div");
+    const player = create(host, showcase, { autoplay: false });
+    expect(player.isPlaying).toBe(false);
+    expect(player.duration).toBe(showcase.duration);
+    player.play();
+    expect(player.isPlaying).toBe(true);
+    player.pause();
+    expect(player.isPlaying).toBe(false);
+    player.toggle();
+    expect(player.isPlaying).toBe(true);
+    player.toggle();
+    expect(player.isPlaying).toBe(false);
+    player.setRate(2);
+    player.loop = true;
+    expect(player.loop).toBe(true);
+    player.seek(0.4);
+    expect(player.time).toBeCloseTo(0.4, 5);
+    player.seekFraction(1);
+    expect(player.time).toBeCloseTo(showcase.duration!, 5);
+    player.stop();
+    expect(player.isPlaying).toBe(false);
+  });
+
+  it("fires onframe on seek; autoplay starts playing", () => {
+    const host = document.createElement("div");
+    let frames = 0;
+    const player = create(host, showcase, {
+      autoplay: true,
+      onframe: () => {
+        frames++;
+      },
+    });
+    expect(player.isPlaying).toBe(true);
+    const before = frames;
+    player.seek(0.1);
+    expect(frames).toBeGreaterThan(before);
+    player.pause();
+  });
+});
+
+describe("@blinn-motion/dom player — text / image / mask / path", () => {
+  // reuse the canvas stub so shader layers (if any) don't warn
+  let origGetContext: typeof HTMLCanvasElement.prototype.getContext;
+  beforeAll(() => {
+    origGetContext = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function () {
+      return {
+        createImageData: (w: number, h: number) => ({ data: new Uint8ClampedArray(w * h * 4) }),
+        putImageData: () => {},
+      } as any;
+    } as any;
+  });
+  afterAll(() => {
+    HTMLCanvasElement.prototype.getContext = origGetContext;
+  });
+
+  it("renders a text layer with content, font and color", () => {
+    const host = document.createElement("div");
+    const textDoc: MotionDoc = {
+      format: "motion-engine",
+      version: "1.0",
+      duration: 1,
+      stage: { width: 200, height: 100 },
+      layers: [
+        {
+          id: "label",
+          type: "text",
+          base: {
+            x: 0,
+            y: 0,
+            width: 200,
+            height: 40,
+            text: {
+              characters: "Hello Blinn",
+              fontSize: 18,
+              fontFamily: "Inter",
+              fontWeight: 600,
+              color: "#FF0000FF",
+              align: "center",
+            },
+          },
+          tracks: [
+            {
+              property: "fillColor",
+              op: "set",
+              keys: [
+                { t: 0, v: "#FF0000FF", easing: { type: "linear" } },
+                { t: 1, v: "#00FF00FF", easing: { type: "hold" } },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const player = create(host, textDoc, { autoplay: false });
+    const el = host.querySelector('[data-id="label"]') as HTMLElement;
+    expect(el.textContent).toBe("Hello Blinn");
+    expect(el.style.fontSize).toBe("18px");
+    expect(el.style.justifyContent).toBe("center");
+    expect(el.style.color).toContain("255");
+    player.seek(1);
+    // fillColor override on text recolors via color, not background
+    expect(el.style.color).toMatch(/0,\s*255,\s*0|rgb\(0,\s*255,\s*0\)/);
+  });
+
+  it("applies image fill as backgroundImage", () => {
+    const host = document.createElement("div");
+    const imgDoc: MotionDoc = {
+      format: "motion-engine",
+      version: "1.0",
+      duration: 1,
+      stage: { width: 100, height: 100 },
+      layers: [
+        {
+          id: "photo",
+          type: "rect",
+          base: {
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+            image: "https://example.com/a.png",
+          },
+          tracks: [],
+        },
+      ],
+    };
+    create(host, imgDoc, { autoplay: false });
+    const el = host.querySelector('[data-id="photo"]') as HTMLElement;
+    expect(el.style.backgroundImage).toContain("https://example.com/a.png");
+    expect(el.style.backgroundSize).toBe("100% 100%");
+  });
+
+  it("shape-mask clips painted siblings via clip-path inset on seek", () => {
+    const host = document.createElement("div");
+    const maskDoc: MotionDoc = {
+      format: "motion-engine",
+      version: "1.0",
+      duration: 1,
+      stage: { width: 200, height: 200 },
+      layers: [
+        {
+          id: "group",
+          type: "rect",
+          base: {
+            x: 0,
+            y: 0,
+            width: 200,
+            height: 200,
+            fill: { type: "solid", color: "#00000000" },
+          },
+          children: [
+            {
+              id: "mask",
+              type: "rect",
+              isMask: true,
+              base: {
+                x: 20,
+                y: 30,
+                width: 80,
+                height: 60,
+                fill: { type: "solid", color: "#FFFFFFFF" },
+              },
+              tracks: [
+                {
+                  property: "translateX",
+                  op: "offset",
+                  keys: [
+                    { t: 0, v: 0, easing: { type: "linear" } },
+                    { t: 1, v: 40, easing: { type: "hold" } },
+                  ],
+                },
+              ],
+            },
+            {
+              id: "content",
+              type: "rect",
+              base: {
+                x: 0,
+                y: 0,
+                width: 200,
+                height: 200,
+                fill: { type: "solid", color: "#FF0000FF" },
+              },
+              tracks: [],
+            },
+          ],
+          tracks: [],
+        },
+      ],
+    };
+    const player = create(host, maskDoc, { autoplay: false });
+    // mask itself is not painted as a sibling under the group — content lives in a clip wrapper
+    const group = host.querySelector('[data-id="group"]') as HTMLElement;
+    expect(group.querySelector('[data-id="content"]')).not.toBeNull();
+    // the clip wrapper gets an inset clip-path driven by the mask layer state
+    const clipWrapper = group.firstElementChild as HTMLElement;
+    expect(clipWrapper.style.clipPath).toContain("inset(");
+    player.seek(1);
+    expect(clipWrapper.style.clipPath).toContain("inset(");
+    // left inset should change as mask translateX moves
+    expect(clipWrapper.style.clipPath).not.toBe("");
+  });
+
+  it("text-as-mask uses the text element as the clip wrapper", () => {
+    const host = document.createElement("div");
+    const maskDoc: MotionDoc = {
+      format: "motion-engine",
+      version: "1.0",
+      duration: 1,
+      stage: { width: 200, height: 80 },
+      layers: [
+        {
+          id: "group",
+          type: "rect",
+          base: { x: 0, y: 0, width: 200, height: 80 },
+          children: [
+            {
+              id: "maskText",
+              type: "text",
+              isMask: true,
+              base: {
+                x: 0,
+                y: 0,
+                width: 200,
+                height: 40,
+                text: {
+                  characters: "MASK",
+                  fontSize: 24,
+                  fontFamily: "Inter",
+                  fontWeight: 700,
+                  color: "#FFFFFFFF",
+                  align: "left",
+                },
+              },
+              tracks: [],
+            },
+            {
+              id: "driver",
+              type: "rect",
+              base: {
+                x: 0,
+                y: 0,
+                width: 100,
+                height: 40,
+                fill: { type: "solid", color: "#00FF00FF" },
+              },
+              tracks: [
+                {
+                  property: "translateX",
+                  op: "offset",
+                  keys: [
+                    { t: 0, v: 0, easing: { type: "linear" } },
+                    { t: 1, v: 50, easing: { type: "hold" } },
+                  ],
+                },
+              ],
+            },
+          ],
+          tracks: [],
+        },
+      ],
+    };
+    const player = create(host, maskDoc, { autoplay: false });
+    const textEl = host.querySelector('[data-id="maskText"]') as HTMLElement;
+    expect(textEl.textContent).toBe("MASK");
+    expect(textEl.style.clipPath).toContain("inset(");
+    player.seek(1);
+    expect(textEl.style.clipPath).toContain("inset(");
+  });
+
+  it("mounts an SVG path vector layer", () => {
+    const host = document.createElement("div");
+    const pathDoc: MotionDoc = {
+      format: "motion-engine",
+      version: "1.0",
+      duration: 1,
+      stage: { width: 100, height: 100 },
+      layers: [
+        {
+          id: "check",
+          type: "vector",
+          base: {
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100,
+            shape: {
+              kind: "path",
+              vw: 100,
+              vh: 100,
+              paths: [
+                {
+                  d: "M10 50 L40 80 L90 20",
+                  fill: null,
+                  stroke: "#22C55EFF",
+                  strokeWidth: 6,
+                  cap: "round",
+                },
+              ],
+            },
+            stroke: { color: "#22C55EFF", weight: 6 },
+          },
+          tracks: [
+            {
+              property: "trimEnd",
+              op: "set",
+              keys: [
+                { t: 0, v: 0, easing: { type: "linear" } },
+                { t: 1, v: 1, easing: { type: "hold" } },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const player = create(host, pathDoc, { autoplay: false });
+    const el = host.querySelector('[data-id="check"]') as HTMLElement;
+    expect(el.querySelector("svg")).not.toBeNull();
+    expect(el.querySelector("path")).not.toBeNull();
+    // trim seek must not throw even when getTotalLength is unavailable in jsdom
+    expect(() => player.seek(0.5)).not.toThrow();
+  });
+
+  it("uses stage background color when provided", () => {
+    const host = document.createElement("div");
+    create(
+      host,
+      {
+        format: "motion-engine",
+        version: "1.0",
+        duration: 1,
+        stage: { width: 50, height: 50, background: "#112233FF" },
+        layers: [],
+      },
+      { autoplay: false },
+    );
+    const stage = host.firstElementChild as HTMLElement;
+    expect(stage.style.background).toMatch(/17,\s*34,\s*51|rgb\(17,\s*34,\s*51\)/);
+  });
+
+  it("applies mixBlendMode and overflow:hidden for clip layers", () => {
+    const host = document.createElement("div");
+    create(
+      host,
+      {
+        format: "motion-engine",
+        version: "1.0",
+        duration: 1,
+        stage: { width: 100, height: 100 },
+        layers: [
+          {
+            id: "blended",
+            type: "rect",
+            base: {
+              x: 0,
+              y: 0,
+              width: 50,
+              height: 50,
+              clip: true,
+              blendMode: "multiply",
+              fill: { type: "solid", color: "#FF0000FF" },
+              effects: [
+                { type: "drop", x: 0, y: 2, radius: 4, spread: 0, color: "#00000088" },
+                { type: "blur", radius: 6 },
+              ],
+            },
+            tracks: [],
+          },
+        ],
+      },
+      { autoplay: false },
+    );
+    const el = host.querySelector('[data-id="blended"]') as HTMLElement;
+    expect(el.style.mixBlendMode).toBe("multiply");
+    expect(el.style.overflow).toBe("hidden");
+    expect(el.style.boxShadow).not.toBe("");
+    expect(el.style.filter).toContain("blur");
   });
 });

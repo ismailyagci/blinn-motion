@@ -3,7 +3,7 @@
  * (== user units, no viewBox scaling) so they map 1:1 and overflow visibly —
  * important for zero-height shapes (an arrow/line whose thickness is all stroke).
  */
-import type { LayerBase } from "@fottie/core";
+import type { LayerBase } from "@blinn-motion/core";
 import { colorCss } from "./css.js";
 
 const NS = "http://www.w3.org/2000/svg";

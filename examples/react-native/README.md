@@ -1,7 +1,7 @@
-# Fottie · React Native example (Expo)
+# Blinn Motion · React Native example (Expo)
 
-Plays the shared `fixtures/card.motion.json` MotionDoc with **@fottie/react-native**,
-which renders @fottie/core's resolved render tree into native `<View>`/`<Text>` nodes.
+Plays the shared `fixtures/card.motion.json` MotionDoc with **@blinn-motion/react-native**,
+which renders @blinn-motion/core's resolved render tree into native `<View>`/`<Text>` nodes.
 
 ## Why it's a template
 
@@ -20,13 +20,13 @@ npm start          # then press i (iOS), a (Android), or w (web)
 ```
 
 `metro.config.js` already watches the repo root so Metro resolves the symlinked
-`@fottie/*` workspace packages and the shared `/fixtures` folder.
+`@blinn-motion/*` workspace packages and the shared `/fixtures` folder.
 
 ## What to expect
 
 The card scales/fades/springs in, the badge spins and shifts color, the title slides
 in — identical timing to the DOM/Canvas/React examples, because every adapter shares
-`@fottie/core`'s `sample(doc, t)` render method.
+`@blinn-motion/core`'s `sample(doc, t)` render method.
 
 ### v1 limitations (React Native backend)
 

@@ -1,7 +1,7 @@
 {
-  "name": "@fottie/canvas",
+  "name": "@blinn-motion/canvas",
   "version": "0.1.0",
-  "description": "Fottie Canvas adapter — paints @fottie/core's resolved render tree onto a 2D canvas. Pure JS, no DOM layout.",
+  "description": "Blinn Motion Canvas adapter — paints @blinn-motion/core's resolved render tree onto a 2D canvas. Pure JS, no DOM layout.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -22,6 +22,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@fottie/core": "^0.1.0"
+    "@blinn-motion/core": "^0.1.0"
   }
 }

@@ -1,7 +1,7 @@
 /**
  * The DOM Player. Builds nested absolutely-positioned `<div>`s (children nest in
  * parents so transforms inherit, like Lottie), then per frame samples each layer
- * with @fottie/core's `computeLayer` and writes CSS transforms/styles. Masks,
+ * with @blinn-motion/core's `computeLayer` and writes CSS transforms/styles. Masks,
  * SVG vector paths and procedural shaders are handled as DOM enhancements.
  */
 import {
@@ -11,7 +11,7 @@ import {
   type Layer,
   type LayerState,
   type MotionDoc,
-} from "@fottie/core";
+} from "@blinn-motion/core";
 import { colorCss, effectsToCss, fillWithStops, paintToCss, shapeClipCss } from "./css.js";
 import { drawShader, type CausticEntry } from "./caustics.js";
 import { buildPathSvg, type SvgEl } from "./svg.js";

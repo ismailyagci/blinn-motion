@@ -1,0 +1,52 @@
+---
+import { site } from "../data/site";
+
+const kf = ["var(--blue)", "var(--violet)", "var(--cyan)", "var(--amber)", "var(--coral)"];
+---
+
+<section class="section">
+  <div class="container">
+    <div class="cta" data-reveal>
+      <div class="cta-rule" aria-hidden="true">
+        {kf.map((c, i) => (
+          <span class="cta-kf" style={`left:${8 + i * 21}%; --kc:${c}`}></span>
+        ))}
+        <span class="cta-head" style="left:54%"></span>
+      </div>
+
+      <span class="eyebrow"><span class="kf"></span> Open source · MIT</span>
+      <h2 class="cta-title">Ship motion that looks<br />identical everywhere.</h2>
+      <p class="cta-lead">Export from Figma Motion, drop the <code class="inline">MotionDoc</code> into your app,
+        and let the engine do the rest — on the web, in React, on native.</p>
+
+      <div class="cta-actions">
+        <a class="btn btn-primary" href={site.repo} target="_blank" rel="noopener">
+          Get started on GitHub
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </a>
+        <a class="btn btn-ghost" href={site.docs}>Read the docs</a>
+      </div>
+
+      <div class="cta-cmd mono"><span class="cmd-p">$</span> npm i @blinn-motion/dom @blinn-motion/core</div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .cta {
+    position: relative; text-align: center; overflow: hidden;
+    padding: clamp(48px, 7vw, 84px) 24px clamp(40px, 6vw, 64px);
+    border: 1px solid var(--line); border-radius: var(--r-xl); background: var(--paper-2);
+  }
+  .cta-rule { position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--line); }
+  .cta-kf { position: absolute; top: 0; width: 9px; height: 9px; margin: -4px 0 0 -4px; background: var(--kc); transform: rotate(45deg); border-radius: 1.5px; }
+  .cta-head { position: absolute; top: -7px; width: 1.5px; height: 15px; margin-left: -0.75px; background: var(--ink); }
+  .cta-head::after { content: ""; position: absolute; left: -4px; top: -2px; width: 9px; height: 9px; background: var(--ink); transform: rotate(45deg); border-radius: 2px; }
+
+  .cta .eyebrow { margin-bottom: 22px; }
+  .cta-title { font-size: clamp(29px, 4.4vw, 48px); font-weight: 700; letter-spacing: -0.04em; line-height: 1.03; }
+  .cta-lead { color: var(--ink-2); font-size: clamp(15.5px, 1.35vw, 18px); margin: 16px auto 0; max-width: 480px; }
+  .cta-actions { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin-top: 30px; }
+  .cta-cmd { display: inline-flex; align-items: center; gap: 9px; margin-top: 26px; font-size: 13.5px; color: var(--ink-2); padding: 11px 16px; border-radius: var(--r); border: 1px solid var(--line); background: var(--paper); }
+  .cmd-p { color: var(--blue); font-weight: 600; }
+</style>

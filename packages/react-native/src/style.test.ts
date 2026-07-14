@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { sample, findNode, type MotionDoc, type RenderNode } from "@fottie/core";
+import { sample, findNode, type MotionDoc, type RenderNode } from "@blinn-motion/core";
 import { nodeToTransform } from "./style.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -53,7 +53,7 @@ function mkNode(overrides: Partial<RenderNode>): RenderNode {
   };
 }
 
-describe("@fottie/react-native nodeToTransform", () => {
+describe("@blinn-motion/react-native nodeToTransform", () => {
   it("maps the card node's box + transform at t=0", () => {
     const tree = sample(doc, 0);
     const card = findNode(tree, "card")!;
@@ -98,7 +98,7 @@ describe("@fottie/react-native nodeToTransform", () => {
   });
 });
 
-describe("@fottie/react-native nodeToTransform — branch coverage", () => {
+describe("@blinn-motion/react-native nodeToTransform — branch coverage", () => {
   it("maps the box to absolute left/top/width/height", () => {
     const s = nodeToTransform(mkNode({ x: 5, y: 6, width: 7, height: 8 }));
     expect(s.position).toBe("absolute");

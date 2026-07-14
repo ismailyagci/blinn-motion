@@ -1,0 +1,14 @@
+{
+  "name": "@blinn-motion/docs",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Blinn Motion documentation site (Mintlify).",
+  "scripts": {
+    "dev": "mintlify dev",
+    "broken-links": "mintlify broken-links",
+    "upgrade": "mintlify upgrade"
+  },
+  "devDependencies": {
+    "mintlify": "^4.2.647"
+  }
+}

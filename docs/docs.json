@@ -1,0 +1,79 @@
+{
+  "$schema": "https://mintlify.com/docs.json",
+  "theme": "mint",
+  "name": "Blinn Motion",
+  "description": "Figma Motion → MotionDoc → a pure-JS render engine. Lottie, but not Lottie.",
+  "colors": {
+    "primary": "#2F6BFF",
+    "light": "#7AA0FF",
+    "dark": "#2F6BFF"
+  },
+  "favicon": "/favicon.svg",
+  "appearance": {
+    "default": "light"
+  },
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "fonts": {
+    "heading": { "family": "Space Grotesk", "weight": 700 },
+    "body": { "family": "Inter" }
+  },
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get started",
+            "pages": ["index", "quickstart"]
+          },
+          {
+            "group": "Core concepts",
+            "pages": [
+              "concepts/motiondoc",
+              "concepts/render-engine",
+              "concepts/easing"
+            ]
+          },
+          {
+            "group": "Adapters",
+            "pages": [
+              "adapters/overview",
+              "adapters/dom",
+              "adapters/canvas",
+              "adapters/react",
+              "adapters/react-native"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": ["guides/figma-plugin", "guides/playback"]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/motiondoc-schema",
+              "reference/core-api",
+              "reference/figma-coverage"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "navbar": {
+    "links": [{ "label": "Live demo", "href": "https://blinnmotion.dev" }],
+    "primary": {
+      "type": "button",
+      "label": "GitHub",
+      "href": "https://github.com/blinn-motion/blinn-motion"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/blinn-motion/blinn-motion"
+    }
+  }
+}

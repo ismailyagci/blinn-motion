@@ -1,0 +1,89 @@
+---
+title: "Quickstart"
+description: "Install a Blinn Motion adapter and play your first MotionDoc in three steps."
+---
+
+You need two things to render an animation: a **MotionDoc** (the JSON document) and a
+**host element** to play it in. Here's the shortest path from zero to motion.
+
+<Steps>
+  <Step title="Install an adapter">
+    Pick the adapter for your platform. Each one pulls in `@blinn-motion/core` automatically.
+
+    <CodeGroup>
+    ```bash npm
+    npm i @blinn-motion/dom
+    ```
+    ```bash pnpm
+    pnpm add @blinn-motion/dom
+    ```
+    ```bash yarn
+    yarn add @blinn-motion/dom
+    ```
+    </CodeGroup>
+  </Step>
+
+  <Step title="Get a MotionDoc">
+    Either **export one from Figma** with the [Blinn Motion plugin](/guides/figma-plugin), or
+    [hand-author one](/concepts/motiondoc) for tests. A MotionDoc is plain JSON:
+
+    ```jsonc card.motion.json
+    {
+      "format": "motion-engine",
+      "version": "1.0",
+      "duration": 1.2,
+      "fps": 60,
+      "stage": { "width": 375, "height": 600, "background": "#0E1116FF" },
+      "layers": [ /* … */ ]
+    }
+    ```
+  </Step>
+
+  <Step title="Mount it and press play">
+    Hand the engine your host element and the document, then call `play()`.
+
+    ```ts
+    import { create } from "@blinn-motion/dom";
+    import doc from "./card.motion.json";
+
+    const player = create(
+      document.getElementById("stage")!,
+      doc,
+      { loop: true, autoplay: true }
+    );
+
+    player.play();            // pause(), toggle()
+    player.seek(0.8);         // jump to 0.8s
+    player.seekFraction(0.5); // jump to the middle
+    ```
+  </Step>
+</Steps>
+
+## Prefer React?
+
+The same document, the same control surface — wrapped in a component.
+
+```tsx
+import { BlinnMotion } from "@blinn-motion/react";
+import doc from "./card.motion.json";
+
+export default function Hero() {
+  return <BlinnMotion doc={doc} renderer="canvas" loop autoplay />;
+}
+```
+
+<Note>
+  The renderer is swappable. `<BlinnMotion renderer="dom" />` uses the full-fidelity DOM adapter;
+  `renderer="canvas"` paints to a 2D canvas. Both play the **same** resolved tree.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Understand the format" icon="file-json" href="/concepts/motiondoc">
+    Layers, tracks, keyframes and easing.
+  </Card>
+  <Card title="Control playback" icon="play" href="/guides/playback">
+    Play, pause, seek, loop, speed and scrubbing.
+  </Card>
+</CardGroup>

@@ -1,0 +1,51 @@
+---
+title: "React Native adapter"
+description: "@blinn-motion/react-native — the same timing on native View / Text elements."
+---
+
+`@blinn-motion/react-native` renders a MotionDoc onto native `<View>` and `<Text>` elements. There's
+**no native module** and **no Skia dependency** — it shares the same pure-JS core maths as
+every other adapter, so timing matches the web exactly.
+
+## Install
+
+```bash
+npm i @blinn-motion/react-native
+```
+
+## Use it
+
+```tsx
+import { BlinnMotionView } from "@blinn-motion/react-native";
+import doc from "./card.motion.json";
+
+export function Splash() {
+  return <BlinnMotionView doc={doc} loop autoplay />;
+}
+```
+
+## Props
+
+<ParamField path="doc" type="MotionDoc" required>
+  The animation document to play.
+</ParamField>
+<ParamField path="loop" type="boolean" default="false">
+  Restart when the timeline ends.
+</ParamField>
+<ParamField path="autoplay" type="boolean" default="false">
+  Start playing on mount.
+</ParamField>
+<ParamField path="style" type="ViewStyle">
+  Style for the host view (size, position, background).
+</ParamField>
+
+<Warning>
+  Native views can't express every web paint feature. Transforms, opacity and solid fills are
+  exact; gradients are approximate and SVG vector paths / shaders aren't drawn. Check the
+  [fidelity matrix](/adapters/overview#fidelity-at-a-glance) before relying on a complex fill.
+</Warning>
+
+## Expo
+
+The adapter is pure JS, so it runs under Expo without any config plugin or prebuild. Drop a
+`<BlinnMotionView />` into your screen and go.

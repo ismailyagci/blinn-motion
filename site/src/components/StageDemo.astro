@@ -1,0 +1,265 @@
+---
+// Live MotionDoc player on a light "canvas", with a keyframe timeline scrubber.
+// Diamonds sit at the card doc's real keyframe times and pop as the playhead passes.
+const keyframes = [
+  { f: 0.0, c: "var(--blue)" },
+  { f: 0.25, c: "var(--violet)" },
+  { f: 0.44, c: "var(--cyan)" },
+  { f: 0.56, c: "var(--amber)" },
+  { f: 0.69, c: "var(--coral)" },
+];
+---
+
+<div class="stage-wrap" data-reveal>
+  <div class="canvas">
+    <div class="toolbar">
+      <span class="kf-tag"><span class="kf-mark"></span><span class="mono">card.motion</span></span>
+      <span class="fps mono">60&nbsp;fps</span>
+      <span class="live"><span class="live-dot"></span>LIVE</span>
+    </div>
+
+    <div class="screen">
+      <div id="blinn-motion-stage" class="fstage" aria-label="Live Blinn Motion animation"></div>
+    </div>
+
+    <div class="timeline">
+      <button id="pp" class="pp" aria-label="Play or pause">
+        <svg class="i-pause" viewBox="0 0 24 24" width="16" height="16"><rect x="6" y="5" width="4" height="14" rx="1.2" fill="currentColor"/><rect x="14" y="5" width="4" height="14" rx="1.2" fill="currentColor"/></svg>
+        <svg class="i-play" viewBox="0 0 24 24" width="16" height="16" style="display:none"><path d="M8 5.5v13l11-6.5z" fill="currentColor"/></svg>
+      </button>
+
+      <div class="tl-track" id="tl">
+        <div class="tl-fill" id="tlFill"></div>
+        {keyframes.map((k) => (
+          <span class="kf-d" data-f={k.f} style={`left:${k.f * 100}%; --kc:${k.c}`}></span>
+        ))}
+        <div class="tl-head" id="tlHead"><span class="tl-head-d"></span></div>
+        <input id="scrub" class="tl-input" type="range" min="0" max="1000" value="0" aria-label="Scrub timeline" />
+      </div>
+
+      <span id="time" class="time mono">0.00<span class="time-u">s</span></span>
+
+      <div class="speed" role="group" aria-label="Playback speed">
+        <button data-spd="0.5">½×</button>
+        <button data-spd="1" class="on">1×</button>
+        <button data-spd="2">2×</button>
+      </div>
+    </div>
+  </div>
+
+  <span class="spec spec-1"><span class="d" style="--kc:var(--coral)"></span>spring</span>
+  <span class="spec spec-2"><span class="d" style="--kc:var(--violet)"></span>cubic-bézier</span>
+  <span class="spec spec-3"><span class="d" style="--kc:var(--blue)"></span>loop</span>
+</div>
+
+<script>
+  import { mount } from "../scripts/blinn-motion-mini";
+  import { cardDoc } from "../data/card";
+
+  const el = document.getElementById("blinn-motion-stage");
+  if (el) {
+    const player = mount(el, cardDoc);
+    const pp = document.getElementById("pp") as HTMLButtonElement;
+    const iPlay = pp.querySelector(".i-play") as SVGElement;
+    const iPause = pp.querySelector(".i-pause") as SVGElement;
+    const scrub = document.getElementById("scrub") as HTMLInputElement;
+    const fill = document.getElementById("tlFill") as HTMLElement;
+    const head = document.getElementById("tlHead") as HTMLElement;
+    const time = document.getElementById("time") as HTMLElement;
+    const diamonds = Array.from(document.querySelectorAll<HTMLElement>(".kf-d"));
+    const spdBtns = Array.from(document.querySelectorAll<HTMLButtonElement>(".speed button"));
+
+    let scrubbing = false;
+
+    const setIcon = (playing: boolean) => {
+      iPlay.style.display = playing ? "none" : "block";
+      iPause.style.display = playing ? "block" : "none";
+    };
+
+    const paint = (f: number) => {
+      const pct = (f * 100).toFixed(2) + "%";
+      fill.style.width = pct;
+      head.style.left = pct;
+      for (const d of diamonds) {
+        const df = Number(d.dataset.f);
+        d.classList.toggle("hit", Math.abs(f - df) < 0.035);
+        d.classList.toggle("past", f >= df - 0.002);
+      }
+    };
+
+    player.onFrame((t, f) => {
+      if (!scrubbing) {
+        scrub.value = String(Math.round(f * 1000));
+        paint(f);
+      }
+      time.innerHTML = t.toFixed(2) + '<span class="time-u">s</span>';
+    });
+
+    pp.addEventListener("click", () => {
+      player.toggle();
+      setIcon(player.playing);
+    });
+
+    scrub.addEventListener("pointerdown", () => {
+      scrubbing = true;
+      if (player.playing) { player.pause(); setIcon(false); }
+    });
+    const end = () => (scrubbing = false);
+    scrub.addEventListener("pointerup", end);
+    scrub.addEventListener("pointercancel", end);
+    scrub.addEventListener("input", () => {
+      const f = Number(scrub.value) / 1000;
+      player.seekFraction(f);
+      paint(f);
+    });
+
+    spdBtns.forEach((b) =>
+      b.addEventListener("click", () => {
+        spdBtns.forEach((x) => x.classList.remove("on"));
+        b.classList.add("on");
+        player.setSpeed(Number(b.dataset.spd));
+      })
+    );
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting) { player.play(); setIcon(true); io.disconnect(); }
+        }
+      },
+      { threshold: 0.4 }
+    );
+    io.observe(el);
+  }
+</script>
+
+<style>
+  .stage-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 440px;
+    min-width: 0;
+    margin-inline: auto;
+  }
+
+  .canvas {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: var(--r-xl);
+    box-shadow: 0 2px 4px rgba(17, 20, 26, 0.04), 0 30px 60px -34px rgba(17, 20, 26, 0.28);
+    overflow: hidden;
+  }
+
+  /* toolbar */
+  .toolbar {
+    display: flex; align-items: center; gap: 12px;
+    padding: 13px 16px; border-bottom: 1px solid var(--line);
+  }
+  .kf-tag { display: inline-flex; align-items: center; gap: 8px; }
+  .kf-mark { width: 9px; height: 9px; background: var(--blue); transform: rotate(45deg); border-radius: 1.5px; }
+  .kf-tag .mono { font-size: 12.5px; color: var(--ink-2); font-weight: 500; }
+  .fps { margin-left: auto; font-size: 11.5px; color: var(--ink-3); }
+  .live {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: var(--mono); font-size: 10.5px; font-weight: 600; letter-spacing: 0.08em;
+    color: #0a7d62; padding: 4px 9px; border-radius: 999px;
+    background: var(--mint-t); border: 1px solid #c2ebde;
+  }
+  .live-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); }
+
+  /* canvas screen — Figma-ish dot grid */
+  .screen {
+    position: relative;
+    aspect-ratio: 375 / 470;
+    background-color: var(--paper-2);
+    background-image: radial-gradient(var(--line-2) 1px, transparent 1.4px);
+    background-size: 20px 20px;
+    background-position: -1px -1px;
+    overflow: hidden;
+  }
+  .fstage { position: absolute; inset: 0; }
+
+  /* timeline */
+  .timeline {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; border-top: 1px solid var(--line);
+  }
+  .pp {
+    flex: none; display: inline-grid; place-items: center;
+    width: 36px; height: 36px; border-radius: 10px; border: 0;
+    color: #fff; background: var(--ink); cursor: pointer;
+    transition: transform 0.12s ease, background 0.18s ease;
+  }
+  .pp:hover { background: #000; transform: scale(1.05); }
+  .pp:active { transform: scale(0.96); }
+
+  .tl-track { position: relative; flex: 1; min-width: 0; height: 28px; display: flex; align-items: center; }
+  .tl-track::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 50%;
+    height: 2px; transform: translateY(-50%); background: var(--line-2); border-radius: 2px;
+  }
+  .tl-fill {
+    position: absolute; left: 0; top: 50%; height: 2px; width: 0;
+    transform: translateY(-50%); background: var(--ink); border-radius: 2px;
+  }
+  .kf-d {
+    position: absolute; top: 50%; width: 8px; height: 8px;
+    margin-left: -4px; transform: translateY(-50%) rotate(45deg);
+    background: var(--paper); border: 1.5px solid var(--kc); border-radius: 1.5px;
+    transition: transform 0.16s cubic-bezier(0.2, 0.7, 0.2, 1), background 0.16s;
+  }
+  .kf-d.past { background: var(--kc); }
+  .kf-d.hit { transform: translateY(-50%) rotate(45deg) scale(1.7); }
+  .tl-head {
+    position: absolute; top: 50%; left: 0; width: 0; height: 0;
+    transform: translateY(-50%);
+  }
+  .tl-head-d {
+    position: absolute; left: -5px; top: -9px;
+    width: 10px; height: 10px; background: var(--ink);
+    transform: rotate(45deg); border-radius: 2px;
+    box-shadow: 0 0 0 3px var(--paper);
+  }
+  .tl-head::after {
+    content: ""; position: absolute; left: -0.75px; top: -8px; width: 1.5px; height: 16px;
+    background: var(--ink); border-radius: 2px;
+  }
+  .tl-input {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    margin: 0; opacity: 0; cursor: pointer;
+  }
+
+  .time { flex: none; font-size: 12px; color: var(--ink-2); font-variant-numeric: tabular-nums; min-width: 42px; text-align: right; font-weight: 500; }
+  .time :global(.time-u) { color: var(--ink-3); }
+
+  .speed { display: inline-flex; gap: 2px; background: var(--paper-2); border-radius: 9px; padding: 3px; border: 1px solid var(--line); }
+  .speed button {
+    border: 0; background: transparent; color: var(--ink-3);
+    font-family: var(--mono); font-size: 12px; font-weight: 500; padding: 4px 8px; border-radius: 6px; cursor: pointer;
+    transition: background 0.14s, color 0.14s;
+  }
+  .speed button.on { background: var(--paper); color: var(--ink); box-shadow: var(--shadow-sm); }
+
+  /* floating spec chips */
+  .spec {
+    position: absolute; display: inline-flex; align-items: center; gap: 7px;
+    font-family: var(--mono); font-size: 11.5px; font-weight: 500; color: var(--ink-2);
+    padding: 7px 11px; border-radius: 999px;
+    background: var(--paper); border: 1px solid var(--line);
+    box-shadow: var(--shadow); white-space: nowrap; z-index: 2;
+  }
+  .spec .d { width: 7px; height: 7px; background: var(--kc); transform: rotate(45deg); border-radius: 1px; }
+  .spec-1 { top: 13%; left: -13%; animation: bob 5s ease-in-out infinite; }
+  .spec-2 { top: 49%; right: -15%; animation: bob 6s ease-in-out infinite 0.7s; }
+  .spec-3 { bottom: 16%; left: -9%; animation: bob 5.5s ease-in-out infinite 1.2s; }
+  @keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+
+  @media (max-width: 1024px) {
+    .spec-1 { left: -4%; } .spec-2 { right: -4%; } .spec-3 { left: 0; }
+  }
+  @media (max-width: 560px) {
+    .spec { display: none; }
+    .timeline { gap: 10px; padding: 12px; }
+    .fps { display: none; }
+  }
+</style>

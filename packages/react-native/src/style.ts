@@ -18,14 +18,14 @@
  * arbitrary transform origin without a measured layout, so anchor handling here
  * is approximate (centre). For the common {x:0.5,y:0.5} case it is exact.
  */
-import { rgbaToCss, type RenderNode } from "@fottie/core";
+import { rgbaToCss, type RenderNode } from "@blinn-motion/core";
 import type { ViewStyle } from "react-native";
 
 /** The style object {@link nodeToTransform} produces. */
-export type FottieNodeStyle = ViewStyle;
+export type BlinnMotionNodeStyle = ViewStyle;
 
-export function nodeToTransform(node: RenderNode): FottieNodeStyle {
-  const style: FottieNodeStyle = {
+export function nodeToTransform(node: RenderNode): BlinnMotionNodeStyle {
+  const style: BlinnMotionNodeStyle = {
     position: "absolute",
     left: node.x,
     top: node.y,

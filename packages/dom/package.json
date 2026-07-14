@@ -1,7 +1,7 @@
 {
-  "name": "@fottie/dom",
+  "name": "@blinn-motion/dom",
   "version": "0.1.0",
-  "description": "Fottie DOM adapter — plays a MotionDoc into nested DOM/CSS layers (transforms, SVG paths, masks, procedural shaders). Built on @fottie/core.",
+  "description": "Blinn Motion DOM adapter — plays a MotionDoc into nested DOM/CSS layers (transforms, SVG paths, masks, procedural shaders). Built on @blinn-motion/core.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -22,6 +22,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@fottie/core": "^0.1.0"
+    "@blinn-motion/core": "^0.1.0"
   }
 }

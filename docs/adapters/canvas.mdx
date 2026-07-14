@@ -1,0 +1,45 @@
+---
+title: "Canvas adapter"
+description: "@blinn-motion/canvas — a pure-JS 2D canvas painter."
+---
+
+`@blinn-motion/canvas` paints the very same resolved tree to a 2D `<canvas>` — one immediate-mode
+draw per frame, with **zero DOM nodes** for the animation itself. Reach for it when you want a
+single compositing surface (lots of moving layers, a background effect, a game-like loop).
+
+## Install
+
+```bash
+npm i @blinn-motion/canvas
+```
+
+## Create a player
+
+The call mirrors the DOM adapter exactly — same signature, same options, same control surface.
+
+```ts
+import { create } from "@blinn-motion/canvas";
+import doc from "./card.motion.json";
+
+const player = create(canvasHost, doc, { loop: true, autoplay: true });
+
+player.play();
+player.seekFraction(0.5);
+```
+
+## When to choose Canvas over DOM
+
+<CardGroup cols={2}>
+  <Card title="Choose Canvas" icon="image">
+    Many layers, a single surface, no per-node DOM cost, or you're already drawing to a canvas.
+  </Card>
+  <Card title="Choose DOM" icon="code">
+    You need the widest paint fidelity — SVG vector paths, arrowheads, complex masks and shaders.
+  </Card>
+</CardGroup>
+
+<Note>
+  Both adapters call `sample(doc, t)` from the same core, so timing is identical. The only
+  difference is the paint backend and which rarer effects each supports — see the
+  [fidelity matrix](/adapters/overview#fidelity-at-a-glance).
+</Note>

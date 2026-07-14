@@ -1,0 +1,69 @@
+---
+title: "Introduction"
+description: "Blinn Motion — Figma Motion → MotionDoc → a pure-JS render engine. Lottie, but not Lottie."
+---
+
+**Blinn Motion** exports a [Figma Motion](https://www.figma.com/) animation as JSON — *not* an
+image — converts it into a small, own format called **MotionDoc**, and plays it with a
+**pure-JS render engine** that has adapters for the **DOM**, **Canvas**, **React** and
+**React Native**.
+
+The render engine is the core. Every adapter paints the *same* resolved render tree, so an
+animation looks and **times identically** across platforms.
+
+```text The pipeline
+Figma Motion  (node.animations / timelines)
+      │  keyframes, easing, springs — raw data
+      ▼
+@blinn-motion/figma-plugin  ──►  MotionDoc JSON
+      │  sample(doc, t) — THE render method
+      ▼
+@blinn-motion/core  ──►  resolved RenderNode tree
+      │
+      ├─► @blinn-motion/dom            divs · CSS · SVG · masks
+      ├─► @blinn-motion/canvas         pure-JS 2D canvas
+      ├─► @blinn-motion/react          <BlinnMotion renderer="…" />
+      └─► @blinn-motion/react-native   native <View> / <Text>
+```
+
+## Start here
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" icon="play" href="/quickstart">
+    Install a package and play your first animation in three steps.
+  </Card>
+  <Card title="The MotionDoc format" icon="file-json" href="/concepts/motiondoc">
+    The small, readable document that holds your whole animation.
+  </Card>
+  <Card title="The render engine" icon="cpu" href="/concepts/render-engine">
+    One pure method — <code>sample(doc, t)</code> — does all the work.
+  </Card>
+  <Card title="Adapters" icon="layer-group" href="/adapters/overview">
+    DOM, Canvas, React and React Native — one document, every platform.
+  </Card>
+</CardGroup>
+
+## Why Blinn Motion
+
+<CardGroup cols={2}>
+  <Card title="Open format you own" icon="lock-open">
+    MotionDoc is small, readable JSON — inspectable, diffable, versionable. No proprietary
+    blob.
+  </Card>
+  <Card title="Identical timing everywhere" icon="arrows-rotate">
+    Same resolved tree, same shared clock. An animation times the same on every adapter.
+  </Card>
+  <Card title="Springs & curves, solved" icon="wave-square">
+    Linear, hold, cubic-bézier (Newton–Raphson) and damped springs — sampled per frame,
+    never pre-baked.
+  </Card>
+  <Card title="Tiny & framework-agnostic" icon="feather">
+    No runtime dependencies in the core. Drop it into vanilla JS, React or React Native.
+  </Card>
+</CardGroup>
+
+<Note>
+  Blinn Motion is an independent, MIT-licensed project. *Lottie* is a trademark of its respective
+  owners; Blinn Motion is not affiliated with it — it's just a kindred idea (ship motion as data,
+  not video) built for the Figma Motion era.
+</Note>

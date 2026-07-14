@@ -1,0 +1,107 @@
+---
+function icon(name: string): string {
+  const icons: Record<string, string> = {
+    figma: `<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M8.5 2A3.5 3.5 0 0 0 8.5 9H12V2zM12 2v7h3.5A3.5 3.5 0 0 0 15.5 2zM8.5 9A3.5 3.5 0 0 0 8.5 16H12V9zm7 0a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7zM8.5 16A3.5 3.5 0 1 0 12 19.5V16z"/></svg>`,
+    plug: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 2v6M15 2v6M7 8h10v3a5 5 0 0 1-10 0zM12 16v6"/></svg>`,
+    cpu: `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v3M15 2v3M9 19v3M15 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/></svg>`,
+  };
+  return icons[name] ?? "";
+}
+
+const steps = [
+  { n: "01", pkg: "Figma Motion", title: "Animate on the timeline", body: "Keyframes, easing curves and springs live in <code class='inline'>node.animations</code> — raw data, never rasterized.", accent: "var(--violet)", icon: "figma" },
+  { n: "02", pkg: "@blinn-motion/figma-plugin", title: "Export, don't bake", body: "The plugin reads the timeline and emits a tiny <code class='inline'>MotionDoc</code> — no PNGs, no video, just your motion.", accent: "var(--blue)", icon: "plug" },
+  { n: "03", pkg: "@blinn-motion/core", title: "sample(doc, t)", body: "The pure render method walks the doc, solves every track at time <code class='inline'>t</code>, returns a resolved tree of final numbers.", accent: "var(--coral)", icon: "cpu" },
+];
+
+const targets = [
+  { k: "DOM", d: "divs · CSS · SVG", c: "var(--blue)" },
+  { k: "Canvas", d: "pure-JS 2D", c: "var(--cyan)" },
+  { k: "React", d: "<BlinnMotion /> component", c: "var(--violet)" },
+  { k: "React Native", d: "native <View> / <Text>", c: "var(--coral)" },
+];
+---
+
+<section class="section" id="pipeline">
+  <div class="container">
+    <div class="section-head center" data-reveal>
+      <span class="eyebrow"><span class="kf"></span> The pipeline</span>
+      <h2 class="title">From Figma timeline<br />to a tree of pure numbers</h2>
+      <p class="lead">No black box in the middle. Your animation becomes an open document, then a
+        deterministic render tree — the same maths everywhere it plays.</p>
+    </div>
+
+    <div class="flow">
+      {steps.map((s, i) => (
+        <>
+          <article class="card step" data-reveal style={`--reveal-delay:${i * 90}ms; --accent:${s.accent}`}>
+            <div class="step-top">
+              <span class="step-icon" set:html={icon(s.icon)} />
+              <span class="step-n mono">{s.n}</span>
+            </div>
+            <span class="step-pkg mono">{s.pkg}</span>
+            <h3 class="step-title">{s.title}</h3>
+            <p class="step-body" set:html={s.body} />
+          </article>
+          {i < steps.length - 1 && (
+            <div class="connector" aria-hidden="true">
+              <svg viewBox="0 0 48 24" width="44" height="22"><path d="M2 12h40m0 0-7-6m7 6-7 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+          )}
+        </>
+      ))}
+    </div>
+
+    <div class="fanout" data-reveal>
+      <div class="fan-label mono"><span class="fan-line"></span><span>one resolved tree · four thin adapters</span><span class="fan-line"></span></div>
+      <div class="fan-targets">
+        {targets.map((t, i) => (
+          <div class="fan-card" data-reveal style={`--reveal-delay:${i * 70}ms; --c:${t.c}`}>
+            <span class="fan-dot"></span>
+            <strong>{t.k}</strong>
+            <span class="fan-d mono">{t.d}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch; gap: 8px; margin-bottom: 52px; }
+  .step { display: flex; flex-direction: column; }
+  .step-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .step-icon {
+    display: grid; place-items: center; width: 42px; height: 42px; border-radius: 11px;
+    color: var(--accent); background: color-mix(in srgb, var(--accent) 12%, white);
+  }
+  .step-n { font-size: 13px; font-weight: 600; color: var(--line-2); }
+  .step-pkg { font-size: 12.5px; color: var(--accent); font-weight: 500; }
+  .step-title { font-size: 19px; margin: 7px 0 9px; letter-spacing: -0.02em; }
+  .step-body { color: var(--ink-2); font-size: 14.5px; line-height: 1.55; margin: 0; }
+
+  .connector { display: grid; place-items: center; color: var(--line-2); padding: 0 2px; }
+  .connector svg { animation: nudge 2.4s ease-in-out infinite; }
+  @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
+
+  .fan-label { display: flex; align-items: center; gap: 16px; color: var(--ink-3); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 20px; }
+  .fan-line { flex: 1; height: 1px; background: var(--line); }
+
+  .fan-targets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+  .fan-card {
+    display: flex; flex-direction: column; gap: 6px; padding: 17px;
+    border-radius: var(--r); border: 1px solid var(--line); background: var(--paper);
+    position: relative; overflow: hidden; transition: transform 0.2s, border-color 0.2s;
+  }
+  .fan-card::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--c); }
+  .fan-card:hover { transform: translateY(-3px); border-color: var(--line-2); }
+  .fan-dot { width: 9px; height: 9px; background: var(--c); transform: rotate(45deg); border-radius: 1.5px; }
+  .fan-card strong { font-size: 15px; font-weight: 600; font-family: var(--display); letter-spacing: -0.01em; }
+  .fan-d { font-size: 11.5px; color: var(--ink-3); }
+
+  @media (max-width: 900px) {
+    .flow { grid-template-columns: 1fr; }
+    .connector { transform: rotate(90deg); padding: 4px 0; }
+    .fan-targets { grid-template-columns: repeat(2, 1fr); }
+  }
+</style>

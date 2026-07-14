@@ -224,7 +224,7 @@ function mount(doc) {
   if (player) player.pause();
   const dur = doc.duration || 1;
   try {
-    player = Fottie.create($('host'), doc, {
+    player = BlinnMotion.create($('host'), doc, {
       loop: $('loop').checked,
       rate: parseFloat($('speed').value),
       onframe: (t, f) => { $('scrub').value = Math.round(f * 1000); $('time').textContent = fmt(t, dur); if (document.activeElement !== $('dbgTime')) $('dbgTime').value = t.toFixed(2); }

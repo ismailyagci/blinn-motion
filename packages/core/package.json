@@ -1,7 +1,7 @@
 {
-  "name": "@fottie/core",
+  "name": "@blinn-motion/core",
   "version": "0.1.0",
-  "description": "Fottie core — pure, DOM-free render engine. Samples a MotionDoc at time t into a backend-agnostic resolved render tree. Shared by every adapter.",
+  "description": "Blinn Motion core — pure, DOM-free render engine. Samples a MotionDoc at time t into a backend-agnostic resolved render tree. Shared by every adapter.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
