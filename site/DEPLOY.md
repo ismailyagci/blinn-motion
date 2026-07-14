@@ -34,7 +34,9 @@ Either:
 - Push a change under `site/` to `main`, or  
 - **Actions → Deploy landing → Run workflow**
 
-Wrangler creates the Pages project **`blinn-motion`** on first deploy if it does not exist.
+The workflow creates the Pages project **`blinn-motion`** on first run if it
+does not exist (`wrangler pages project create`), then uploads `dist/`.
+
 Preview URL: `https://blinn-motion.pages.dev`
 
 ### 4. Custom domains

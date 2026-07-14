@@ -82,9 +82,21 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-        # Direct wrangler (not wrangler-action) so auth/API errors print clearly.
+          PROJECT_NAME: blinn-motion
+        # Wrangler 4 no longer auto-creates Pages projects on deploy.
+        # Create once if missing, then direct-upload dist/.
         run: |
+          set -euo pipefail
+          # Ensure the Pages project exists (idempotent).
+          if ! npx --yes wrangler@4 pages project list 2>/dev/null | grep -qE "(^|\\s)${PROJECT_NAME}(\\s|$)"; then
+            echo "Creating Pages project: ${PROJECT_NAME}"
+            npx --yes wrangler@4 pages project create "${PROJECT_NAME}" \
+              --production-branch=main
+          else
+            echo "Pages project ${PROJECT_NAME} already exists"
+          fi
+
           npx --yes wrangler@4 pages deploy dist \
-            --project-name=blinn-motion \
+            --project-name="${PROJECT_NAME}" \
             --branch=main \
             --commit-dirty=true
