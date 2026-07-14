@@ -61,6 +61,8 @@ Pages custom domains use Cloudflare Universal SSL. Wait a few minutes after atta
 
 ## Local build
 
+Astro 7 needs **Node ≥ 22.12**. CI uses Node 22 for the same reason.
+
 ```bash
 cd site
 npm install
