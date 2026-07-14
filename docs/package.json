@@ -5,6 +5,8 @@
   "description": "Blinn Motion documentation site (Mintlify).",
   "scripts": {
     "dev": "mintlify dev",
+    "export": "mint export --output export.zip",
+    "build": "npm run export && node ./scripts/unpack-export.mjs",
     "broken-links": "mintlify broken-links",
     "upgrade": "mintlify upgrade"
   },

@@ -17,9 +17,10 @@ Other scripts: `npm run broken-links` (check internal links), `npm run upgrade` 
 
 ## Deploy
 
-Production: **https://docs.blinnmotion.com** (Mintlify Cloud + Cloudflare DNS).
+Production: **https://docs.blinnmotion.com**  
+(`mint export` → static zip → Cloudflare Pages project `blinn-motion-docs`)
 
-See **[DEPLOY.md](./DEPLOY.md)** for Mintlify GitHub App, custom domain, and CNAME setup.
+See **[DEPLOY.md](./DEPLOY.md)** for secrets, first deploy, and custom domain.
 
 ## Structure
 

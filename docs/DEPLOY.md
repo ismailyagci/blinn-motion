@@ -1,46 +1,63 @@
 # Deploying docs (`docs.blinnmotion.com`)
 
-Docs are a **Mintlify** site. Cloudflare only manages DNS for the custom domain;
-Mintlify builds and hosts the HTML.
+Docs are authored as **Mintlify** MDX (`docs.json` + `*.mdx`). For production we
+run **`mint export`** → static HTML/JS zip → unpack → **Cloudflare Pages**
+(same model as the landing page).
 
-## One-time setup
+| | |
+|--|--|
+| Preview (Pages) | `https://blinn-motion-docs.pages.dev` |
+| Production | `https://docs.blinnmotion.com` |
+| Workflow | `.github/workflows/deploy-docs.yml` |
+| Pages project | `blinn-motion-docs` |
 
-### 1. Connect Mintlify → GitHub
+> Official Mintlify docs label offline/static export as Enterprise; in practice
+> `mint export` currently produces a full static zip for this repo (verified
+> locally). If a future CLI version gates it, re-check plan / CLI output.
 
-1. Open [mintlify.com/start](https://mintlify.com/start)
-2. Connect the `ismailyagci/blinn-motion` repository
-3. Set the **docs directory** to `docs` (this monorepo’s Mintlify root)
-4. Install the Mintlify GitHub App (read access to the repo)
+## Secrets
 
-After that, every push to `main` that touches `docs/` triggers a Mintlify deploy.
-Staging URLs look like `*.mintlify.app` / `*.mintlify.site` until the custom domain is live.
+Same as landing (`site/DEPLOY.md`):
 
-### 2. Custom domain on Mintlify
+| Secret | Purpose |
+|--------|---------|
+| `CLOUDFLARE_API_TOKEN` | Pages Edit |
+| `CLOUDFLARE_ACCOUNT_ID` | Account id |
 
-1. Mintlify dashboard → **Settings → Custom domain**
-2. Add `docs.blinnmotion.com`
-3. Copy the CNAME target Mintlify shows (usually `cname.mintlify.com`)
+## First deploy
 
-### 3. DNS on Cloudflare
+1. Secrets already set for landing → reuse them  
+2. **Actions → Deploy docs → Run workflow** (or push a change under `docs/`)  
+3. Open `https://blinn-motion-docs.pages.dev`  
+4. Cloudflare → **Workers & Pages → blinn-motion-docs → Custom domains**  
+5. Add **`docs.blinnmotion.com`**
 
-In the **blinnmotion.com** zone:
+Domain is already on Cloudflare → DNS is usually applied automatically.
 
-| Type  | Name | Target                         | Proxy status      |
-|-------|------|--------------------------------|-------------------|
-| CNAME | docs | `cname.mintlify.com` (or Mintlify’s value) | DNS only (grey cloud) **or** Proxied if Mintlify allows |
-
-Mintlify’s docs typically recommend **DNS only** (grey cloud) so their certs issue cleanly.
-If you enable the orange cloud, use Full (strict) SSL and follow Mintlify’s Cloudflare notes.
-
-### 4. GitHub Actions
-
-`.github/workflows/deploy-docs.yml` validates `docs.json` and page presence on PRs / main.
-It does **not** replace Mintlify hosting — deploy still comes from the Mintlify GitHub App.
-
-## Local preview
+## Local export
 
 ```bash
 cd docs
 npm install
-npm run dev    # usually http://localhost:3000
+npx mint export --output export.zip
+unzip -q export.zip -d dist
+# open dist/index.html via any static server, e.g.:
+npx serve dist
 ```
+
+`export.zip` and `docs/dist/` are gitignored.
+
+## Local preview (live Mintlify dev server)
+
+```bash
+cd docs
+npm install
+npm run dev    # http://localhost:3000
+```
+
+## What the CI does
+
+1. Validate `docs.json` + nav page files exist  
+2. `mint export` → static bundle  
+3. Unzip to `dist/` (drop `serve.js` / launcher scripts)  
+4. `wrangler pages deploy` to project `blinn-motion-docs`  
