@@ -27,6 +27,12 @@ npm run build      # static output → dist/
 npm run preview    # serve the built dist/
 ```
 
+## Deploy
+
+Production: **https://blinnmotion.com** (Cloudflare Pages via GitHub Actions).
+
+See **[DEPLOY.md](./DEPLOY.md)** for API tokens, GitHub secrets, and custom-domain DNS.
+
 ## Structure
 
 ```

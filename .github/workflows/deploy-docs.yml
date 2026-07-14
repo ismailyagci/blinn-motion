@@ -1,0 +1,86 @@
+# Validate Mintlify docs on every change. Hosting is Mintlify Cloud;
+# Cloudflare only holds the DNS for docs.blinnmotion.com.
+#
+# Setup (one-time):
+#   1. https://mintlify.com/start → connect this repo, set docs path to `docs/`
+#   2. Mintlify dashboard → Custom domain → docs.blinnmotion.com
+#   3. Cloudflare DNS → CNAME docs → cname.mintlify.com (or value Mintlify shows)
+#
+# Mintlify's GitHub App deploys automatically on push to main when `docs/` changes.
+# This workflow adds CI validation so broken docs fail the PR/main run early.
+
+name: Deploy docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+      - ".github/workflows/deploy-docs.yml"
+  pull_request:
+    paths:
+      - "docs/**"
+      - ".github/workflows/deploy-docs.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate Mintlify docs
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: docs
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: docs/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check docs.json is valid JSON
+        run: node -e "JSON.parse(require('fs').readFileSync('docs.json','utf8')); console.log('docs.json OK')"
+
+      - name: Check required MDX pages exist
+        run: |
+          set -euo pipefail
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const cfg = JSON.parse(fs.readFileSync("docs.json", "utf8"));
+          const pages = [];
+          for (const tab of cfg.navigation?.tabs || []) {
+            for (const group of tab.groups || []) {
+              for (const p of group.pages || []) pages.push(p);
+            }
+          }
+          let missing = 0;
+          for (const p of pages) {
+            const file = path.join(process.cwd(), `${p}.mdx`);
+            if (!fs.existsSync(file)) {
+              console.error("Missing page:", file);
+              missing++;
+            }
+          }
+          if (missing) {
+            console.error(`\n${missing} navigation page(s) missing on disk`);
+            process.exit(1);
+          }
+          console.log(`OK — ${pages.length} nav pages present`);
+          NODE
+
+      - name: Broken links (best-effort)
+        # mintlify broken-links can be flaky offline; fail the job only on hard errors
+        continue-on-error: true
+        run: npx mintlify broken-links

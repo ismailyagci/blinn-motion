@@ -80,6 +80,24 @@ On `npm install`, husky installs a **pre-commit** hook that runs `npm test` and
 git commit --no-verify
 ```
 
+### Deploy (GitHub Actions + Cloudflare)
+
+| Site | URL | Host | Workflow |
+|------|-----|------|----------|
+| Landing | https://blinnmotion.com | Cloudflare Pages | `.github/workflows/deploy-site.yml` |
+| Docs | https://docs.blinnmotion.com | Mintlify (+ CF DNS) | `.github/workflows/deploy-docs.yml` + Mintlify GitHub App |
+
+**Landing (priority)** — set these repo secrets, then push to `main` or run the workflow manually:
+
+1. `CLOUDFLARE_API_TOKEN` — token with **Account → Cloudflare Pages → Edit**
+2. `CLOUDFLARE_ACCOUNT_ID` — Cloudflare account id
+
+Full steps (Pages project, custom domain, DNS): see [`site/DEPLOY.md`](site/DEPLOY.md).
+
+**Docs** — connect the repo in [Mintlify](https://mintlify.com/start) with docs path `docs/`, then CNAME `docs` → Mintlify’s target in Cloudflare DNS. Details: [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
+CI (tests + typecheck) runs on every PR/push via `.github/workflows/ci.yml`.
+
 ### Run an example
 
 ```bash

@@ -15,6 +15,12 @@ npm run dev        # http://localhost:3000
 
 Other scripts: `npm run broken-links` (check internal links), `npm run upgrade` (update the CLI).
 
+## Deploy
+
+Production: **https://docs.blinnmotion.com** (Mintlify Cloud + Cloudflare DNS).
+
+See **[DEPLOY.md](./DEPLOY.md)** for Mintlify GitHub App, custom domain, and CNAME setup.
+
 ## Structure
 
 ```

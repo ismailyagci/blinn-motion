@@ -64,16 +64,16 @@
     ]
   },
   "navbar": {
-    "links": [{ "label": "Live demo", "href": "https://blinnmotion.dev" }],
+    "links": [{ "label": "Live demo", "href": "https://blinnmotion.com" }],
     "primary": {
       "type": "button",
       "label": "GitHub",
-      "href": "https://github.com/blinn-motion/blinn-motion"
+      "href": "https://github.com/ismailyagci/blinn-motion"
     }
   },
   "footer": {
     "socials": {
-      "github": "https://github.com/blinn-motion/blinn-motion"
+      "github": "https://github.com/ismailyagci/blinn-motion"
     }
   }
 }
