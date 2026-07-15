@@ -5,8 +5,8 @@ description: "Blinn Motion — the runtime for Figma Motion. MotionDoc → pure-
 
 **Blinn Motion** is the runtime for [Figma Motion](https://www.figma.com/). It exports a Motion
 timeline as JSON — *not* an image — converts it into a small format called **MotionDoc**, and
-plays it with a **pure-JS render engine** with adapters for the **DOM**, **Canvas**, **React**
-and **React Native**.
+plays it with a **pure-JS render engine** plus thin adapters for **DOM**, **Canvas**, **React**,
+**Vue**, **Svelte**, **Angular**, **Lit**, **React Native**, and more.
 
 The render engine is the core. Every adapter paints the *same* resolved render tree, so an
 animation looks and **times identically** across platforms.
@@ -23,8 +23,15 @@ Figma Motion  (node.animations / timelines)
       ├─► @blinn-motion/dom            divs · CSS · SVG · masks
       ├─► @blinn-motion/canvas         pure-JS 2D canvas
       ├─► @blinn-motion/react          <BlinnMotion renderer="…" />
+      ├─► @blinn-motion/vue            Vue 3 component + composable
+      ├─► @blinn-motion/svelte         use:blinnMotion action
+      ├─► @blinn-motion/angular        standalone <blinn-motion>
+      ├─► @blinn-motion/lit            <blinn-motion> custom element
       └─► @blinn-motion/react-native   native <View> / <Text>
 ```
+
+Meta-frameworks use the packages above (no extra runtime): **Next.js** → React client components,
+**Astro** → React/Lit islands, **Expo** → React Native.
 
 ## Start here
 
@@ -39,7 +46,7 @@ Figma Motion  (node.animations / timelines)
     One pure method — <code>sample(doc, t)</code> — does all the work.
   </Card>
   <Card title="Adapters" icon="layer-group" href="/adapters/overview">
-    DOM, Canvas, React and React Native — one document, every platform.
+    DOM, Canvas, React, Vue, Svelte, Angular, Lit, RN — one document, every platform.
   </Card>
 </CardGroup>
 
@@ -57,8 +64,8 @@ Figma Motion  (node.animations / timelines)
     MotionDoc is small, readable JSON — inspectable, git-diffable, versionable.
   </Card>
   <Card title="Built for product UI" icon="layer-group">
-    Real frames and transforms, not only illustration loops. Drop into vanilla JS, React or
-    React Native with a thin adapter.
+    Real frames and transforms, not only illustration loops. Drop into vanilla JS, React, Vue,
+    Svelte, Angular, Lit or React Native with a thin adapter.
   </Card>
 </CardGroup>
 

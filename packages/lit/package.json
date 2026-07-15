@@ -1,0 +1,35 @@
+{
+  "name": "@blinn-motion/lit",
+  "version": "0.1.0",
+  "description": "Blinn Motion Lit adapter — <blinn-motion> custom element for DOM/Canvas backends.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": true,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "lit": ">=3"
+  },
+  "dependencies": {
+    "@blinn-motion/core": "^0.1.0",
+    "@blinn-motion/dom": "^0.1.0",
+    "@blinn-motion/canvas": "^0.1.0"
+  },
+  "devDependencies": {
+    "lit": "^3.2.1"
+  }
+}

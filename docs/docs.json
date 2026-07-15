@@ -2,7 +2,7 @@
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "Blinn Motion",
-  "description": "The runtime for Figma Motion. MotionDoc → pure-JS engine → DOM · Canvas · React · React Native.",
+  "description": "The runtime for Figma Motion. MotionDoc → pure-JS engine → DOM · Canvas · React · Vue · Svelte · Angular · Lit · React Native.",
   "colors": {
     "primary": "#2F6BFF",
     "light": "#7AA0FF",
@@ -44,6 +44,10 @@
               "adapters/dom",
               "adapters/canvas",
               "adapters/react",
+              "adapters/vue",
+              "adapters/svelte",
+              "adapters/angular",
+              "adapters/lit",
               "adapters/react-native"
             ]
           },

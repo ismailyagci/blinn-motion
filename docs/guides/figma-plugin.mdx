@@ -1,17 +1,17 @@
 ---
 title: "Export from Figma"
-description: "Turn a Figma Motion timeline into a downloadable MotionDoc with the Blinn Motion plugin."
+description: "Turn a Figma Motion timeline into a MotionDoc — with docs links and framework-specific setup inside the plugin."
 ---
 
-The `@blinn-motion/figma-plugin` reads a Figma **Motion** timeline and emits a MotionDoc — no PNGs,
-no video, just your keyframes, easing and springs as data.
+The **Blinn Motion** Figma plugin reads a **Motion** timeline and emits a MotionDoc — no PNGs, no
+video, just keyframes, easing and springs as data.
 
 ## Build the plugin
 
 The plugin previews animations with an inlined `@blinn-motion/dom` bundle, so build that first.
 
 ```bash
-npm run build -w @blinn-motion/dom          # produces the inlined browser bundle
+npm run build -w @blinn-motion/dom          # browser bundle for the UI
 npm run build -w @blinn-motion/figma-plugin # tsc → dist/code.js, inlines → ui.html
 ```
 
@@ -23,28 +23,52 @@ npm run build -w @blinn-motion/figma-plugin # tsc → dist/code.js, inlines → 
     `packages/figma-plugin/manifest.json`.
   </Step>
   <Step title="Select an animated frame">
-    Choose a frame that has a Motion timeline (one with keyframes on the timeline panel).
+    Choose a frame that has a Motion timeline (keyframes on the timeline panel).
   </Step>
   <Step title="Run the plugin">
-    The left pane previews the animation with `@blinn-motion/dom`. The right pane shows the
-    **MotionDoc** and the raw Figma JSON side by side.
+    Preview with the DOM engine, inspect layers, review issues (badge on **Advanced** only),
+    and use **Docs** / **Site** in the header to open documentation and the marketing site.
   </Step>
-  <Step title="Download the MotionDoc">
-    Hit **Download .json**. The file plays anywhere, with any Blinn Motion adapter.
+  <Step title="Export">
+    Click **Export**. The plugin asks **which stack** you ship on, shows install + a drop-in
+    snippet for that stack, then lets you **Download `.motion.json`**.
   </Step>
 </Steps>
 
-## Then play it
+## Export modal (framework guide)
+
+Instead of a silent JSON download, Export opens a guided flow:
+
+1. **Pick a framework** — React, Vue, Svelte, Angular, Lit, Vanilla, Canvas, Next.js, React Native (Expo), Astro, or JSON only  
+2. **Install** — copyable `npm install …` for that package  
+3. **File placement** — where to drop the MotionDoc  
+4. **Snippet** — copyable play code for that stack  
+5. **Download** — `.motion.json` for your project  
+
+Links inside the modal open [docs.blinnmotion.com](https://docs.blinnmotion.com) adapter pages and [blinnmotion.com](https://blinnmotion.com).
+
+## After export
 
 ```ts
 import { create } from "@blinn-motion/dom";
-import doc from "./downloaded.motion.json";
+import doc from "./card.motion.json";
 
 create(document.getElementById("stage")!, doc, { loop: true }).play();
 ```
 
+Or use the package shown for your stack — see [Adapters overview](/adapters/overview).
+
+## Advanced tools
+
+| Area | Purpose |
+| --- | --- |
+| **Needs attention** | Import/export checks (blank layers, opacity 0, etc.) |
+| **Compare** | Outlines, exact time, Figma screenshot overlay |
+| **Data export** | Copy MotionDoc / download raw Figma JSON (debug) |
+
+Issue count appears once — on the **Advanced** summary badge (not repeated in the header or status chips).
+
 <Note>
   Not everything in Figma Motion converts one-to-one. Before relying on a specific effect,
-  skim [Figma Motion coverage](/reference/figma-coverage) to see what's supported, approximate,
-  or out of scope.
+  skim [Figma Motion coverage](/reference/figma-coverage).
 </Note>

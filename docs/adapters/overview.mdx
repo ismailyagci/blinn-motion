@@ -1,42 +1,82 @@
 ---
 title: "Adapters overview"
-description: "One resolved tree, four thin painters — DOM, Canvas, React and React Native."
+description: "One resolved tree, thin painters — DOM, Canvas, React, Vue, Svelte, Angular, Lit, React Native, and more."
 ---
 
 The core resolves a MotionDoc to a tree of final numbers. An **adapter** is a thin painter
 that walks that tree and draws it for one backend. Because they all paint the *same* tree, an
 animation looks and **times identically** wherever it runs.
 
+## Paint backends
+
+These packages actually draw pixels / DOM / native views:
+
 <CardGroup cols={2}>
   <Card title="@blinn-motion/dom" icon="code" href="/adapters/dom">
     Full-fidelity CSS: nested divs, gradients, SVG vector paths, masks and shaders.
   </Card>
   <Card title="@blinn-motion/canvas" icon="image" href="/adapters/canvas">
-    A pure-JS 2D canvas painter — one immediate-mode draw per frame, zero DOM nodes.
-  </Card>
-  <Card title="@blinn-motion/react" icon="react" href="/adapters/react">
-    A declarative `<BlinnMotion />` component with a swappable renderer.
+    Pure-JS 2D canvas — one immediate-mode draw per frame, zero DOM nodes.
   </Card>
   <Card title="@blinn-motion/react-native" icon="mobile" href="/adapters/react-native">
-    The same timing on native `<View>` / `<Text>` — no native module.
+    Native `<View>` / `<Text>` on iOS/Android (Expo or bare RN).
   </Card>
 </CardGroup>
 
+## Framework bindings
+
+These wrap **dom** and/or **canvas** with idiomatic components / actions / elements.
+Playback surface matches React: play, pause, seek, `progress` (0…1), rate.
+
+<CardGroup cols={2}>
+  <Card title="@blinn-motion/react" icon="react" href="/adapters/react">
+    `<BlinnMotion />` + `useBlinnMotion` — `renderer="dom" | "canvas"`.
+  </Card>
+  <Card title="@blinn-motion/vue" icon="vuejs" href="/adapters/vue">
+    Vue 3 component + `useBlinnMotion` composable.
+  </Card>
+  <Card title="@blinn-motion/svelte" icon="code" href="/adapters/svelte">
+    `use:blinnMotion` action + `attachBlinnMotion`.
+  </Card>
+  <Card title="@blinn-motion/angular" icon="code" href="/adapters/angular">
+    Standalone `<blinn-motion>` component.
+  </Card>
+  <Card title="@blinn-motion/lit" icon="fire" href="/adapters/lit">
+    `<blinn-motion>` custom element for any stack.
+  </Card>
+</CardGroup>
+
+## Meta-frameworks (no extra package)
+
+Use an existing adapter inside the host framework:
+
+| Stack | Use |
+| --- | --- |
+| **Next.js** | `@blinn-motion/react` in a **client** component (`"use client"`) |
+| **Astro** | React / Lit **islands** (`client:load`) — no server paint required |
+| **Expo** | `@blinn-motion/react-native` |
+| **Vite vanilla** | `@blinn-motion/dom` or `@blinn-motion/canvas` |
+
+Runnable demos live under [`examples/`](https://github.com/ismailyagci/blinn-motion/tree/main/examples) in the monorepo (vue, svelte, angular, lit, next, astro, expo, …).
+
 ## Same control surface
 
-Every adapter exposes the same playback API, because they all build on the core's
-[`Ticker`](/reference/core-api#ticker):
+Every painter builds on the core [`Ticker`](/reference/core-api#ticker):
 
 | Method | Does |
 | --- | --- |
-| `play()` / `pause()` / `toggle()` | start, stop, flip playback |
+| `play()` / `pause()` / `stop()` / `toggle()` | transport |
 | `seek(t)` | jump to `t` seconds |
 | `seekFraction(f)` | jump to `0..1` of the duration |
+| `setProgress(p)` | external 0…1 (scroll, gesture, scrubber) |
+| `setRate(r)` | playback speed |
 | `loop` | get/set looping |
+
+Framework bindings expose the same surface via refs, composables, component methods, or the custom element instance.
 
 ## Fidelity at a glance
 
-| Feature | DOM | Canvas | React | React Native |
+| Feature | DOM | Canvas | React* | RN |
 | --- | :-: | :-: | :-: | :-: |
 | Transforms & opacity | ✅ | ✅ | ✅ | ✅ |
 | Gradients | ✅ | ✅ | ✅ | ⚠️ |
@@ -44,7 +84,8 @@ Every adapter exposes the same playback API, because they all build on the core'
 | Masks / clip shapes | ✅ | ⚠️ | ✅ | ⚠️ |
 | Procedural shaders | ✅ | ⚠️ | ✅ | ❌ |
 
+\* React / Vue / Svelte / Angular / Lit with `renderer="dom"` inherit DOM fidelity; `renderer="canvas"` inherits Canvas fidelity.
+
 <Note>
-  The DOM adapter is the fidelity reference — it implements the widest set of paint features.
-  Canvas and React Native trade some of the rarer effects for portability.
+  The DOM adapter is the fidelity reference. Canvas and React Native trade some rarer effects for portability.
 </Note>

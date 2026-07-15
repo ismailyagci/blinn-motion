@@ -5,181 +5,730 @@
 <style>
   :root {
     --bg: var(--figma-color-bg, #1e1e1e);
-    --bg2: var(--figma-color-bg-secondary, #2a2a2a);
-    --txt: var(--figma-color-text, #e6e6e6);
-    --mut: var(--figma-color-text-secondary, #9a9a9a);
+    --bg2: var(--figma-color-bg-secondary, #2c2c2c);
+    --bg3: var(--figma-color-bg-tertiary, #383838);
+    --txt: var(--figma-color-text, #f5f5f5);
+    --mut: var(--figma-color-text-secondary, #a0a0a0);
+    --dim: var(--figma-color-text-tertiary, #6b6b6b);
     --line: var(--figma-color-border, #3a3a3a);
-    --acc: var(--figma-color-bg-brand, #5b8cff);
+    --acc: var(--figma-color-bg-brand, #0d99ff);
     --accTxt: var(--figma-color-text-onbrand, #fff);
+    --ok: #3d9a5f;
+    --okBg: #1a2e22;
+    --warn: #e0a23c;
+    --warnBg: #2e2618;
+    --bad: #e06c5c;
+    --badBg: #2e1c1a;
+    --r: 8px;
+    --side: 208px;
   }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
-  body { font: 11px/1.4 Inter, ui-sans-serif, system-ui, sans-serif; color: var(--txt); background: var(--bg);
-         display: flex; flex-direction: row; height: 100vh; overflow: hidden; }
+  body {
+    font: 12px/1.45 Inter, system-ui, -apple-system, sans-serif;
+    color: var(--txt); background: var(--bg);
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+  }
 
-  /* preview column */
-  .preview { flex: 1 1 auto; min-width: 0; min-height: 0; overflow: hidden;
-             display: flex; flex-direction: column; border-right: 1px solid var(--line); }
-  .pvHead { padding: 9px 14px; border-bottom: 1px solid var(--line); display: flex; align-items: baseline; gap: 8px; flex: none; }
-  .pvHead b { font-size: 12px; } .pvHead .dur { color: var(--mut); }
-  .warn { margin-left: auto; color: #e0a23c; font-size: 10px; max-width: 50%; text-align: right; }
+  /* ── top bar ── */
+  .top {
+    flex: none; display: flex; align-items: center; gap: 10px;
+    padding: 9px 12px; border-bottom: 1px solid var(--line); z-index: 2;
+  }
+  .brand { display: flex; align-items: center; gap: 8px; min-width: 0; }
+  .logo {
+    width: 22px; height: 22px; border-radius: 6px; flex: none;
+    display: block; overflow: hidden; flex-shrink: 0;
+  }
+  .logo svg { width: 100%; height: 100%; display: block; }
+  .brand h1 { margin: 0; font-size: 13px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
+  .topMeta {
+    color: var(--mut); font-size: 11px; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; min-width: 0; max-width: 42%;
+  }
+  .top .grow { flex: 1; }
+  .topActions { display: flex; gap: 6px; flex: none; align-items: center; }
 
-  .stageArea { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; overflow: hidden;
-               position: relative;
-               background:
-                 repeating-conic-gradient(#ffffff0a 0 90deg, #00000018 0 180deg) 0 0/22px 22px, var(--bg2); }
-  .hostBox { position: relative; overflow: hidden; outline: 1px solid #ffffff24; flex: none; }
+  /* ── main row: layers | stage ── */
+  .main {
+    flex: 1 1 auto; min-height: 0;
+    display: flex; flex-direction: row; overflow: hidden;
+  }
+
+  /* ── left layers (Figma-like) ── */
+  .sidebar {
+    flex: 0 0 var(--side); width: var(--side); min-width: 0; min-height: 0;
+    border-right: 1px solid var(--line); background: var(--bg);
+    display: flex; flex-direction: column;
+  }
+  .sideHead {
+    flex: none; display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 10px 6px; border-bottom: 1px solid var(--line);
+  }
+  .sideHead h2 {
+    margin: 0; font-size: 10px; font-weight: 600; letter-spacing: 0.07em;
+    text-transform: uppercase; color: var(--dim);
+  }
+  .sideCount { font-size: 10px; color: var(--dim); font-variant-numeric: tabular-nums; }
+  .sideScroll { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 4px 0 8px; }
+  .sideEmpty {
+    padding: 16px 12px; color: var(--dim); font-size: 11px; line-height: 1.45;
+  }
+
+  .layer {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 8px; min-width: 0; cursor: default;
+    border-left: 2px solid transparent;
+  }
+  .layer:hover { background: var(--bg2); }
+  .layer.hasAnim { border-left-color: var(--acc); }
+  .layer .ico {
+    width: 16px; height: 16px; border-radius: 3px; flex: none;
+    background: var(--bg3); color: var(--mut); font-size: 9px;
+    display: grid; place-items: center; font-weight: 600;
+  }
+  .layer .nm {
+    flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    color: var(--txt); font-size: 11px;
+  }
+  .layer .dotAnim {
+    flex: none; width: 5px; height: 5px; border-radius: 50%;
+    background: var(--acc); opacity: 0.85;
+  }
+  .layer .tags {
+    flex: none; display: none; gap: 2px; max-width: 72px; overflow: hidden;
+  }
+  .layer:hover .tags { display: flex; }
+  .tag {
+    font-size: 8px; padding: 1px 4px; border-radius: 3px;
+    background: #1a3a55; color: #8ec8f0; white-space: nowrap;
+  }
+  .more { color: var(--dim); font-size: 10px; padding: 6px 10px; }
+
+  /* ── stage column ── */
+  .stageCol {
+    flex: 1 1 auto; min-width: 0; min-height: 0;
+    display: flex; flex-direction: column;
+  }
+  .stageArea {
+    flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center;
+    overflow: hidden; position: relative;
+    background:
+      repeating-conic-gradient(#ffffff08 0 90deg, #00000014 0 180deg) 0 0 / 18px 18px,
+      var(--bg2);
+  }
+  .hostBox { position: relative; overflow: hidden; outline: 1px solid #ffffff18; flex: none; border-radius: 2px; }
   #host { transform-origin: top left; }
-  .empty { color: var(--mut); text-align: center; max-width: 260px; padding: 20px; }
-
-  .ctrls { flex: none; padding: 8px 12px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 8px;
-           background: var(--bg); }
-  .play { width: 34px; height: 28px; font-size: 12px; display: inline-flex; align-items: center; justify-content: center; }
-  .ctrls input[type=range] { flex: 1; min-width: 60px; accent-color: var(--acc); }
-  .tt { color: var(--mut); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .chk { color: var(--mut); display: inline-flex; gap: 4px; align-items: center; cursor: pointer; user-select: none; }
-  .fit { color: var(--mut); white-space: nowrap; }
-  select { font: inherit; background: var(--bg2); color: var(--txt); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; }
-
-  button { font: inherit; background: var(--bg2); color: var(--txt); border: 1px solid var(--line);
-           border-radius: 6px; padding: 6px 10px; cursor: pointer; }
-  button:hover { border-color: var(--acc); }
-  button.primary { background: var(--acc); border-color: var(--acc); color: var(--accTxt); }
-  button.icon { width: 30px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
-
-  /* side column */
-  .side { flex: 0 0 360px; min-width: 0; min-height: 0; overflow: hidden;
-          display: flex; flex-direction: column; background: var(--bg); }
-  .tabs { display: flex; gap: 4px; padding: 8px 10px 0; border-bottom: 1px solid var(--line); flex: none; }
-  .tab { padding: 6px 10px; border: 1px solid transparent; border-bottom: none; border-radius: 6px 6px 0 0;
-         color: var(--mut); cursor: pointer; }
-  .tab.on { color: var(--txt); background: var(--bg2); border-color: var(--line); }
-  pre { flex: 1 1 auto; min-height: 0; margin: 0; overflow: auto; padding: 10px 12px; white-space: pre; background: var(--bg);
-        font: 10px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; color: #cdd6e6; }
-  .sideBar { flex: none; padding: 8px 10px; border-top: 1px solid var(--line); display: flex; gap: 6px; align-items: center; }
-  .sideBar .grow { flex: 1; }
-  .stat { flex: none; padding: 4px 12px; color: var(--mut); border-top: 1px solid var(--line); font-size: 10px; }
-
-  /* debug bar (onion-skin reference + outlines + exact time) */
-  .dbg { flex: none; padding: 7px 12px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 10px;
-         background: var(--bg2); flex-wrap: wrap; }
-  .dbg label { color: var(--mut); display: inline-flex; gap: 5px; align-items: center; white-space: nowrap; }
-  .dbg input[type=number] { width: 56px; background: var(--bg); color: var(--txt); border: 1px solid var(--line); border-radius: 5px; padding: 3px 5px; font: inherit; }
-  .dbg input[type=range] { width: 78px; accent-color: var(--acc); }
-  #refImg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; pointer-events: none; display: none; z-index: 5; mix-blend-mode: normal; }
   #host.outline [data-id] { outline: 1px solid #ff00d4aa; outline-offset: -1px; }
-  /* health report */
-  .health { flex: 1 1 auto; min-height: 0; overflow: auto; padding: 10px 12px; font: 10px/1.5 ui-monospace, Menlo, monospace; }
-  .health .hl { margin: 0 0 8px; padding: 7px 9px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg2); }
-  .health .hl.bad { border-color: #b4523c; } .health .hl.warnc { border-color: #b08a2c; } .health .hl.ok { border-color: #3a7a4a; }
-  .health .hid { color: var(--mut); } .health .hname { color: var(--txt); font-weight: 600; }
-  .health .iss { color: #e88; display: block; margin-top: 3px; } .health .iss.w { color: #e0b84c; }
+  #refImg {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    object-fit: fill; pointer-events: none; display: none; z-index: 5;
+  }
+  .empty {
+    color: var(--mut); text-align: center; max-width: 260px; padding: 24px 16px;
+    display: flex; flex-direction: column; align-items: center; gap: 12px;
+  }
+  .emptyIcon {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: var(--bg3); display: grid; place-items: center; font-size: 22px;
+  }
+  .emptyTitle { color: var(--txt); font-size: 13px; font-weight: 600; }
+  .empty p { margin: 0; font-size: 11px; line-height: 1.5; color: var(--mut); }
+
+  /* transport */
+  .ctrls {
+    flex: none; padding: 8px 12px; border-top: 1px solid var(--line);
+    display: flex; align-items: center; gap: 8px; background: var(--bg);
+  }
+  .ctrls input[type=range] { flex: 1; min-width: 40px; accent-color: var(--acc); }
+  .tt { color: var(--mut); font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 11px; min-width: 86px; }
+  .chk { color: var(--mut); display: inline-flex; gap: 4px; align-items: center; cursor: pointer; user-select: none; font-size: 11px; }
+  .fit { color: var(--dim); white-space: nowrap; font-size: 10px; }
+
+  /* status strip under transport */
+  .status {
+    flex: none; padding: 8px 12px; border-top: 1px solid var(--line);
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    background: var(--bg);
+  }
+  .stats { display: flex; flex-wrap: wrap; gap: 5px; flex: 1; min-width: 0; }
+  .chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 999px;
+    background: var(--bg2); border: 1px solid var(--line);
+    color: var(--mut); font-size: 10px; white-space: nowrap;
+  }
+  .chip b { color: var(--txt); font-weight: 600; }
+  .chip.ok { border-color: #2a5a3a; background: var(--okBg); color: #8fd4a8; }
+  .chip.ok b { color: #b8ecc8; }
+  .chip.warn { border-color: #6a5520; background: var(--warnBg); color: #e8c56a; }
+  .chip.warn b { color: #f0d88a; }
+  .chip.bad { border-color: #6a3028; background: var(--badBg); color: #f0a090; }
+  .chip.bad b { color: #ffc8bc; }
+  .statusActions { display: flex; gap: 6px; flex: none; }
+
+  /* ── Advanced panel ── */
+  .adv {
+    flex: none; border-top: 1px solid var(--line); background: var(--bg);
+    max-height: 46%; display: flex; flex-direction: column; min-height: 0;
+  }
+  .adv > summary {
+    list-style: none; cursor: pointer; user-select: none;
+    padding: 8px 12px; display: flex; align-items: center; gap: 8px;
+    background: var(--bg2); border-bottom: 1px solid transparent;
+    flex: none;
+  }
+  .adv > summary::-webkit-details-marker { display: none; }
+  .adv[open] > summary { border-bottom-color: var(--line); }
+  .advChevron {
+    width: 14px; height: 14px; display: grid; place-items: center;
+    color: var(--dim); font-size: 9px; transition: transform .15s;
+  }
+  .adv[open] .advChevron { transform: rotate(90deg); }
+  .advTitle { font-size: 11px; font-weight: 600; color: var(--txt); }
+  .advSub { font-size: 10px; color: var(--dim); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .advBadge {
+    display: none; font-size: 10px; font-weight: 600;
+    padding: 1px 7px; border-radius: 999px;
+    background: var(--warnBg); color: #e8c56a; border: 1px solid #6a5520;
+  }
+  .advBadge.show { display: inline-flex; }
+  .advBadge.bad { background: var(--badBg); color: #f0a090; border-color: #6a3028; }
+
+  .advBody {
+    flex: 1 1 auto; min-height: 0; overflow: auto;
+    padding: 12px; display: none; flex-direction: column; gap: 12px;
+  }
+  .adv[open] .advBody { display: flex; }
+
+  /* advanced sections as cards */
+  .card {
+    border: 1px solid var(--line); border-radius: 10px; background: var(--bg2);
+    overflow: hidden;
+  }
+  .cardHead {
+    display: flex; align-items: center; gap: 8px;
+    padding: 8px 12px; border-bottom: 1px solid var(--line);
+    background: rgba(0,0,0,.12);
+  }
+  .cardHead h3 {
+    margin: 0; font-size: 11px; font-weight: 600; color: var(--txt); flex: 1;
+  }
+  .cardHead .meta { font-size: 10px; color: var(--dim); }
+  .cardBody { padding: 10px 12px; }
+
+  .issues { display: flex; flex-direction: column; gap: 6px; }
+  .issue {
+    display: flex; gap: 8px; align-items: flex-start;
+    padding: 8px 10px; border-radius: 8px;
+    border: 1px solid var(--line); background: var(--bg);
+  }
+  .issue.warn { border-color: #6a5520; background: var(--warnBg); }
+  .issue.bad { border-color: #6a3028; background: var(--badBg); }
+  .issue .dot {
+    flex: none; width: 6px; height: 6px; border-radius: 50%; margin-top: 5px;
+    background: var(--warn);
+  }
+  .issue.bad .dot { background: var(--bad); }
+  .issue .body { min-width: 0; flex: 1; }
+  .issue .name { font-weight: 600; font-size: 11px; color: var(--txt); }
+  .issue .msg { font-size: 11px; color: var(--mut); margin-top: 2px; line-height: 1.4; }
+
+  .okRow {
+    display: none; align-items: center; gap: 8px;
+    padding: 8px 10px; border-radius: 8px;
+    border: 1px solid #2a5a3a; background: var(--okBg); color: #8fd4a8; font-size: 11px;
+  }
+  .okRow.show { display: flex; }
+  .okRow .check {
+    width: 16px; height: 16px; border-radius: 50%; background: var(--ok);
+    color: #fff; font-size: 10px; display: grid; place-items: center; flex: none;
+  }
+
+  /* tool grid inside compare card */
+  .toolGrid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  }
+  @media (max-width: 640px) {
+    .toolGrid { grid-template-columns: 1fr; }
+  }
+  .tool {
+    display: flex; flex-direction: column; gap: 6px;
+    padding: 8px 10px; border-radius: 8px;
+    background: var(--bg); border: 1px solid var(--line);
+  }
+  .tool label.row {
+    display: flex; align-items: center; gap: 8px;
+    color: var(--txt); font-size: 11px; cursor: pointer; user-select: none;
+  }
+  .tool .lbl {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; color: var(--dim);
+  }
+  .tool .hint { font-size: 10px; color: var(--dim); line-height: 1.35; }
+  .tool .rowInline {
+    display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  }
+  .tool input[type=number] {
+    width: 56px; background: var(--bg2); color: var(--txt);
+    border: 1px solid var(--line); border-radius: 5px; padding: 4px 6px; font: inherit;
+  }
+  .tool input[type=range] { flex: 1; min-width: 60px; accent-color: var(--acc); }
+  .tool input[type=file] { font-size: 10px; color: var(--mut); max-width: 100%; }
+
+  .dataRow {
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+  }
+  .dataRow .hint { flex: 1; min-width: 120px; font-size: 10px; color: var(--dim); }
+
+  /* buttons */
+  button {
+    font: inherit; background: var(--bg2); color: var(--txt);
+    border: 1px solid var(--line); border-radius: 6px;
+    padding: 6px 12px; cursor: pointer; white-space: nowrap;
+  }
+  button:hover { border-color: var(--acc); }
+  button:disabled { opacity: 0.4; cursor: default; border-color: var(--line); }
+  button.primary {
+    background: var(--acc); border-color: var(--acc); color: var(--accTxt); font-weight: 600;
+  }
+  button.primary:hover { filter: brightness(1.08); border-color: var(--acc); }
+  button.primary:disabled { filter: none; opacity: 0.4; }
+  button.ghost { background: transparent; }
+  button.sm { padding: 4px 8px; font-size: 11px; }
+  button.icon {
+    width: 30px; height: 28px; padding: 0;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  button.play {
+    width: 34px; height: 28px; font-size: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  select {
+    font: inherit; background: var(--bg2); color: var(--txt);
+    border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px;
+  }
+
+  /* toast */
+  .toast {
+    position: fixed; bottom: 16px; left: 50%; transform: translateX(-50%) translateY(12px);
+    background: var(--bg3); color: var(--txt); border: 1px solid var(--line);
+    padding: 8px 14px; border-radius: 8px; font-size: 11px;
+    opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s; z-index: 50;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* external links (docs / site) */
+  .extLinks { display: flex; gap: 4px; flex: none; align-items: center; }
+  a.linkBtn, button.linkBtn {
+    font: inherit; background: transparent; color: var(--mut);
+    border: 1px solid transparent; border-radius: 6px;
+    padding: 4px 8px; cursor: pointer; white-space: nowrap; font-size: 11px;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 4px;
+  }
+  a.linkBtn:hover, button.linkBtn:hover { color: var(--txt); border-color: var(--line); background: var(--bg2); }
+  a.linkBtn .arr, button.linkBtn .arr { font-size: 9px; opacity: 0.7; }
+
+  /* export modal */
+  .modalOverlay {
+    display: none; position: fixed; inset: 0; z-index: 40;
+    background: rgba(0,0,0,.55); align-items: center; justify-content: center;
+    padding: 16px;
+  }
+  .modalOverlay.show { display: flex; }
+  .modal {
+    width: min(520px, 100%); max-height: min(560px, 100%);
+    background: var(--bg); border: 1px solid var(--line); border-radius: 12px;
+    box-shadow: 0 16px 48px rgba(0,0,0,.45);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .modalHead {
+    flex: none; display: flex; align-items: flex-start; gap: 10px;
+    padding: 14px 16px 10px; border-bottom: 1px solid var(--line);
+  }
+  .modalHead h2 { margin: 0; font-size: 14px; font-weight: 600; flex: 1; }
+  .modalHead p { margin: 4px 0 0; font-size: 11px; color: var(--mut); line-height: 1.4; }
+  .modalBody {
+    flex: 1 1 auto; min-height: 0; overflow: auto; padding: 12px 16px 16px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+  .modalFoot {
+    flex: none; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+    padding: 10px 16px; border-top: 1px solid var(--line); background: var(--bg2);
+  }
+  .modalFoot .grow { flex: 1; }
+  .fwGrid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 6px;
+  }
+  .fwBtn {
+    text-align: left; padding: 9px 10px; border-radius: 8px;
+    background: var(--bg2); border: 1px solid var(--line);
+    font-size: 11px; font-weight: 600; color: var(--txt);
+    display: flex; flex-direction: column; gap: 4px; min-height: 64px;
+    align-items: flex-start;
+  }
+  .fwBtn:hover { border-color: var(--acc); }
+  .fwBtn.active {
+    border-color: var(--acc); background: #1a3a55;
+    box-shadow: inset 0 0 0 1px var(--acc);
+  }
+  .fwBtn .fwIcon {
+    width: 26px; height: 26px; border-radius: 7px; flex: none;
+    display: grid; place-items: center;
+    background: rgba(255,255,255,.06); color: var(--fw, var(--acc));
+  }
+  .fwBtn .fwIcon svg { width: 16px; height: 16px; display: block; }
+  .fwBtn .fwLabel { line-height: 1.15; }
+  .fwBtn .fwSub { font-size: 9px; font-weight: 500; color: var(--dim); letter-spacing: 0; line-height: 1.2; }
+  .setupStep {
+    border: 1px solid var(--line); border-radius: 10px; background: var(--bg2);
+    overflow: hidden;
+  }
+  .setupStep .stepHead {
+    display: flex; align-items: center; gap: 8px;
+    padding: 7px 10px; border-bottom: 1px solid var(--line);
+    background: rgba(0,0,0,.12);
+  }
+  .setupStep .n {
+    width: 18px; height: 18px; border-radius: 50%; flex: none;
+    background: var(--acc); color: var(--accTxt); font-size: 10px; font-weight: 700;
+    display: grid; place-items: center;
+  }
+  .setupStep .stepTitle { font-size: 11px; font-weight: 600; flex: 1; }
+  .setupStep .stepBody { padding: 10px; display: flex; flex-direction: column; gap: 8px; }
+  .setupStep .stepHint { font-size: 11px; color: var(--mut); line-height: 1.45; margin: 0; }
+  .codeBox {
+    position: relative; background: var(--bg); border: 1px solid var(--line);
+    border-radius: 8px; padding: 10px 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 10.5px; line-height: 1.45; color: #d4dce8; white-space: pre-wrap; word-break: break-word;
+    max-height: 140px; overflow: auto;
+  }
+  .codeBox .copyMini {
+    position: absolute; top: 6px; right: 6px;
+    padding: 2px 6px; font-size: 10px;
+  }
+  .setupLinks { display: flex; flex-wrap: wrap; gap: 6px; }
 </style>
 </head>
 <body>
-  <div class="preview">
-    <div class="pvHead">
-      <b id="title">—</b><span class="dur" id="dur"></span>
-      <span class="warn" id="warn"></span>
-    </div>
-    <div class="stageArea" id="stageArea">
-      <div class="empty" id="empty">
-        <div id="emptyMsg">Select an animated frame in Figma (one with a Motion timeline) to preview it here with our own engine.</div>
-        <button id="demoEmpty" class="primary" style="margin-top:12px">🎬 Create a demo animation</button>
+  <header class="top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true" title="Blinn Motion">
+        <!-- Brand mark (site/public/favicon.svg) — square B + blue diamond -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" role="img">
+          <rect x="6" y="6" width="52" height="52" rx="15" fill="#11141A"/>
+          <g fill="none" stroke="#ffffff" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M24 18 V46"/>
+            <path d="M24 18 H32.5 C38.6 18 38.6 32 32.5 32 H24"/>
+            <path d="M24 32 H34.5 C41.2 32 41.2 46 34.5 46 H24"/>
+          </g>
+          <rect x="43.6" y="43.6" width="7.6" height="7.6" rx="1.5" transform="rotate(45 47.4 47.4)" fill="#2F6BFF"/>
+        </svg>
       </div>
-      <div class="hostBox" id="hostBox" style="display:none"><div id="host"></div><img id="refImg" alt="reference" /></div>
+      <h1>Blinn Motion</h1>
     </div>
-    <div class="ctrls">
-      <button class="play" id="play" title="Play / Pause">▶</button>
-      <button class="icon" id="restart" title="Restart">⟲</button>
-      <input type="range" id="scrub" min="0" max="1000" value="0" />
-      <span class="tt" id="time">0.00 / 0.00s</span>
-      <label class="chk"><input type="checkbox" id="loop" checked /> loop</label>
-      <select id="speed" title="Playback speed">
-        <option value="0.25">0.25×</option>
-        <option value="0.5">0.5×</option>
-        <option value="1" selected>1×</option>
-        <option value="2">2×</option>
-      </select>
-      <span class="fit">fit <span id="fit">100%</span></span>
-      <button class="icon" id="dbgToggle" title="Debug / compare tools">🔍</button>
+    <div class="topMeta" id="topMeta">Select a frame with motion</div>
+    <span class="grow"></span>
+    <div class="extLinks">
+      <button type="button" class="linkBtn" id="linkDocs" title="Open documentation">Docs <span class="arr">↗</span></button>
+      <button type="button" class="linkBtn" id="linkSite" title="Open blinnmotion.com">Site <span class="arr">↗</span></button>
     </div>
-    <div class="dbg" id="dbgBar" style="display:none">
-      <label title="Outline every layer box + name in the preview"><input type="checkbox" id="dbgOutline" /> outlines</label>
-      <label title="Seek to an exact time to match Figma's playhead">t <input id="dbgTime" type="number" step="0.05" min="0" value="0" /> s</label>
-      <label title="Load a Figma screenshot at this time to overlay (onion-skin)">ref <input id="dbgRef" type="file" accept="image/*" /></label>
-      <label>α <input id="dbgRefOp" type="range" min="0" max="100" value="50" /></label>
-      <button class="icon" id="dbgRefClear" title="Clear reference">✕</button>
+    <div class="topActions">
+      <button class="ghost icon" id="reexport" title="Re-read selection">↻</button>
+      <button class="primary" id="download" disabled>Export</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- Figma-style layers on the left -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sideHead">
+        <h2>Layers</h2>
+        <span class="sideCount" id="sideCount">—</span>
+      </div>
+      <div class="sideScroll" id="layers">
+        <div class="sideEmpty" id="sideEmpty">Select a frame to list its layers.</div>
+      </div>
+    </aside>
+
+    <div class="stageCol">
+      <div class="stageArea" id="stageArea">
+        <div class="empty" id="empty">
+          <div class="emptyIcon">▸</div>
+          <div class="emptyTitle">No animation selected</div>
+          <p id="emptyMsg">Select a frame that has a Motion timeline on the canvas to preview it here.</p>
+          <button id="demoEmpty" class="primary">Create demo animation</button>
+        </div>
+        <div class="hostBox" id="hostBox" style="display:none">
+          <div id="host"></div>
+          <img id="refImg" alt="" />
+        </div>
+      </div>
+
+      <div class="ctrls">
+        <button class="play" id="play" title="Play / Pause" disabled>▶</button>
+        <button class="icon" id="restart" title="Restart" disabled>⟲</button>
+        <input type="range" id="scrub" min="0" max="1000" value="0" disabled />
+        <span class="tt" id="time">0.00 / 0.00s</span>
+        <label class="chk"><input type="checkbox" id="loop" checked /> Loop</label>
+        <select id="speed" title="Playback speed" disabled>
+          <option value="0.25">0.25×</option>
+          <option value="0.5">0.5×</option>
+          <option value="1" selected>1×</option>
+          <option value="2">2×</option>
+        </select>
+        <span class="fit">fit <span id="fit">100%</span></span>
+      </div>
+
+      <div class="status">
+        <div class="stats" id="stats">
+          <span class="chip">Waiting for selection…</span>
+        </div>
+        <div class="statusActions">
+          <button class="ghost sm" id="demo" title="Insert a sample animated frame">Demo</button>
+          <button class="primary sm" id="download2" disabled>Export…</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="side">
-    <div class="tabs">
-      <div class="tab on" data-tab="doc">MotionDoc (our engine)</div>
-      <div class="tab" data-tab="raw">Figma raw</div>
-      <div class="tab" data-tab="health">Health</div>
+  <details class="adv" id="adv">
+    <summary>
+      <span class="advChevron">▸</span>
+      <span class="advTitle">Advanced</span>
+      <span class="advSub" id="advSub">Compare · data</span>
+      <span class="advBadge" id="advBadge">0</span>
+    </summary>
+    <div class="advBody">
+      <!-- Needs attention -->
+      <section class="card" id="issuesCard">
+        <div class="cardHead">
+          <h3>Needs attention</h3>
+          <span class="meta" id="issuesMeta">Import &amp; export checks</span>
+        </div>
+        <div class="cardBody">
+          <div class="okRow" id="okRow">
+            <span class="check">✓</span>
+            <span>No issues — export should match the preview closely.</span>
+          </div>
+          <div class="issues" id="issues"></div>
+          <div class="sideEmpty" id="issuesEmpty" style="padding:4px 0">Select a frame to run checks.</div>
+        </div>
+      </section>
+
+      <!-- Compare -->
+      <section class="card">
+        <div class="cardHead">
+          <h3>Compare with Figma</h3>
+          <span class="meta">Optional debug tools</span>
+        </div>
+        <div class="cardBody">
+          <div class="toolGrid">
+            <div class="tool">
+              <div class="lbl">Outlines</div>
+              <label class="row"><input type="checkbox" id="dbgOutline" /> Show layer bounds in preview</label>
+              <div class="hint">Helps spot missing or off-stage layers.</div>
+            </div>
+            <div class="tool">
+              <div class="lbl">Exact time</div>
+              <div class="rowInline">
+                <input id="dbgTime" type="number" step="0.05" min="0" value="0" />
+                <span class="hint">seconds</span>
+              </div>
+              <div class="hint">Match Figma’s playhead for frame-by-frame checks.</div>
+            </div>
+            <div class="tool" style="grid-column: 1 / -1">
+              <div class="lbl">Reference overlay</div>
+              <div class="rowInline">
+                <input id="dbgRef" type="file" accept="image/*" />
+                <span class="hint">α</span>
+                <input id="dbgRefOp" type="range" min="0" max="100" value="50" />
+                <button class="icon sm" id="dbgRefClear" title="Clear reference">✕</button>
+              </div>
+              <div class="hint">Drop a Figma screenshot at the same time to onion-skin compare.</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Data -->
+      <section class="card">
+        <div class="cardHead">
+          <h3>Data export</h3>
+          <span class="meta">For engineers / debugging</span>
+        </div>
+        <div class="cardBody">
+          <div class="dataRow">
+            <span class="hint">Use <b>Export</b> for the guided MotionDoc + framework setup. These are low-level tools.</span>
+            <button class="ghost sm" id="copyDoc" disabled>Copy MotionDoc</button>
+            <button class="ghost sm" id="downloadRaw" disabled>Download raw Figma JSON</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Help links -->
+      <section class="card">
+        <div class="cardHead">
+          <h3>Learn more</h3>
+          <span class="meta">Website &amp; docs</span>
+        </div>
+        <div class="cardBody">
+          <div class="dataRow">
+            <span class="hint">Guides, adapters, MotionDoc schema, and the live demo.</span>
+            <button type="button" class="ghost sm" id="linkDocs2">Open docs ↗</button>
+            <button type="button" class="ghost sm" id="linkSite2">Open site ↗</button>
+          </div>
+        </div>
+      </section>
     </div>
-    <pre id="json">{}</pre>
-    <div class="health" id="health" style="display:none"></div>
-    <div class="sideBar">
-      <button id="copy">Copy</button>
-      <button id="download" class="primary">Download .json</button>
-      <span class="grow"></span>
-      <button id="demo">🎬 Demo</button>
-      <button id="reexport">↻ Re-read</button>
+  </details>
+
+  <!-- Export: framework picker + setup -->
+  <div class="modalOverlay" id="exportModal" role="dialog" aria-modal="true" aria-labelledby="exportTitle">
+    <div class="modal">
+      <div class="modalHead">
+        <div style="flex:1; min-width:0">
+          <h2 id="exportTitle">Export MotionDoc</h2>
+          <p>Pick your stack — we show install + a drop-in snippet, then you download the JSON.</p>
+        </div>
+        <button type="button" class="icon ghost" id="exportClose" title="Close">✕</button>
+      </div>
+      <div class="modalBody">
+        <div>
+          <div style="font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--dim);margin-bottom:6px">1 · Framework</div>
+          <div class="fwGrid" id="fwGrid"></div>
+        </div>
+        <div id="exportSetup"></div>
+      </div>
+      <div class="modalFoot">
+        <button type="button" class="ghost sm" id="exportDocsFw">Adapter docs ↗</button>
+        <button type="button" class="ghost sm" id="exportSite">Website ↗</button>
+        <span class="grow"></span>
+        <button type="button" class="ghost" id="exportCancel">Cancel</button>
+        <button type="button" class="primary" id="exportDownload">Download .motion.json</button>
+      </div>
     </div>
-    <div class="stat" id="stat">Layers: 0 · Tracks: 0</div>
   </div>
+
+  <div class="toast" id="toast"></div>
 
 <script>/*__ENGINE__*/</script>
 <script>
 const $ = (id) => document.getElementById(id);
-let current = { doc: null, raw: null };
-let activeTab = 'doc';
+let current = { doc: null, raw: null, notice: '' };
 let player = null;
+let lastIssueCount = 0;
+
+const PROP_LABEL = {
+  translateX: 'X', translateY: 'Y', translateXY: 'Move',
+  rotation: 'Rotate', scaleX: 'Scale X', scaleY: 'Scale Y', scaleXY: 'Scale',
+  opacity: 'Opacity', width: 'Width', height: 'Height',
+  strokeWeight: 'Stroke', strokeColor: 'Stroke color', fillColor: 'Fill',
+  cornerRadiusTL: 'Radius', cornerRadiusTR: 'Radius', cornerRadiusBR: 'Radius', cornerRadiusBL: 'Radius',
+  trimStart: 'Trim', trimEnd: 'Trim', polygonCount: 'Points',
+  borderTopWeight: 'Border', borderRightWeight: 'Border',
+  borderBottomWeight: 'Border', borderLeftWeight: 'Border',
+};
 
 function post(m) { parent.postMessage({ pluginMessage: m }, '*'); }
 function fmt(t, d) { return t.toFixed(2) + ' / ' + d.toFixed(2) + 's'; }
-function countTracks(doc) {
-  let layers = 0, tracks = 0;
-  (function walk(ls){ (ls||[]).forEach(l => { layers++; tracks += (l.tracks||[]).length; walk(l.children); }); })(doc.layers);
-  return { layers, tracks };
+function toast(msg) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('show'), 1800);
 }
-function showJson() {
-  if (activeTab === 'health') {
-    $('json').style.display = 'none'; $('health').style.display = 'block';
-    renderHealth();
-    return;
-  }
-  $('health').style.display = 'none'; $('json').style.display = 'block';
-  const obj = activeTab === 'doc' ? current.doc : current.raw;
-  $('json').textContent = obj ? JSON.stringify(obj, null, 2) : '{}';
+function setTransportEnabled(on) {
+  ['play', 'restart', 'scrub', 'speed'].forEach((id) => { $(id).disabled = !on; });
+  $('download').disabled = !on;
+  $('download2').disabled = !on;
+  $('copyDoc').disabled = !on;
+  $('downloadRaw').disabled = !on;
+}
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
-// ---- Health check: scan the MotionDoc for layers that will look WRONG, so we can localize
-// a "looks different from Figma" complaint without rendering. Pure analysis of the doc.
-function dataUrlBytes(u) { if (!u || typeof u !== 'string') return 0; const i = u.indexOf(','); return i < 0 ? 0 : Math.floor((u.length - i - 1) * 0.75); }
+function countTracks(doc) {
+  let layers = 0, tracks = 0, animated = 0;
+  (function walk(ls) {
+    (ls || []).forEach((l) => {
+      layers++;
+      const n = (l.tracks || []).length;
+      tracks += n;
+      if (n) animated++;
+      walk(l.children);
+    });
+  })(doc.layers);
+  return { layers, tracks, animated };
+}
+
+function collectLayers(doc, max) {
+  const out = [];
+  (function walk(ls, depth) {
+    (ls || []).forEach((l) => {
+      if (out.length >= max) return;
+      const props = (l.tracks || []).map((t) => t.property);
+      const uniq = [];
+      props.forEach((p) => {
+        const lab = PROP_LABEL[p] || (p.indexOf(':') >= 0 ? p.split(':')[0] : p);
+        if (uniq.indexOf(lab) < 0) uniq.push(lab);
+      });
+      out.push({
+        id: l.id,
+        name: l.name || '(unnamed)',
+        type: l.type || 'layer',
+        props: uniq,
+        depth,
+        animated: uniq.length > 0,
+      });
+      walk(l.children, depth + 1);
+    });
+  })(doc.layers, 0);
+  return out;
+}
+
+function dataUrlBytes(u) {
+  if (!u || typeof u !== 'string') return 0;
+  const i = u.indexOf(',');
+  return i < 0 ? 0 : Math.floor((u.length - i - 1) * 0.75);
+}
 function analyzeLayer(l, dur, out, path) {
   const b = l.base || {}, tracks = l.tracks || [], issues = [];
-  const props = {}; tracks.forEach(t => { props[t.property] = (props[t.property] || 0) + 1; });
-  // 1) degenerate rasterized texture (the scale-0 / 0-size export -> ~1x1 PNG bug)
-  if (b.image) { const n = dataUrlBytes(b.image); if (n < 300) issues.push(['bad', 'texture exported ~tiny (' + n + 'B) — node was probably scaled-0 / 0-size at export; appears blank']); }
-  // 2) zero / negative size (won't paint)
+  const props = {};
+  tracks.forEach((t) => { props[t.property] = (props[t.property] || 0) + 1; });
+
+  if (b.image) {
+    const n = dataUrlBytes(b.image);
+    if (n < 300) issues.push(['bad', 'This layer may appear blank — it was exported while scaled to zero or had no size.']);
+  }
   const isPath = b.shape && b.shape.kind === 'path';
-  if (!isPath && (!(b.width > 0) || !(b.height > 0))) issues.push(['warn', 'size ' + b.width + '×' + b.height + ' — nothing visible unless a width/height track grows it']);
-  // 3) starts invisible and never animates opacity -> will NEVER show
-  if ((b.opacity === 0) && !props.opacity) issues.push(['bad', 'opacity 0 at rest and no opacity track — this layer never becomes visible']);
-  // 4) no paint at all
-  const paints = b.fill || b.image || b.text || b.shape; if (!paints && l.type !== 'group') issues.push(['warn', 'no fill / image / shape / text — invisible']);
-  // 5) vector path missing geometry
-  if (isPath && !(b.shape.paths && b.shape.paths.length && b.shape.paths[0].d)) issues.push(['bad', 'vector shape but path data is empty']);
-  // 6) keyframes beyond the timeline, or NaN values
-  tracks.forEach(t => (t.keys || []).forEach(k => {
-    if (k.t > dur + 0.001) issues.push(['warn', t.property + ' keyframe at t=' + k.t.toFixed(2) + 's is beyond duration ' + dur.toFixed(2) + 's']);
+  if (!isPath && (!(b.width > 0) || !(b.height > 0))) {
+    issues.push(['warn', 'Starts at zero size — it only becomes visible if width/height is animated.']);
+  }
+  if ((b.opacity === 0) && !props.opacity) {
+    issues.push(['bad', 'Hidden (opacity 0) and never fades in — it will stay invisible.']);
+  }
+  const paints = b.fill || b.image || b.text || b.shape;
+  if (!paints && l.type !== 'group') {
+    issues.push(['warn', 'No fill, image, or text — nothing to see.']);
+  }
+  if (isPath && !(b.shape.paths && b.shape.paths.length && b.shape.paths[0].d)) {
+    issues.push(['bad', 'Vector path data is empty.']);
+  }
+  tracks.forEach((t) => (t.keys || []).forEach((k) => {
+    if (k.t > dur + 0.001) {
+      issues.push(['warn', 'A keyframe sits past the end of the timeline (' + k.t.toFixed(2) + 's).']);
+    }
     const flat = Array.isArray(k.v) ? k.v : [k.v];
-    if (flat.some(x => typeof x === 'number' && !isFinite(x))) issues.push(['bad', t.property + ' has a non-finite keyframe value']);
+    if (flat.some((x) => typeof x === 'number' && !isFinite(x))) {
+      issues.push(['bad', 'A keyframe has an invalid value.']);
+    }
   }));
-  if (issues.length) out.push({ id: l.id, name: l.name, path, type: l.type, issues, tracks: Object.keys(props).join(', ') || '—' });
+
+  if (issues.length) out.push({ id: l.id, name: l.name, path, type: l.type, issues });
   (l.children || []).forEach((c, i) => analyzeLayer(c, dur, out, path + ' › ' + (c.name || i)));
 }
 function scanHealth() {
@@ -188,35 +737,154 @@ function scanHealth() {
   (current.doc.layers || []).forEach((l, i) => analyzeLayer(l, dur, out, l.name || ('#' + i)));
   return out;
 }
-function renderHealth() {
-  const el = $('health');
-  if (!current.doc) { el.innerHTML = '<div class="hl">No selection.</div>'; return; }
-  const doc = current.doc, dur = doc.duration || 1, out = scanHealth();
-  const c = countTracks(doc);
-  let html = '<div class="hl ' + (out.length ? 'warnc' : 'ok') + '">'
-    + '<span class="hname">' + (out.length ? out.length + ' layer(s) look suspect' : 'No structural issues found') + '</span>'
-    + '<span class="hid"> · ' + c.layers + ' layers · ' + c.tracks + ' tracks · ' + dur.toFixed(2) + 's · stage ' + doc.stage.width + '×' + doc.stage.height + '</span>'
-    + (current._notice ? '<span class="iss w">⚠ ' + current._notice + '</span>' : '') + '</div>';
-  out.forEach(o => {
-    html += '<div class="hl ' + (o.issues.some(i => i[0] === 'bad') ? 'bad' : 'warnc') + '">'
-      + '<span class="hname">' + (o.name || '(unnamed)') + '</span> <span class="hid">' + o.type + ' · ' + o.id + ' · tracks: ' + o.tracks + '</span>'
-      + o.issues.map(i => '<span class="iss ' + (i[0] === 'warn' ? 'w' : '') + '">' + (i[0] === 'bad' ? '✗ ' : '⚠ ') + i[1] + '</span>').join('') + '</div>';
+
+function typeGlyph(t) {
+  if (t === 'text') return 'T';
+  if (t === 'ellipse') return '○';
+  if (t === 'group') return '▢';
+  if (t === 'image') return '◫';
+  return '▭';
+}
+
+function openAdvanced() {
+  $('adv').open = true;
+  try { $('issuesCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' }); } catch (e) {}
+}
+
+function buildIssueCards() {
+  const cards = [];
+  if (current.notice) {
+    cards.push({ level: 'warn', name: 'Partial import', msg: current.notice });
+  }
+  scanHealth().forEach((h) => {
+    h.issues.forEach((iss) => {
+      cards.push({ level: iss[0], name: h.name || '(unnamed)', msg: iss[1] });
+    });
   });
-  el.innerHTML = html;
+  return cards;
+}
+
+function renderInspector() {
+  const doc = current.doc;
+  const stats = $('stats');
+  const layersEl = $('layers');
+  const issuesEl = $('issues');
+  const okRow = $('okRow');
+  const issuesEmpty = $('issuesEmpty');
+  const sideEmpty = $('sideEmpty');
+
+  if (!doc) {
+    stats.innerHTML = '<span class="chip">Waiting for selection…</span>';
+    layersEl.innerHTML = '<div class="sideEmpty" id="sideEmpty">Select a frame to list its layers.</div>';
+    $('sideCount').textContent = '—';
+    issuesEl.innerHTML = '';
+    okRow.classList.remove('show');
+    issuesEmpty.style.display = 'block';
+    issuesEmpty.textContent = 'Select a frame to run checks.';
+    $('topMeta').textContent = 'Select a frame with motion';
+    $('advSub').textContent = 'Compare · data';
+    $('advBadge').classList.remove('show', 'bad');
+    lastIssueCount = 0;
+    return;
+  }
+
+  const c = countTracks(doc);
+  const dur = doc.duration || 0;
+  const sw = doc.stage.width || 0, sh = doc.stage.height || 0;
+  const name = (doc.meta && doc.meta.name) || 'Selection';
+  const cards = buildIssueCards();
+  const bad = cards.filter((x) => x.level === 'bad').length;
+  lastIssueCount = cards.length;
+
+  $('topMeta').textContent = name + ' · ' + dur.toFixed(1) + 's · ' + sw + '×' + sh;
+
+  // Status chips — duration / size / animated only (issue count lives on Advanced badge)
+  let chips = '';
+  chips += '<span class="chip"><b>' + dur.toFixed(1) + 's</b></span>';
+  chips += '<span class="chip"><b>' + sw + '×' + sh + '</b></span>';
+  chips += '<span class="chip"><b>' + c.animated + '</b> / ' + c.layers + ' animated</span>';
+  if (!c.tracks) {
+    chips += '<span class="chip warn"><b>No motion</b></span>';
+  } else if (!cards.length) {
+    chips += '<span class="chip ok"><b>Ready</b></span>';
+  }
+  stats.innerHTML = chips;
+
+  // Left layers panel
+  const list = collectLayers(doc, 80);
+  $('sideCount').textContent = c.animated + '/' + c.layers;
+  if (list.length) {
+    let html = list.map((l) => {
+      const tags = l.props.slice(0, 2).map((p) => '<span class="tag">' + escapeHtml(p) + '</span>').join('');
+      return '<div class="layer' + (l.animated ? ' hasAnim' : '') + '" style="padding-left:' + (8 + l.depth * 12) + 'px" title="' + escapeHtml(l.name + (l.props.length ? ' · ' + l.props.join(', ') : '')) + '">'
+        + '<span class="ico">' + typeGlyph(l.type) + '</span>'
+        + '<span class="nm">' + escapeHtml(l.name) + '</span>'
+        + (l.animated ? '<span class="dotAnim" title="Animated"></span>' : '')
+        + (tags ? '<span class="tags">' + tags + '</span>' : '')
+        + '</div>';
+    }).join('');
+    if (c.layers > list.length) {
+      html += '<div class="more">+' + (c.layers - list.length) + ' more</div>';
+    }
+    layersEl.innerHTML = html;
+  } else {
+    layersEl.innerHTML = '<div class="sideEmpty">No layers in this frame.</div>';
+  }
+
+  // Advanced → Needs attention
+  issuesEmpty.style.display = 'none';
+  if (cards.length) {
+    okRow.classList.remove('show');
+    issuesEl.innerHTML = cards.map((card) =>
+      '<div class="issue ' + card.level + '">'
+      + '<span class="dot"></span>'
+      + '<div class="body"><div class="name">' + escapeHtml(card.name) + '</div>'
+      + '<div class="msg">' + escapeHtml(card.msg) + '</div></div></div>'
+    ).join('');
+    $('issuesMeta').textContent = cards.length + ' item' + (cards.length === 1 ? '' : 's');
+  } else if (c.tracks > 0) {
+    issuesEl.innerHTML = '';
+    okRow.classList.add('show');
+    $('issuesMeta').textContent = 'All clear';
+  } else {
+    issuesEl.innerHTML = '';
+    okRow.classList.remove('show');
+    issuesEmpty.style.display = 'block';
+    issuesEmpty.textContent = 'No Motion keyframes — nothing to check yet.';
+    $('issuesMeta').textContent = 'Import & export checks';
+  }
+
+  // Single issue indicator: Advanced row badge (bottom-right of the panel chrome)
+  const badge = $('advBadge');
+  if (cards.length) {
+    badge.textContent = String(cards.length);
+    badge.classList.add('show');
+    badge.classList.toggle('bad', bad > 0);
+    badge.title = cards.length + ' issue' + (cards.length === 1 ? '' : 's') + ' — open Advanced';
+    $('advSub').textContent = 'Compare · data';
+  } else {
+    badge.classList.remove('show', 'bad');
+    badge.title = '';
+    $('advSub').textContent = c.tracks ? 'Ready · compare · data' : 'Compare · data';
+  }
 }
 
 function fitStage() {
   if (!current.doc) return;
   const area = $('stageArea');
   const sw = current.doc.stage.width || 1, sh = current.doc.stage.height || 1;
-  const scale = Math.max(Math.min((area.clientWidth - 36) / sw, (area.clientHeight - 36) / sh, 1), 0.01);
+  const scale = Math.max(Math.min((area.clientWidth - 28) / sw, (area.clientHeight - 28) / sh, 1), 0.01);
   $('host').style.transform = 'scale(' + scale + ')';
   $('hostBox').style.width = (sw * scale) + 'px';
   $('hostBox').style.height = (sh * scale) + 'px';
   $('fit').textContent = Math.round(scale * 100) + '%';
 }
 window.addEventListener('resize', fitStage);
-if (window.ResizeObserver) new ResizeObserver(() => fitStage()).observe(document.getElementById('stageArea'));
+if (window.ResizeObserver) new ResizeObserver(() => fitStage()).observe($('stageArea'));
+
+function setPlayingUi(playing) {
+  $('play').textContent = playing ? '❚❚' : '▶';
+}
 
 function mount(doc) {
   $('empty').style.display = 'none';
@@ -227,97 +895,285 @@ function mount(doc) {
     player = BlinnMotion.create($('host'), doc, {
       loop: $('loop').checked,
       rate: parseFloat($('speed').value),
-      onframe: (t, f) => { $('scrub').value = Math.round(f * 1000); $('time').textContent = fmt(t, dur); if (document.activeElement !== $('dbgTime')) $('dbgTime').value = t.toFixed(2); }
+      onframe: (t, f) => {
+        $('scrub').value = Math.round(f * 1000);
+        $('time').textContent = fmt(t, dur);
+        if (document.activeElement !== $('dbgTime')) $('dbgTime').value = t.toFixed(2);
+      },
     });
   } catch (err) {
     player = null;
-    $('warn').textContent = '⚠ render error: ' + (err && err.message ? err.message : err);
+    setTransportEnabled(false);
+    toast('Preview failed to render');
+    current.notice = 'Preview error: ' + (err && err.message ? err.message : err);
+    renderInspector();
     return;
   }
+  setTransportEnabled(true);
   requestAnimationFrame(fitStage);
   $('time').textContent = fmt(0, player.duration);
-  if (doc.duration > 0 && countTracks(doc).tracks > 0) { player.play(); $('play').textContent = '❚❚'; }
-  else { $('play').textContent = '▶'; }
+  const c = countTracks(doc);
+  if (doc.duration > 0 && c.tracks > 0) {
+    player.play();
+    setPlayingUi(true);
+  } else {
+    setPlayingUi(false);
+  }
+}
+
+function downloadJson(obj, suffix) {
+  if (!obj) return;
+  const name = ((current.doc && current.doc.meta && current.doc.meta.name) || 'motion').replace(/[^\w.-]+/g, '_');
+  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name + (suffix || '') + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  toast('Downloaded ' + a.download);
+}
+
+const SITE_URL = 'https://blinnmotion.com';
+const DOCS_URL = 'https://docs.blinnmotion.com';
+
+function openUrl(url) {
+  post({ type: 'open-url', url: url });
+}
+
+function copyText(txt, okMsg) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(() => toast(okMsg || 'Copied')).catch(() => toast('Copy failed'));
+  } else {
+    toast('Clipboard unavailable');
+  }
+}
+
+/**
+ * Inline brand marks (viewBox 0 0 24 24).
+ * No letter-forms that collapse into other words at 16px (e.g. fake "Ex" read as "AI").
+ * Prefer geometric / well-known glyphs only.
+ */
+const FW_ICONS = {
+  // React atom
+  react: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.25"><ellipse cx="12" cy="12" rx="10" ry="3.8"/><ellipse cx="12" cy="12" rx="10" ry="3.8" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="3.8" transform="rotate(120 12 12)"/></g><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>',
+  // Vue chevron V
+  vue: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M1.8 3.2h4.4L12 13.6 17.8 3.2h4.4L12 20.8 1.8 3.2zm6.4 0L12 10l3.8-6.8h-2.8L12 6.2 11 3.2H8.2z"/></svg>',
+  // Svelte — simplified open loop (not a letter)
+  svelte: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M20.5 6.3a5.8 5.8 0 0 0-7.8-2.1L9.5 6.3a4 4 0 0 0-1.7 5.4l.4.7a2.4 2.4 0 0 0 1.4-.2 2 2 0 0 1 2.7.7 2 2 0 0 1 0 1.6l-1.7 2.6a2 2 0 0 1-2.7.7 2 2 0 0 1-1-1.3l-1.9.5a4 4 0 0 0 1.9 2.7 4.2 4.2 0 0 0 5.6-1.5l3.5-5.5a4 4 0 0 0-1.7-5.4 2.4 2.4 0 0 0-1.4.2 2 2 0 0 1-2.7-.7 2 2 0 0 1 0-1.6l1.7-2.6a2 2 0 0 1 2.7-.7c.5.3.8.8 1 1.3l1.9-.5a4 4 0 0 0-1.2-2.1z"/></svg>',
+  // Angular shield
+  angular: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2 2.8 5.6l1.5 12.6L12 21.8l7.7-3.6 1.5-12.6L12 2.2zm0 3.2 4.8 1.7-.6 4.8H12V5.4zm0 8.3h3.9l-.7 5.4L12 20.5v-6.8zM7.2 7.1 12 5.4v5.8H7.8L7.2 7.1zm.6 6.6H12v6.8l-3.5-1.3-.7-5.5z"/></svg>',
+  // Lit flame
+  lit: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12.8 2.5c.2 2.8-1.5 4.2-3 5.5-1.4 1.2-2.6 2.3-2.6 4.5a5.3 5.3 0 0 0 5.3 5.3c3.2 0 5.5-2.4 5.5-5.8 0-4.2-3.4-6-5.2-9.5zm-.3 14.8a2.8 2.8 0 0 1-2.8-2.8c0-1.4.7-2.2 2-3.4.4 1.4 1.5 1.9 1.5 3.3 0 1.1.4 1.6 1.1 2.2-.5.5-1.1.7-1.8.7z"/></svg>',
+  // HTML5 shield (DOM / vanilla)
+  vanilla: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 3h16l-1.5 17L12 22 5.5 20 4 3zm3.1 5.2.3 3.4h6.8l-.2 2.3-2.2.6-2.2-.6-.1-1.4H7.6l.3 2.9L12 17l4.1-1.1.6-6.5H7.1z"/></svg>',
+  // Canvas frame + brush dot
+  canvas: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M9 4.5v15"/><circle cx="14.5" cy="14" r="2.2" fill="currentColor" stroke="none"/></g></svg>',
+  // Next.js — circle + diagonal (not a lone N that can blur)
+  next: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5"/><path fill="currentColor" d="M9 8h1.8l4 7.2V8H16.5v8h-1.8l-4-7.2V16H9z"/></svg>',
+  // Expo / RN — phone + orbit (mobile), never letter-forms
+  expo: '<svg viewBox="0 0 24 24" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2.5" width="8" height="19" rx="2"/><path d="M11 4.5h2M11.2 18.8h1.6"/><ellipse cx="12" cy="11.2" rx="6.5" ry="2.4"/><ellipse cx="12" cy="11.2" rx="6.5" ry="2.4" transform="rotate(60 12 11.2)"/><ellipse cx="12" cy="11.2" rx="6.5" ry="2.4" transform="rotate(120 12 11.2)"/></g><circle cx="12" cy="11.2" r="1.35" fill="currentColor"/></svg>',
+  // Astro — four-point star
+  astro: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2.2 10.1 9.5 2.8 11.4l7.3 1.9L12 21.8l1.9-8.5 7.3-1.9-7.3-1.9L12 2.2zm0 5.6.8 2.8 2.8.8-2.8.8-.8 2.8-.8-2.8-2.8-.8 2.8-.8.8-2.8z"/></svg>',
+  // JSON braces
+  json: '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M8 5.5c-2 0-3 1.2-3 3v1.5c0 1.2-.8 2-2 2 1.2 0 2 .8 2 2V15c0 1.8 1 3 3 3M16 5.5c2 0 3 1.2 3 3v1.5c0 1.2.8 2 2 2-1.2 0-2 .8-2 2V15c0 1.8-1 3-3 3"/></svg>',
+};
+
+/** Per-stack install + play snippet shown after Export. */
+const FRAMEWORKS = [
+  { id: 'react', icon: 'react', color: '#61dafb', label: 'React', sub: '@blinn-motion/react', docs: DOCS_URL + '/adapters/react', install: 'npm install @blinn-motion/react', fileHint: 'Save the JSON next to your app, e.g. src/motion/card.motion.json', snippet: "import { BlinnMotion } from '@blinn-motion/react';\nimport doc from './card.motion.json';\n\n// clock-driven\n<BlinnMotion doc={doc} renderer=\"dom\" loop autoplay />\n\n// or canvas · or progress-driven\n// <BlinnMotion doc={doc} renderer=\"canvas\" />\n// <BlinnMotion doc={doc} progress={scrollP} />" },
+  { id: 'vue', icon: 'vue', color: '#42b883', label: 'Vue', sub: '@blinn-motion/vue', docs: DOCS_URL + '/adapters/vue', install: 'npm install @blinn-motion/vue', fileHint: 'Save as src/motion/card.motion.json (or import the JSON in Vite)', snippet: "import { BlinnMotion } from '@blinn-motion/vue';\nimport doc from './card.motion.json';\n\n<BlinnMotion :doc=\"doc\" renderer=\"dom\" :loop=\"true\" :autoplay=\"true\" />" },
+  { id: 'svelte', icon: 'svelte', color: '#ff3e00', label: 'Svelte', sub: '@blinn-motion/svelte', docs: DOCS_URL + '/adapters/svelte', install: 'npm install @blinn-motion/svelte', fileHint: 'Save the JSON in your project, then bind a host node', snippet: "import { blinnMotion } from '@blinn-motion/svelte';\nimport doc from './card.motion.json';\n\n<div use:blinnMotion={{ doc, renderer: 'dom', loop: true, autoplay: true }}></div>" },
+  { id: 'angular', icon: 'angular', color: '#dd0031', label: 'Angular', sub: '@blinn-motion/angular', docs: DOCS_URL + '/adapters/angular', install: 'npm install @blinn-motion/angular', fileHint: 'Put the JSON in assets/ or import it; use the standalone component', snippet: "import { BlinnMotionComponent } from '@blinn-motion/angular';\n\n// standalone imports: [BlinnMotionComponent]\n<blinn-motion [doc]=\"doc\" renderer=\"dom\" [loop]=\"true\" [autoplay]=\"true\"></blinn-motion>" },
+  { id: 'lit', icon: 'lit', color: '#324fff', label: 'Lit', sub: '@blinn-motion/lit', docs: DOCS_URL + '/adapters/lit', install: 'npm install @blinn-motion/lit', fileHint: 'Import the package (registers <blinn-motion>), set .doc from your JSON', snippet: "import { defineBlinnMotionElement } from '@blinn-motion/lit';\nimport doc from './card.motion.json';\n\ndefineBlinnMotionElement();\nconst el = document.querySelector('blinn-motion');\nel.doc = doc;\nel.renderer = 'dom';\nel.loop = true;\nel.autoplay = true;" },
+  { id: 'vanilla', icon: 'vanilla', color: '#e34f26', label: 'Vanilla', sub: '@blinn-motion/dom', docs: DOCS_URL + '/adapters/dom', install: 'npm install @blinn-motion/dom', fileHint: 'Load the JSON (fetch or bundler import) and pass it to create()', snippet: "import { create } from '@blinn-motion/dom';\nimport doc from './card.motion.json';\n\nconst player = create(document.getElementById('stage'), doc, { loop: true, autoplay: true });\n// player.pause() · seek(1.2) · setProgress(0.5) · setRate(2)" },
+  { id: 'canvas', icon: 'canvas', color: '#22d3ee', label: 'Canvas', sub: '@blinn-motion/canvas', docs: DOCS_URL + '/adapters/canvas', install: 'npm install @blinn-motion/canvas', fileHint: 'Same MotionDoc — pure 2D canvas backend', snippet: "import { create } from '@blinn-motion/canvas';\nimport doc from './card.motion.json';\n\ncreate(document.querySelector('canvas'), doc, { autoplay: true, loop: true, dpr: 2 });" },
+  { id: 'next', icon: 'next', color: '#e5e7eb', label: 'Next.js', sub: 'React adapter · client', docs: DOCS_URL + '/adapters/react', install: 'npm install @blinn-motion/react', fileHint: 'Client component only — motion mounts in the browser', snippet: "'use client';\nimport { BlinnMotion } from '@blinn-motion/react';\nimport doc from './card.motion.json';\n\nexport function Hero() {\n  return <BlinnMotion doc={doc} renderer=\"dom\" loop autoplay />;\n}" },
+  { id: 'expo', icon: 'expo', color: '#61dafb', label: 'React Native', sub: 'Expo · @blinn-motion/react-native', docs: DOCS_URL + '/adapters/react-native', install: 'npm install @blinn-motion/react-native', fileHint: 'Native Views (Expo or bare RN) — no dual canvas; same MotionDoc timing', snippet: "import { BlinnMotionView } from '@blinn-motion/react-native';\nimport doc from './card.motion.json';\n\n// works in Expo and bare React Native\n<BlinnMotionView doc={doc} loop autoplay />" },
+  { id: 'astro', icon: 'astro', color: '#ff5d01', label: 'Astro', sub: 'React / Lit islands', docs: DOCS_URL + '/adapters/lit', install: 'npm install @blinn-motion/react   # or @blinn-motion/lit', fileHint: 'Hydrate a client island — no server-side paint required', snippet: "---\n// React island example\nimport { MotionIsland } from '../components/MotionIsland';\n---\n<MotionIsland client:load />\n\n// MotionIsland.tsx → <BlinnMotion doc={doc} … /> from @blinn-motion/react" },
+  { id: 'json', icon: 'json', color: '#f0db4f', label: 'JSON only', sub: 'MotionDoc file', docs: DOCS_URL + '/reference/motiondoc-schema', install: '# No package required yet — download the file first', fileHint: 'Plain JSON you can commit, diff in PRs, and load later in any adapter', snippet: "// After download, load it in any stack:\nimport doc from './card.motion.json';\n// then pass `doc` to create() / <BlinnMotion> / <blinn-motion>" },
+];
+
+let selectedFw = 'react';
+
+function selectedFramework() {
+  return FRAMEWORKS.find((f) => f.id === selectedFw) || FRAMEWORKS[0];
+}
+
+function renderFwGrid() {
+  const grid = $('fwGrid');
+  if (!grid) return;
+  grid.innerHTML = FRAMEWORKS.map((f) =>
+    '<button type="button" class="fwBtn' + (f.id === selectedFw ? ' active' : '') + '" data-fw="' + f.id + '" style="--fw:' + f.color + '">'
+    + '<span class="fwIcon">' + (FW_ICONS[f.icon] || '') + '</span>'
+    + '<span class="fwLabel">' + escapeHtml(f.label) + '</span>'
+    + '<span class="fwSub">' + escapeHtml(f.sub) + '</span>'
+    + '</button>'
+  ).join('');
+  grid.querySelectorAll('[data-fw]').forEach((btn) => {
+    btn.onclick = () => {
+      selectedFw = btn.getAttribute('data-fw');
+      renderFwGrid();
+      renderExportSetup();
+    };
+  });
+}
+
+function renderExportSetup() {
+  const f = selectedFramework();
+  const root = $('exportSetup');
+  if (!root) return;
+  root.innerHTML =
+    '<div class="setupStep">'
+    + '<div class="stepHead"><span class="n">2</span><span class="stepTitle">Install package</span>'
+    + '<button type="button" class="ghost sm" id="copyInstall">Copy</button></div>'
+    + '<div class="stepBody"><div class="codeBox" id="installCode">' + escapeHtml(f.install) + '</div></div>'
+    + '</div>'
+    + '<div class="setupStep">'
+    + '<div class="stepHead"><span class="n">3</span><span class="stepTitle">Add the MotionDoc file</span></div>'
+    + '<div class="stepBody"><p class="stepHint">' + escapeHtml(f.fileHint) + '</p>'
+    + '<p class="stepHint">Download places <code>*.motion.json</code> on your machine — drop it into the project path you use in the snippet.</p></div>'
+    + '</div>'
+    + '<div class="setupStep">'
+    + '<div class="stepHead"><span class="n">4</span><span class="stepTitle">Play it in ' + escapeHtml(f.label) + '</span>'
+    + '<button type="button" class="ghost sm" id="copySnippet">Copy code</button></div>'
+    + '<div class="stepBody"><div class="codeBox" id="snippetCode">' + escapeHtml(f.snippet) + '</div></div>'
+    + '</div>';
+  $('copyInstall').onclick = () => copyText(f.install, 'Install command copied');
+  $('copySnippet').onclick = () => copyText(f.snippet, 'Snippet copied');
+  const docsBtn = $('exportDocsFw');
+  if (docsBtn) docsBtn.onclick = () => openUrl(f.docs);
+}
+
+function openExportModal() {
+  if (!current.doc) {
+    toast('Select a frame with motion first');
+    return;
+  }
+  renderFwGrid();
+  renderExportSetup();
+  $('exportModal').classList.add('show');
+}
+
+function closeExportModal() {
+  $('exportModal').classList.remove('show');
 }
 
 window.onmessage = (e) => {
-  const m = e.data.pluginMessage; if (!m) return;
+  const m = e.data.pluginMessage;
+  if (!m) return;
+
   if (m.type === 'export') {
-    current.doc = m.doc; current.raw = m.raw; current._notice = m.notice || '';
-    $('title').textContent = m.doc.meta.name || 'Selection';
-    $('dur').textContent = '· ' + m.doc.duration.toFixed(2) + 's · ' + m.doc.stage.width + '×' + m.doc.stage.height;
-    const base = m.notice ? '⚠ ' + m.notice : (m.hasMotion ? '' : '⚠ no Motion keyframes on this selection');
-    const suspect = scanHealth(), bad = suspect.filter(s => s.issues.some(i => i[0] === 'bad')).length;
-    const hint = suspect.length ? (base ? '  ·  ' : '') + '🔍 ' + suspect.length + ' layer(s) suspect' + (bad ? ' (' + bad + ' blank)' : '') + ' — see Health' : '';
-    $('warn').textContent = base + hint;
-    const c = countTracks(m.doc); $('stat').textContent = 'Layers: ' + c.layers + ' · Tracks: ' + c.tracks;
-    showJson();
+    current.doc = m.doc;
+    current.raw = m.raw;
+    current.notice = m.notice || (!m.hasMotion ? 'No Motion keyframes found on this selection.' : '');
+    renderInspector();
     mount(m.doc);
   } else if (m.type === 'empty') {
-    current = { doc: null, raw: null };
-    $('title').textContent = '—'; $('dur').textContent = ''; $('warn').textContent = '';
-    $('emptyMsg').textContent = m.reason;
-    $('empty').style.display = 'block';
+    current = { doc: null, raw: null, notice: '' };
+    $('emptyMsg').textContent = m.reason || 'Select a frame that has a Motion timeline.';
+    $('empty').style.display = 'flex';
     $('hostBox').style.display = 'none';
-    $('hostBox').style.width = ''; $('hostBox').style.height = '';
+    $('hostBox').style.width = '';
+    $('hostBox').style.height = '';
     if (player) { player.pause(); player = null; }
-    $('time').textContent = '0.00 / 0.00s'; $('scrub').value = 0; $('play').textContent = '▶'; $('fit').textContent = '100%';
-    $('stat').textContent = 'Layers: 0 · Tracks: 0';
-    showJson();
+    $('time').textContent = '0.00 / 0.00s';
+    $('scrub').value = 0;
+    setPlayingUi(false);
+    setTransportEnabled(false);
+    $('fit').textContent = '100%';
+    renderInspector();
   } else if (m.type === 'error') {
-    $('warn').textContent = '⚠ ' + m.message;
+    toast(m.message || 'Something went wrong');
   }
 };
 
-$('play').onclick = () => { if (!player) return; player.toggle(); $('play').textContent = player._playing ? '❚❚' : '▶'; };
-$('restart').onclick = () => { if (!player) return; player.stop(); player.play(); $('play').textContent = '❚❚'; };
-$('scrub').oninput = () => { if (!player) return; player.pause(); $('play').textContent = '▶'; player.seekFraction($('scrub').value / 1000); };
+$('play').onclick = () => {
+  if (!player) return;
+  player.toggle();
+  setPlayingUi(player.isPlaying);
+};
+$('restart').onclick = () => {
+  if (!player) return;
+  player.stop();
+  player.play();
+  setPlayingUi(true);
+};
+$('scrub').oninput = () => {
+  if (!player) return;
+  player.pause();
+  setPlayingUi(false);
+  player.seekFraction($('scrub').value / 1000);
+};
 $('loop').onchange = () => { if (player) player.loop = $('loop').checked; };
 $('speed').onchange = () => { if (player) player.setRate(parseFloat($('speed').value)); };
+
 $('reexport').onclick = () => post({ type: 'reexport' });
 $('demo').onclick = () => post({ type: 'createDemo' });
 $('demoEmpty').onclick = () => post({ type: 'createDemo' });
 
-// ---- debug / compare tools ----
-$('dbgToggle').onclick = () => {
-  const bar = $('dbgBar'); const show = bar.style.display === 'none';
-  bar.style.display = show ? 'flex' : 'none';
-  $('dbgToggle').style.color = show ? 'var(--acc)' : '';
+// Docs / website (sandbox → main thread openExternal)
+$('linkDocs').onclick = () => openUrl(DOCS_URL);
+$('linkSite').onclick = () => openUrl(SITE_URL);
+$('linkDocs2').onclick = () => openUrl(DOCS_URL);
+$('linkSite2').onclick = () => openUrl(SITE_URL);
+$('exportSite').onclick = () => openUrl(SITE_URL);
+
+// Export opens framework setup — download is step 5 inside the modal
+$('download').onclick = openExportModal;
+$('download2').onclick = openExportModal;
+$('exportClose').onclick = closeExportModal;
+$('exportCancel').onclick = closeExportModal;
+$('exportModal').addEventListener('click', (e) => {
+  if (e.target === $('exportModal')) closeExportModal();
+});
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && $('exportModal').classList.contains('show')) closeExportModal();
+});
+$('exportDownload').onclick = () => {
+  if (!current.doc) return;
+  const fw = selectedFramework();
+  downloadJson(current.doc, '.motion');
+  post({ type: 'notify', message: 'MotionDoc downloaded · ' + fw.label + ' setup ready' });
 };
+
+$('copyDoc').onclick = () => {
+  if (!current.doc) return;
+  copyText(JSON.stringify(current.doc, null, 2), 'Copied MotionDoc JSON');
+};
+$('downloadRaw').onclick = () => {
+  if (!current.raw) return;
+  downloadJson(current.raw, '.figma-raw');
+};
+
+// Advanced tools
 $('dbgOutline').onchange = () => $('host').classList.toggle('outline', $('dbgOutline').checked);
 $('dbgTime').oninput = () => {
-  if (!player) return; player.pause(); $('play').textContent = '▶';
+  if (!player) return;
+  player.pause();
+  setPlayingUi(false);
   const t = Math.max(0, Math.min(parseFloat($('dbgTime').value) || 0, player.duration));
-  player.seek(t); $('scrub').value = Math.round((t / player.duration) * 1000);
+  player.seek(t);
+  $('scrub').value = Math.round((t / player.duration) * 1000);
 };
 $('dbgRef').onchange = () => {
-  const f = $('dbgRef').files && $('dbgRef').files[0]; if (!f) return;
-  const img = $('refImg'); img.src = URL.createObjectURL(f);
-  img.style.display = 'block'; img.style.opacity = $('dbgRefOp').value / 100;
+  const f = $('dbgRef').files && $('dbgRef').files[0];
+  if (!f) return;
+  const img = $('refImg');
+  img.src = URL.createObjectURL(f);
+  img.style.display = 'block';
+  img.style.opacity = $('dbgRefOp').value / 100;
 };
 $('dbgRefOp').oninput = () => { $('refImg').style.opacity = $('dbgRefOp').value / 100; };
-$('dbgRefClear').onclick = () => { const img = $('refImg'); img.style.display = 'none'; img.removeAttribute('src'); $('dbgRef').value = ''; };
-
-document.querySelectorAll('.tab').forEach(tab => tab.onclick = () => {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('on'));
-  tab.classList.add('on'); activeTab = tab.dataset.tab; showJson();
-});
-
-$('copy').onclick = () => {
-  const txt = $('json').textContent;
-  navigator.clipboard && navigator.clipboard.writeText(txt);
-  post({ type: 'notify', message: 'Copied ' + activeTab + ' JSON' });
-};
-$('download').onclick = () => {
-  const obj = activeTab === 'doc' ? current.doc : current.raw; if (!obj) return;
-  const name = ((current.doc && current.doc.meta.name) || 'motion').replace(/[^\w.-]+/g, '_');
-  const blob = new Blob([JSON.stringify(obj, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = name + '.' + activeTab + '.json';
-  document.body.appendChild(a); a.click(); a.remove();
+$('dbgRefClear').onclick = () => {
+  const img = $('refImg');
+  img.style.display = 'none';
+  img.removeAttribute('src');
+  $('dbgRef').value = '';
 };
 
+setTransportEnabled(false);
+renderInspector();
 post({ type: 'ready' });
 </script>
 </body>

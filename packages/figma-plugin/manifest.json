@@ -1,5 +1,5 @@
 {
-  "name": "Blinn Motion",
+  "name": "Blinn Motion — Figma Motion to React CSS",
   "id": "1652079450805813081",
   "api": "1.0.0",
   "main": "dist/code.js",
@@ -12,7 +12,10 @@
   "ui": "ui.html",
   "networkAccess": {
     "allowedDomains": [
-      "none"
-    ]
+      "https://blinnmotion.com",
+      "https://www.blinnmotion.com",
+      "https://docs.blinnmotion.com"
+    ],
+    "reasoning": "Open the Blinn Motion website and documentation from in-plugin links after export / help."
   }
 }

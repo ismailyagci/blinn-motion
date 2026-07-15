@@ -1,18 +1,5 @@
 ---
-const adapters = [
-  { name: "DOM", pkg: "@blinn-motion/dom", c: "var(--blue)", tint: "var(--blue-t)", badge: "full fidelity",
-    desc: "Full-fidelity CSS adapter — nested divs, gradients, SVG vector paths with arrowheads, clip-path stars, masks and procedural shaders.",
-    code: `import { create } from "@blinn-motion/dom";\ncreate(el, doc, { loop: true }).play();` },
-  { name: "Canvas", pkg: "@blinn-motion/canvas", c: "var(--cyan)", tint: "var(--cyan-t)", badge: "zero DOM",
-    desc: "A pure-JS 2D canvas painter for the very same resolved tree — one immediate-mode draw per frame, no DOM nodes.",
-    code: `import { create } from "@blinn-motion/canvas";\ncreate(el, doc, { loop: true }).play();` },
-  { name: "React", pkg: "@blinn-motion/react", c: "var(--violet)", tint: "var(--violet-t)", badge: "component + hook",
-    desc: "A declarative component and hook. Switch the painter with one prop; play, pause and seek through a ref.",
-    code: `<BlinnMotion doc={doc} renderer="canvas" loop autoplay />` },
-  { name: "React Native", pkg: "@blinn-motion/react-native", c: "var(--coral)", tint: "var(--coral-t)", badge: "native views",
-    desc: "The same timing on native <View> / <Text>. No native module, no Skia dependency — just the shared core maths.",
-    code: `<BlinnMotionView doc={doc} loop />` },
-];
+import { adapters, frameworkSvg } from "../data/frameworks";
 ---
 
 <section class="section section-alt" id="adapters">
@@ -26,9 +13,9 @@ const adapters = [
 
     <div class="adapter-grid">
       {adapters.map((a, i) => (
-        <article class="card adapter" data-reveal style={`--reveal-delay:${i * 70}ms; --c:${a.c}; --tint:${a.tint}`}>
+        <article class="card adapter" data-reveal style={`--reveal-delay:${i * 50}ms; --c:${a.c}; --tint:${a.tint}`}>
           <div class="adapter-head">
-            <span class="adapter-mark"></span>
+            <span class="adapter-logo" set:html={frameworkSvg(a.id, 22)} />
             <div class="adapter-id">
               <h3 class="adapter-name">{a.name}</h3>
               <span class="adapter-pkg mono">{a.pkg}</span>
@@ -47,8 +34,14 @@ const adapters = [
   .adapter-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
   .adapter { display: flex; flex-direction: column; }
   .adapter-head { display: flex; align-items: center; gap: 12px; margin-bottom: 15px; }
-  .adapter-mark { width: 13px; height: 13px; background: var(--c); transform: rotate(45deg); border-radius: 2px; flex: none; }
-  .adapter-id { display: flex; flex-direction: column; gap: 1px; }
+  .adapter-logo {
+    width: 40px; height: 40px; border-radius: 11px; flex: none;
+    display: grid; place-items: center;
+    color: var(--c); background: var(--tint);
+    border: 1px solid color-mix(in srgb, var(--c) 22%, transparent);
+  }
+  .adapter-logo :global(svg) { display: block; }
+  .adapter-id { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
   .adapter-name { font-size: 18px; letter-spacing: -0.02em; line-height: 1.1; }
   .adapter-pkg { font-size: 12px; color: var(--ink-3); }
   .adapter-badge {
@@ -61,8 +54,10 @@ const adapters = [
     border: 1px solid var(--line); border-radius: var(--r-sm);
     font-size: 12.5px; line-height: 1.6; color: var(--ink-2); overflow-x: auto; white-space: pre;
   }
-  @media (max-width: 760px) {
+  @media (max-width: 900px) {
     .adapter-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 760px) {
     .adapter-badge { display: none; }
   }
 </style>

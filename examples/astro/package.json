@@ -1,0 +1,26 @@
+{
+  "name": "@blinn-motion/example-astro",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/react": "^4.1.0",
+    "@blinn-motion/core": "^0.1.0",
+    "@blinn-motion/lit": "^0.1.0",
+    "@blinn-motion/react": "^0.1.0",
+    "astro": "^5.1.0",
+    "lit": "^3.2.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "typescript": "^5.9.3"
+  }
+}

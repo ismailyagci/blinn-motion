@@ -2,7 +2,7 @@
   "name": "@blinn-motion/figma-plugin",
   "version": "0.1.0",
   "private": true,
-  "description": "Blinn Motion Figma plugin — exports a selected Figma Motion animation as a MotionDoc and previews it live with @blinn-motion/dom.",
+  "description": "Blinn Motion — Figma Motion to React CSS. Export Figma Motion timelines as MotionDoc and preview with @blinn-motion/dom.",
   "license": "MIT",
   "scripts": {
     "build": "tsc -p tsconfig.json && node build.js",

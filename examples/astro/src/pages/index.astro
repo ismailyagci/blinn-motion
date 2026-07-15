@@ -1,0 +1,37 @@
+---
+import "../styles/demo.css";
+import { ReactIsland } from "../components/ReactIsland";
+---
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Blinn Motion · Astro example</title>
+  </head>
+  <body>
+    <div class="demo">
+      <div class="stack-badge">Astro islands · React + Lit adapters</div>
+      <h1>Blinn Motion · Astro advanced demo</h1>
+      <p class="lede">
+        Static Astro shell with client islands: a <strong>React</strong> dual-stage panel
+        (<code>@blinn-motion/react</code>) and a <strong>Lit</strong> dual-stage panel
+        (<code>@blinn-motion/lit</code>). No separate Astro runtime package — islands use existing adapters.
+      </p>
+
+      <section style="margin-bottom: 28px">
+        <h2 style="font-size: 16px; margin: 0 0 12px">React island (client:load)</h2>
+        <ReactIsland client:load />
+      </section>
+
+      <section>
+        <h2 style="font-size: 16px; margin: 0 0 12px">Lit island (client:load)</h2>
+        <div id="lit-root"></div>
+      </section>
+    </div>
+    <script>
+      import { mountLitIsland } from "../scripts/mount-lit";
+      mountLitIsland(document.getElementById("lit-root")!);
+    </script>
+  </body>
+</html>

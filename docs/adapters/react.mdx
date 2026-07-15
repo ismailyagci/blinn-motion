@@ -1,16 +1,18 @@
 ---
 title: "React adapter"
-description: "@blinn-motion/react — a declarative Blinn Motion component with a swappable renderer."
+description: "@blinn-motion/react — declarative BlinnMotion component with a swappable renderer."
 ---
 
 `@blinn-motion/react` wraps the engine in a component and a hook. Pick the paint backend with one
-prop; drive playback through a ref.
+prop; drive playback through a ref or controlled `progress`.
 
 ## Install
 
 ```bash
 npm i @blinn-motion/react
 ```
+
+Peer: React ≥ 17.
 
 ## The component
 
@@ -38,11 +40,17 @@ export default function Hero() {
 <ParamField path="renderer" type='"dom" | "canvas"' default='"dom"'>
   Which adapter paints the resolved tree.
 </ParamField>
-<ParamField path="loop" type="boolean" default="false">
+<ParamField path="loop" type="boolean" default="true">
   Restart when the timeline ends.
 </ParamField>
-<ParamField path="autoplay" type="boolean" default="false">
-  Start playing on mount.
+<ParamField path="autoplay" type="boolean" default="true">
+  Start playing on mount. Forced off when `progress` is set.
+</ParamField>
+<ParamField path="rate" type="number" default="1">
+  Playback speed multiplier.
+</ParamField>
+<ParamField path="progress" type="number">
+  Controlled progress `0…1`. Ideal for scroll- / gesture-linked motion.
 </ParamField>
 <ParamField path="onFrame" type="(t: number, fraction: number) => void">
   Per-frame callback for scrubbers and timecode readouts.
@@ -52,7 +60,7 @@ export default function Hero() {
 
 ```tsx
 import { useRef } from "react";
-import { Blinn Motion, type BlinnMotionHandle } from "@blinn-motion/react";
+import { BlinnMotion, type BlinnMotionHandle } from "@blinn-motion/react";
 
 function Controlled({ doc }) {
   const ref = useRef<BlinnMotionHandle>(null);
@@ -69,7 +77,35 @@ function Controlled({ doc }) {
 }
 ```
 
-<Note>
-  The ref exposes the same surface as every adapter: `play`, `pause`, `toggle`, `seek`,
-  `seekFraction` and `loop`.
-</Note>
+Ref surface: `play` · `pause` · `stop` · `toggle` · `seek` · `seekFraction` · `setProgress` · `setRate` · `player`.
+
+## Hook
+
+```tsx
+import { useRef } from "react";
+import { useBlinnMotion } from "@blinn-motion/react";
+
+const host = useRef<HTMLDivElement>(null);
+const player = useBlinnMotion(host, doc, { renderer: "canvas" });
+// <div ref={host} />
+```
+
+## Next.js
+
+Use a **client** component — motion does not paint on the server:
+
+```tsx
+"use client";
+import { BlinnMotion } from "@blinn-motion/react";
+import doc from "./card.motion.json";
+
+export function MotionHero() {
+  return <BlinnMotion doc={doc} renderer="dom" loop autoplay />;
+}
+```
+
+See [`examples/next`](https://github.com/ismailyagci/blinn-motion/tree/main/examples/next).
+
+## Examples
+
+[`examples/react`](https://github.com/ismailyagci/blinn-motion/tree/main/examples/react) · dual DOM/Canvas stages.

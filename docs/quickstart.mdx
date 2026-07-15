@@ -4,27 +4,33 @@ description: "Install a Blinn Motion adapter and play your first MotionDoc in th
 ---
 
 You need two things to render an animation: a **MotionDoc** (the JSON document) and a
-**host element** to play it in. Here's the shortest path from zero to motion.
+**host** (element, component, or custom element). Here's the shortest path from zero to motion.
 
 <Steps>
   <Step title="Install an adapter">
-    Pick the adapter for your platform. Each one pulls in `@blinn-motion/core` automatically.
+    Pick the package for your stack. Each web binding pulls in `@blinn-motion/core` and the paint backends it needs.
 
     <CodeGroup>
-    ```bash npm
+    ```bash DOM
     npm i @blinn-motion/dom
     ```
-    ```bash pnpm
-    pnpm add @blinn-motion/dom
+    ```bash React
+    npm i @blinn-motion/react
     ```
-    ```bash yarn
-    yarn add @blinn-motion/dom
+    ```bash Vue
+    npm i @blinn-motion/vue
+    ```
+    ```bash React Native
+    npm i @blinn-motion/react-native
     ```
     </CodeGroup>
+
+    Also available: `@blinn-motion/canvas`, `@blinn-motion/svelte`, `@blinn-motion/angular`, `@blinn-motion/lit`.
   </Step>
 
   <Step title="Get a MotionDoc">
-    Either **export one from Figma** with the [Blinn Motion plugin](/guides/figma-plugin), or
+    Either **export one from Figma** with the [Blinn Motion plugin](/guides/figma-plugin)
+    (Export → pick your framework → download JSON), or
     [hand-author one](/concepts/motiondoc) for tests. A MotionDoc is plain JSON:
 
     ```jsonc card.motion.json
@@ -40,9 +46,10 @@ You need two things to render an animation: a **MotionDoc** (the JSON document) 
   </Step>
 
   <Step title="Mount it and press play">
-    Hand the engine your host element and the document, then call `play()`.
+    Hand the engine your host and the document.
 
-    ```ts
+    <CodeGroup>
+    ```ts DOM
     import { create } from "@blinn-motion/dom";
     import doc from "./card.motion.json";
 
@@ -52,30 +59,44 @@ You need two things to render an animation: a **MotionDoc** (the JSON document) 
       { loop: true, autoplay: true }
     );
 
-    player.play();            // pause(), toggle()
-    player.seek(0.8);         // jump to 0.8s
-    player.seekFraction(0.5); // jump to the middle
+    player.play();
+    player.seek(0.8);
+    player.setProgress(0.5); // 0…1 — scroll / gesture
     ```
+    ```tsx React
+    import { BlinnMotion } from "@blinn-motion/react";
+    import doc from "./card.motion.json";
+
+    export default function Hero() {
+      return <BlinnMotion doc={doc} renderer="dom" loop autoplay />;
+    }
+    ```
+    ```vue Vue
+    <script setup>
+    import { BlinnMotion } from "@blinn-motion/vue";
+    import doc from "./card.motion.json";
+    </script>
+
+    <template>
+      <BlinnMotion :doc="doc" renderer="dom" :loop="true" :autoplay="true" />
+    </template>
+    ```
+    </CodeGroup>
   </Step>
 </Steps>
 
-## Prefer React?
+## Pick your stack
 
-The same document, the same control surface — wrapped in a component.
-
-```tsx
-import { BlinnMotion } from "@blinn-motion/react";
-import doc from "./card.motion.json";
-
-export default function Hero() {
-  return <BlinnMotion doc={doc} renderer="canvas" loop autoplay />;
-}
-```
-
-<Note>
-  The renderer is swappable. `<BlinnMotion renderer="dom" />` uses the full-fidelity DOM adapter;
-  `renderer="canvas"` paints to a 2D canvas. Both play the **same** resolved tree.
-</Note>
+| Stack | Package | Docs |
+| --- | --- | --- |
+| Vanilla / Vite | `@blinn-motion/dom` or `canvas` | [DOM](/adapters/dom) · [Canvas](/adapters/canvas) |
+| React / Next.js | `@blinn-motion/react` | [React](/adapters/react) |
+| Vue | `@blinn-motion/vue` | [Vue](/adapters/vue) |
+| Svelte | `@blinn-motion/svelte` | [Svelte](/adapters/svelte) |
+| Angular | `@blinn-motion/angular` | [Angular](/adapters/angular) |
+| Lit / web components | `@blinn-motion/lit` | [Lit](/adapters/lit) |
+| Expo / React Native | `@blinn-motion/react-native` | [React Native](/adapters/react-native) |
+| Astro | React or Lit islands | [overview](/adapters/overview) |
 
 ## Next steps
 
@@ -85,5 +106,11 @@ export default function Hero() {
   </Card>
   <Card title="Control playback" icon="play" href="/guides/playback">
     Play, pause, seek, loop, speed and scrubbing.
+  </Card>
+  <Card title="Export from Figma" icon="figma" href="/guides/figma-plugin">
+    Plugin setup, export flow, framework guides.
+  </Card>
+  <Card title="All adapters" icon="layer-group" href="/adapters/overview">
+    Fidelity matrix and package map.
   </Card>
 </CardGroup>

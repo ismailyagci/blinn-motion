@@ -7,7 +7,7 @@
 //   2) `doc`  — our own engine format (MotionDoc, see engine/SCHEMA.md), played by motion-engine.js
 // and posts both to the UI for preview / download.
 
-figma.showUI(__html__, { width: 880, height: 600, themeColors: true });
+figma.showUI(__html__, { width: 820, height: 620, themeColors: true });
 
 // ---------------------------------------------------------------- helpers ---
 
@@ -773,7 +773,7 @@ function findRoot(node: any): any {
 async function exportSelection() {
   const sel = figma.currentPage.selection;
   if (!sel.length) {
-    figma.ui.postMessage({ type: 'empty', reason: 'Select an animated frame (one with a Motion timeline).' });
+    figma.ui.postMessage({ type: 'empty', reason: 'Select a frame that has a Motion timeline on the canvas.' });
     return;
   }
   const root: any = findRoot(sel[0]);
@@ -788,8 +788,14 @@ async function exportSelection() {
     let trackCount = 0;
     const count = (ls: any[]) => { for (const l of ls) { trackCount += (l.tracks || []).length; if (l.children) count(l.children); } };
     count(doc.layers);
+    // Designer-facing copy: Figma's Motion plugin API still can't serialize some
+    // effect/shader base types — those layers export as static rather than animated.
     const notice = readSkips > 0
-      ? readSkips + ' layer' + (readSkips > 1 ? 's' : '') + ' skipped (Figma Beta couldn’t read their animations)'
+      ? readSkips + ' layer' + (readSkips > 1 ? 's' : '')
+        + ' couldn’t fully import '
+        + (readSkips > 1 ? 'their animations' : 'its animation')
+        + ' (Figma Motion API limitation). '
+        + (readSkips > 1 ? 'They' : 'It') + ' will appear static in the preview and export.'
       : '';
     figma.ui.postMessage({ type: 'export', doc, raw, hasMotion: trackCount > 0, notice });
   } catch (e: any) {
@@ -882,6 +888,14 @@ figma.ui.onmessage = (msg: any) => {
   else if (msg.type === 'resize') figma.ui.resize(Math.max(560, msg.width | 0), Math.max(400, msg.height | 0));
   else if (msg.type === 'close') figma.closePlugin();
   else if (msg.type === 'notify') figma.notify(msg.message || '');
+  else if (msg.type === 'open-url' && typeof msg.url === 'string') {
+    // Website + docs — domains allowlisted in manifest networkAccess
+    try {
+      figma.openExternal(msg.url);
+    } catch {
+      figma.notify('Could not open link');
+    }
+  }
 };
 
 exportSelection();

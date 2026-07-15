@@ -1,12 +1,17 @@
 ---
 import { site } from "../data/site";
 import StageDemo from "./StageDemo.astro";
+import { frameworkSvg, type FrameworkIconId } from "../data/frameworks";
 
-const adapters = [
-  { k: "DOM", c: "var(--blue)" },
-  { k: "Canvas", c: "var(--cyan)" },
-  { k: "React", c: "var(--violet)" },
-  { k: "React Native", c: "var(--coral)" },
+const adapters: { k: string; c: string; id: FrameworkIconId }[] = [
+  { k: "DOM", c: "var(--blue)", id: "dom" },
+  { k: "Canvas", c: "var(--cyan)", id: "canvas" },
+  { k: "React", c: "var(--violet)", id: "react" },
+  { k: "Vue", c: "#42b883", id: "vue" },
+  { k: "Svelte", c: "#ff3e00", id: "svelte" },
+  { k: "Angular", c: "#dd0031", id: "angular" },
+  { k: "Lit", c: "#324fff", id: "lit" },
+  { k: "RN", c: "var(--coral)", id: "rn" },
 ];
 ---
 
@@ -28,10 +33,11 @@ const adapters = [
       </p>
 
       <div class="hero-actions" data-reveal style="--reveal-delay:170ms">
-        <a class="btn btn-primary" href={site.repo} target="_blank" rel="noopener">
-          Get started
+        <a class="btn btn-primary" href={site.docs} target="_blank" rel="noopener">
+          Read the docs
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
         </a>
+        <a class="btn btn-ghost" href={site.repo} target="_blank" rel="noopener">GitHub</a>
         <a class="btn btn-ghost" href="#code">See the code</a>
       </div>
 
@@ -39,7 +45,10 @@ const adapters = [
         <span class="trust-label mono">renders identically on</span>
         <div class="trust-chips">
           {adapters.map((a) => (
-            <span class="tchip"><i style={`--kc:${a.c}`}></i>{a.k}</span>
+            <span class="tchip" style={`--kc:${a.c}`}>
+              <span class="tchip-logo" set:html={frameworkSvg(a.id, 15)} />
+              {a.k}
+            </span>
           ))}
         </div>
       </div>
@@ -77,9 +86,13 @@ const adapters = [
   .tchip {
     display: inline-flex; align-items: center; gap: 8px;
     font-size: 13.5px; font-weight: 500; color: var(--ink);
-    padding: 7px 13px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper);
+    padding: 7px 13px 7px 10px; border-radius: 999px; border: 1px solid var(--line); background: var(--paper);
   }
-  .tchip i { width: 8px; height: 8px; background: var(--kc); transform: rotate(45deg); border-radius: 1.5px; }
+  .tchip-logo {
+    display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px;
+    color: var(--kc); background: color-mix(in srgb, var(--kc) 14%, transparent);
+  }
+  .tchip-logo :global(svg) { display: block; }
 
   .hero-stage { min-width: 0; }
 

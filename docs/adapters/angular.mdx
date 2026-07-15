@@ -1,0 +1,79 @@
+---
+title: "Angular adapter"
+description: "@blinn-motion/angular — standalone <blinn-motion> component for Angular 17+."
+---
+
+`@blinn-motion/angular` provides a **standalone** component that paints via DOM or Canvas.
+
+## Install
+
+```bash
+npm i @blinn-motion/angular
+```
+
+Peers: `@angular/core` and `@angular/common` ≥ 17.
+
+## Component
+
+```ts
+import { Component } from "@angular/core";
+import { BlinnMotionComponent } from "@blinn-motion/angular";
+import type { MotionDoc } from "@blinn-motion/core";
+import doc from "./card.motion.json";
+
+@Component({
+  selector: "app-hero",
+  standalone: true,
+  imports: [BlinnMotionComponent],
+  template: `
+    <blinn-motion
+      #motion
+      [doc]="doc"
+      renderer="dom"
+      [loop]="true"
+      [autoplay]="true"
+      (frame)="onFrame($event)"
+    ></blinn-motion>
+    <button type="button" (click)="motion.toggle()">Play / pause</button>
+  `,
+})
+export class HeroComponent {
+  doc = doc as MotionDoc;
+  onFrame(e: { time: number; fraction: number }) {
+    /* scrubber / meter */
+  }
+}
+```
+
+## Inputs / outputs
+
+| Input | Type | Default |
+| --- | --- | --- |
+| `doc` | `MotionDoc` | required |
+| `renderer` | `"dom" \| "canvas"` | `"dom"` |
+| `loop` | `boolean` | `true` |
+| `autoplay` | `boolean` | `true` |
+| `rate` | `number` | `1` |
+| `progress` | `number` | controlled 0…1 |
+
+| Output | Payload |
+| --- | --- |
+| `frame` | `{ time: number; fraction: number }` |
+
+## Imperative API on the component
+
+`play` · `pause` · `stop` · `toggle` · `seek` · `seekFraction` · `setProgress` · `setRate` · `ensureMounted()`
+
+## Pure mount (tests / custom hosts)
+
+```ts
+import { attachBlinnMotion } from "@blinn-motion/angular";
+
+const handle = attachBlinnMotion(hostEl, { doc, autoplay: false });
+handle.seekFraction(0.5);
+handle.dispose();
+```
+
+## Examples
+
+[`examples/angular`](https://github.com/ismailyagci/blinn-motion/tree/main/examples/angular) — Vite + Angular 19 zoneless advanced demo.

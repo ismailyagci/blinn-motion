@@ -1,11 +1,13 @@
 ---
 title: "React Native adapter"
-description: "@blinn-motion/react-native — the same timing on native View / Text elements."
+description: "@blinn-motion/react-native — the same timing on native View / Text (Expo or bare RN)."
 ---
 
 `@blinn-motion/react-native` renders a MotionDoc onto native `<View>` and `<Text>` elements. There's
 **no native module** and **no Skia dependency** — it shares the same pure-JS core maths as
 every other adapter, so timing matches the web exactly.
+
+Works with **Expo** and bare React Native.
 
 ## Install
 
@@ -29,23 +31,38 @@ export function Splash() {
 <ParamField path="doc" type="MotionDoc" required>
   The animation document to play.
 </ParamField>
-<ParamField path="loop" type="boolean" default="false">
+<ParamField path="loop" type="boolean" default="true">
   Restart when the timeline ends.
 </ParamField>
-<ParamField path="autoplay" type="boolean" default="false">
-  Start playing on mount.
+<ParamField path="autoplay" type="boolean" default="true">
+  Start playing on mount. Forced off when `progress` is set.
+</ParamField>
+<ParamField path="rate" type="number" default="1">
+  Playback speed.
+</ParamField>
+<ParamField path="progress" type="number">
+  Controlled `0…1` for gesture- / scroll-linked motion.
+</ParamField>
+<ParamField path="onFrame" type="(t: number, fraction: number) => void">
+  Per-frame callback.
 </ParamField>
 <ParamField path="style" type="ViewStyle">
   Style for the host view (size, position, background).
 </ParamField>
 
-<Warning>
-  Native views can't express every web paint feature. Transforms, opacity and solid fills are
-  exact; gradients are approximate and SVG vector paths / shaders aren't drawn. Check the
-  [fidelity matrix](/adapters/overview#fidelity-at-a-glance) before relying on a complex fill.
-</Warning>
+## Imperative handle
+
+Via `ref`: `play` · `pause` · `stop` · `toggle` · `seek` · `seekFraction` · `setProgress` · `setRate`.
 
 ## Expo
 
-The adapter is pure JS, so it runs under Expo without any config plugin or prebuild. Drop a
-`<BlinnMotionView />` into your screen and go.
+```bash
+npx expo start
+```
+
+See [`examples/expo`](https://github.com/ismailyagci/blinn-motion/tree/main/examples/expo) for the advanced transport / progress demo (single native stage — no Canvas dual backend on RN).
+
+## Fidelity notes
+
+RN trades some web-only paint features (vector paths, procedural shaders) for native Views.
+Transforms, opacity, and timing match the other adapters. See the [fidelity matrix](/adapters/overview#fidelity-at-a-glance).

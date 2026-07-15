@@ -1,0 +1,78 @@
+---
+title: "Lit adapter"
+description: "@blinn-motion/lit — <blinn-motion> custom element for any web stack."
+---
+
+`@blinn-motion/lit` registers a **custom element** that plays a MotionDoc through DOM or Canvas.
+Use it from Lit, vanilla HTML, Astro islands, or any framework that can host web components.
+
+## Install
+
+```bash
+npm i @blinn-motion/lit
+```
+
+Peer: Lit ≥ 3.
+
+## Register + play
+
+```ts
+import { defineBlinnMotionElement } from "@blinn-motion/lit";
+import doc from "./card.motion.json";
+
+// Safe to call more than once; also auto-registers on package import.
+defineBlinnMotionElement();
+
+const el = document.querySelector("blinn-motion")!;
+el.doc = doc;
+el.renderer = "dom"; // or "canvas"
+el.loop = true;
+el.autoplay = true;
+
+el.addEventListener("frame", (e) => {
+  const { time, fraction } = (e as CustomEvent).detail;
+});
+```
+
+```html
+<blinn-motion></blinn-motion>
+```
+
+<Warning>
+  Set <code>sideEffects: true</code> is already declared on the package so bundlers keep
+  registration. Prefer an explicit <code>defineBlinnMotionElement()</code> in your entry
+  so tree-shaking never drops the element definition.
+</Warning>
+
+## Properties
+
+| Property | Type | Default |
+| --- | --- | --- |
+| `doc` | `MotionDoc` | required |
+| `renderer` | `"dom" \| "canvas"` | `"dom"` |
+| `loop` | `boolean` | `true` |
+| `autoplay` | `boolean` | `true` |
+| `rate` | `number` | `1` |
+| `progress` | `number \| undefined` | controlled 0…1 |
+
+## Methods
+
+Same as other adapters: `play`, `pause`, `stop`, `toggle`, `seek`, `seekFraction`, `setProgress`, `setRate`.
+
+## Events
+
+| Event | Detail |
+| --- | --- |
+| `frame` | `{ time, fraction }` (bubbles, composed) |
+
+## Pure mount
+
+```ts
+import { attachBlinnMotion } from "@blinn-motion/lit";
+attachBlinnMotion(host, { doc, renderer: "canvas" });
+```
+
+## Examples
+
+- [`examples/lit`](https://github.com/ismailyagci/blinn-motion/tree/main/examples/lit)
+- [`examples/astro`](https://github.com/ismailyagci/blinn-motion/tree/main/examples/astro) (Lit island)

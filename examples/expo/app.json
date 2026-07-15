@@ -1,0 +1,26 @@
+{
+  "expo": {
+    "name": "Blinn Motion Expo",
+    "slug": "blinn-motion-expo",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ],
+    "splash": {
+      "resizeMode": "contain",
+      "backgroundColor": "#0b0d12"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#0b0d12"
+      }
+    }
+  }
+}

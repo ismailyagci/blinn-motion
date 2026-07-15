@@ -1,0 +1,78 @@
+---
+title: "Vue adapter"
+description: "@blinn-motion/vue — Vue 3 component and composable for MotionDoc playback."
+---
+
+`@blinn-motion/vue` mounts the **DOM** or **Canvas** backend with Vue lifecycle.
+Use the component for drop-in markup, or `useBlinnMotion` / `attachBlinnMotion` for full control.
+
+## Install
+
+```bash
+npm i @blinn-motion/vue
+```
+
+Peer: Vue ≥ 3.3.
+
+## Component
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { BlinnMotion, type BlinnMotionHandle } from "@blinn-motion/vue";
+import doc from "./card.motion.json";
+
+const motion = ref<BlinnMotionHandle | null>(null);
+</script>
+
+<template>
+  <BlinnMotion
+    ref="motion"
+    :doc="doc"
+    renderer="dom"
+    :loop="true"
+    :autoplay="true"
+    :on-frame="(t, f) => console.log(t, f)"
+  />
+  <button type="button" @click="motion?.toggle()">Play / pause</button>
+</template>
+```
+
+## Props
+
+| Prop | Type | Default | Notes |
+| --- | --- | --- | --- |
+| `doc` | `MotionDoc` | required | Animation document |
+| `renderer` | `"dom" \| "canvas"` | `"dom"` | Paint backend |
+| `loop` | `boolean` | `true` | Restart at end |
+| `autoplay` | `boolean` | `true` | Off when `progress` is set |
+| `rate` | `number` | `1` | Playback speed |
+| `progress` | `number` | — | Controlled 0…1 (scroll / scrub) |
+| `onFrame` | `(t, f) => void` | — | Per-frame callback |
+
+## Imperative handle (template ref)
+
+`play` · `pause` · `stop` · `toggle` · `seek` · `seekFraction` · `setProgress` · `setRate` · `player`
+
+## Composable
+
+```ts
+import { ref } from "vue";
+import { useBlinnMotion } from "@blinn-motion/vue";
+import doc from "./card.motion.json";
+
+const host = ref<HTMLElement | null>(null);
+const player = useBlinnMotion(host, doc, { renderer: "canvas", autoplay: true });
+```
+
+## Progress-driven
+
+```vue
+<BlinnMotion :doc="doc" :progress="scrollP" />
+```
+
+When `progress` is set, autoplay is forced off and the player scrubs to that fraction.
+
+## Examples
+
+See [`examples/vue`](https://github.com/ismailyagci/blinn-motion/tree/main/examples/vue) for the full advanced demo (doc switch, dual stages, transport, scrub, rate, progress mode).

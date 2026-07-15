@@ -1,0 +1,72 @@
+---
+title: "Svelte adapter"
+description: "@blinn-motion/svelte — use:blinnMotion action and attachBlinnMotion for Svelte 4/5."
+---
+
+`@blinn-motion/svelte` exposes an idiomatic **action** plus the same pure mount helper as other web packages.
+
+## Install
+
+```bash
+npm i @blinn-motion/svelte
+```
+
+Peer: Svelte ≥ 4.
+
+## Action
+
+```svelte
+<script lang="ts">
+  import { blinnMotion, getBlinnHandle } from "@blinn-motion/svelte";
+  import doc from "./card.motion.json";
+
+  let host: HTMLDivElement | undefined;
+</script>
+
+<div
+  bind:this={host}
+  use:blinnMotion={{
+    doc,
+    renderer: "dom",
+    loop: true,
+    autoplay: true,
+    onFrame: (t, f) => {},
+  }}
+></div>
+
+<button
+  type="button"
+  onclick={() => getBlinnHandle(host)?.toggle()}
+>
+  Play / pause
+</button>
+```
+
+## Action params
+
+| Param | Type | Default |
+| --- | --- | --- |
+| `doc` | `MotionDoc` | required |
+| `renderer` | `"dom" \| "canvas"` | `"dom"` |
+| `loop` | `boolean` | `true` |
+| `autoplay` | `boolean` | `true` (off if `progress` set) |
+| `rate` | `number` | `1` |
+| `progress` | `number` | controlled 0…1 |
+| `onFrame` | `(t, f) => void` | — |
+
+The host also dispatches a `frame` CustomEvent with `{ time, fraction }`.
+
+## Pure mount
+
+```ts
+import { attachBlinnMotion } from "@blinn-motion/svelte";
+
+const handle = attachBlinnMotion(el, { doc, renderer: "canvas" });
+handle.play();
+// later:
+handle.dispose();
+```
+
+## Examples
+
+[`examples/svelte`](https://github.com/ismailyagci/blinn-motion/tree/main/examples/svelte) — advanced dual-stage demo.

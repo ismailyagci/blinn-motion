@@ -26,18 +26,19 @@ See **[DEPLOY.md](./DEPLOY.md)** for secrets, first deploy, and custom domain.
 
 ```
 docs.json                 theme, colors, fonts, navigation, navbar/footer
-favicon.svg · logo/       brand assets (flat blinn-motion mark)
+favicon.svg · logo/       brand assets
 index.mdx                 Introduction
-quickstart.mdx            install → MotionDoc → play
+quickstart.mdx            install → MotionDoc → play (all stacks)
 concepts/
   motiondoc.mdx           the format, by example
   render-engine.mdx       sample(doc, t), composition, the Ticker
-  easing.mdx              the four easing shapes + Figma mapping
+  easing.mdx              easing shapes + Figma mapping
 adapters/
-  overview.mdx            one tree, four painters + fidelity matrix
-  dom · canvas · react · react-native
+  overview.mdx            paint backends + framework bindings + fidelity
+  dom · canvas
+  react · vue · svelte · angular · lit · react-native
 guides/
-  figma-plugin.mdx        export from Figma
+  figma-plugin.mdx        export modal, docs/site links, framework setup
   playback.mdx            play/pause/seek/loop/speed/scrubber
 reference/
   motiondoc-schema.mdx    every field (mirrors core/SCHEMA.md)

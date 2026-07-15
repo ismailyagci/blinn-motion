@@ -1,0 +1,35 @@
+{
+  "name": "@blinn-motion/svelte",
+  "version": "0.1.0",
+  "description": "Blinn Motion Svelte adapter — use:blinnMotion action and attachBlinnMotion() for DOM/Canvas backends.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "svelte": ">=4"
+  },
+  "dependencies": {
+    "@blinn-motion/core": "^0.1.0",
+    "@blinn-motion/dom": "^0.1.0",
+    "@blinn-motion/canvas": "^0.1.0"
+  },
+  "devDependencies": {
+    "svelte": "^5.16.0"
+  }
+}

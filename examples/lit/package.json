@@ -1,0 +1,19 @@
+{
+  "name": "@blinn-motion/example-lit",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@blinn-motion/core": "^0.1.0",
+    "@blinn-motion/lit": "^0.1.0",
+    "lit": "^3.2.1"
+  },
+  "devDependencies": {
+    "vite": "^5.4.11"
+  }
+}
