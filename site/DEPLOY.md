@@ -76,3 +76,5 @@ npm run preview
 
 The workflow only runs when `site/**` or the workflow file changes.
 Use **workflow_dispatch** to redeploy without a code change.
+
+<!-- deploy: 2026-07-15T14:36Z -->

@@ -1,26 +1,26 @@
-# Blinn Motion examples
+# Blinn Motion · Example lab
 
-Every app here follows the **same advanced demo flow** so you can switch stacks without relearning controls.
+Each app is a **director-style lab**, not a bare sandbox: dual stages (web), transport console,
+scrub, rate, clock vs progress mode, and a covered-cases grid.
 
-See [`_shared/flow.md`](./_shared/flow.md) for the checklist of cases.
+Shared chrome: [`_shared/lab.css`](./_shared/lab.css) · flow contract: [`_shared/flow.md`](./_shared/flow.md)
 
 | Example | Stack | Adapter |
 |---------|--------|---------|
-| [`vanilla`](./vanilla) | Vite + TypeScript | `@blinn-motion/dom` + `@blinn-motion/canvas` |
-| [`react`](./react) | React + Vite | `@blinn-motion/react` |
-| [`react-native`](./react-native) | Expo RN | `@blinn-motion/react-native` |
-| [`vue`](./vue) | Vue 3 + Vite | `@blinn-motion/vue` |
-| [`svelte`](./svelte) | Svelte 5 + Vite | `@blinn-motion/svelte` |
-| [`angular`](./angular) | Angular 19 + Vite | `@blinn-motion/angular` |
-| [`lit`](./lit) | Lit 3 + Vite | `@blinn-motion/lit` |
-| [`next`](./next) | Next.js App Router | `@blinn-motion/react` (client) |
-| [`astro`](./astro) | Astro islands | React + Lit adapters |
+| [`vanilla`](./vanilla) | Vite + TypeScript | `@blinn-motion/dom` + `canvas` |
+| [`react`](./react) | React + Vite | `@blinn-motion/react` **(flagship UI)** |
+| [`vue`](./vue) | Vue 3 | `@blinn-motion/vue` |
+| [`svelte`](./svelte) | Svelte 5 | `@blinn-motion/svelte` |
+| [`angular`](./angular) | Angular 19 | `@blinn-motion/angular` |
+| [`lit`](./lit) | Lit 3 | `@blinn-motion/lit` |
+| [`next`](./next) | Next.js App Router | React (client) |
+| [`astro`](./astro) | Astro islands | React + Lit |
 | [`expo`](./expo) | Expo | `@blinn-motion/react-native` |
-
-Shared chrome: [`_shared/demo.css`](./_shared/demo.css), fixtures via [`_shared/fixtures.ts`](./_shared/fixtures.ts) (or direct JSON imports for Next/Astro/Expo).
+| [`react-native`](./react-native) | RN (legacy simpler) | `@blinn-motion/react-native` |
 
 ```bash
-# from repo root after npm install && npm run build
-npm run dev --workspace @blinn-motion/example-vue
-npm run build --workspace @blinn-motion/example-lit
+# from repo root
+npm install && npm run build
+npm run dev --workspace @blinn-motion/example-react
+# → http://localhost:5173 (or next free port)
 ```

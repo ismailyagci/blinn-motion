@@ -3,62 +3,159 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Blinn Motion · Vanilla (DOM + Canvas)</title>
-    <style>
-      :root { color-scheme: dark; }
-      * { box-sizing: border-box; }
-      body {
-        margin: 0; padding: 32px;
-        font-family: ui-sans-serif, system-ui, -apple-system, sans-serif;
-        background: #0b0d12; color: #e7eaf0;
-      }
-      h1 { margin: 0 0 4px; font-size: 22px; }
-      .sub { color: #8b93a7; margin: 0 0 24px; font-size: 14px; }
-      .row { display: flex; gap: 32px; flex-wrap: wrap; }
-      .pane { background: #11141b; border: 1px solid #1e2430; border-radius: 14px; padding: 16px; }
-      .pane h2 { margin: 0 0 12px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: #8b93a7; }
-      .controls { display: flex; align-items: center; gap: 14px; margin-top: 24px; flex-wrap: wrap; }
-      button { background: #2d6cff; color: #fff; border: 0; border-radius: 8px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
-      button.ghost { background: #1e2430; }
-      input[type="range"] { width: 280px; }
-      label { font-size: 13px; color: #8b93a7; display: inline-flex; gap: 6px; align-items: center; }
-      code { color: #9fb4ff; }
-    </style>
+    <title>Blinn Motion · Vanilla lab</title>
+    <meta
+      name="description"
+      content="Advanced Blinn Motion vanilla example — dual DOM/Canvas, transport, scrub, rate, progress mode."
+    />
+    <link rel="stylesheet" href="/src/lab.css" />
   </head>
   <body>
-    <h1>Blinn Motion · Vanilla</h1>
-    <p class="sub">
-      One <code>MotionDoc</code>, two backends — <strong>@blinn-motion/dom</strong> and
-      <strong>@blinn-motion/canvas</strong> — both driven by the same
-      <code>@blinn-motion/core</code> render method.
-    </p>
+    <div class="lab">
+      <header class="lab-top">
+        <a class="lab-brand" href="https://blinnmotion.com" target="_blank" rel="noreferrer">
+          <span class="lab-mark">
+            <svg viewBox="0 0 64 64" width="22" height="22" aria-hidden>
+              <rect x="6" y="6" width="52" height="52" rx="15" fill="#11141A" />
+              <g fill="none" stroke="#fff" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M24 18 V46" />
+                <path d="M24 18 H32.5 C38.6 18 38.6 32 32.5 32 H24" />
+                <path d="M24 32 H34.5 C41.2 32 41.2 46 34.5 46 H24" />
+              </g>
+              <rect x="43.6" y="43.6" width="7.6" height="7.6" rx="1.5" transform="rotate(45 47.4 47.4)" fill="#2F6BFF" />
+            </svg>
+          </span>
+          <span>
+            <div class="lab-brand-name">Blinn Motion</div>
+            <div class="lab-brand-sub">Example lab</div>
+          </span>
+        </a>
+        <div class="lab-top-grow"></div>
+        <nav class="lab-top-links">
+          <a class="lab-link" href="https://docs.blinnmotion.com/adapters/dom" target="_blank" rel="noreferrer">DOM docs ↗</a>
+          <a class="lab-link" href="https://docs.blinnmotion.com/adapters/canvas" target="_blank" rel="noreferrer">Canvas docs ↗</a>
+          <a class="lab-link" href="https://docs.blinnmotion.com" target="_blank" rel="noreferrer">All docs ↗</a>
+        </nav>
+      </header>
 
-    <div class="row">
-      <div class="pane"><h2>DOM adapter</h2><div id="dom"></div></div>
-      <div class="pane"><h2>Canvas adapter</h2><div id="canvas"></div></div>
+      <div class="lab-header">
+        <div class="stack-pill"><span class="dot"></span> Vanilla · DOM + Canvas</div>
+        <h1 class="lab-title">Dual-backend motion lab <em>without a framework</em></h1>
+        <p class="lab-lede">
+          One <code>MotionDoc</code>, two backends — <code>@blinn-motion/dom</code> and
+          <code>@blinn-motion/canvas</code> — locked to the same clock. Director console for
+          fixtures, transport, scrub, rate, and progress-driven mode.
+        </p>
+      </div>
+
+      <div class="lab-grid">
+        <section class="card">
+          <div class="card-head">
+            <h2>Stage bay</h2>
+            <span class="card-meta" id="fixtureNote">showcase</span>
+          </div>
+          <div class="card-body">
+            <div class="stages">
+              <div class="stage">
+                <div class="stage-bar">
+                  <span class="tag dom">dom</span>
+                  <span class="hint">CSS · SVG · full fidelity</span>
+                </div>
+                <div class="stage-host" id="dom"></div>
+              </div>
+              <div class="stage">
+                <div class="stage-bar">
+                  <span class="tag canvas">canvas</span>
+                  <span class="hint">immediate-mode 2D</span>
+                </div>
+                <div class="stage-host" id="canvas"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <aside class="card">
+          <div class="card-head">
+            <h2>Director console</h2>
+            <span class="card-meta">live</span>
+          </div>
+          <div class="card-body">
+            <div class="console-section">
+              <span class="console-label">MotionDoc</span>
+              <div class="seg" id="docSeg">
+                <button type="button" data-doc="card">Card intro</button>
+                <button type="button" data-doc="showcase" class="on">Showcase</button>
+              </div>
+            </div>
+
+            <div class="console-section">
+              <span class="console-label">Transport</span>
+              <div class="transport">
+                <button type="button" class="btn btn-primary" id="toggle">❚❚ Pause</button>
+                <button type="button" class="btn btn-ghost" id="restart">↺ Restart</button>
+              </div>
+            </div>
+
+            <div class="console-section">
+              <span class="console-label">Timeline</span>
+              <div class="meter-block">
+                <div class="meter-row">
+                  <span class="meter-time" id="timeLabel">0.00s <span style="color:var(--ink-3);font-weight:500;font-size:13px">/ 0.00s</span></span>
+                  <span class="meter-frac" id="fracLabel">0% · f=0.000</span>
+                </div>
+                <input class="scrub" id="scrub" type="range" min="0" max="1" step="0.001" value="0" />
+              </div>
+            </div>
+
+            <div class="console-section">
+              <span class="console-label">Rate</span>
+              <div class="seg" id="rateSeg">
+                <button type="button" data-rate="0.5">0.5×</button>
+                <button type="button" data-rate="1" class="on">1×</button>
+                <button type="button" data-rate="1.5">1.5×</button>
+                <button type="button" data-rate="2">2×</button>
+              </div>
+            </div>
+
+            <div class="console-section">
+              <span class="console-label">Drive mode</span>
+              <div class="seg" id="modeSeg">
+                <button type="button" data-mode="clock" class="on">Clock</button>
+                <button type="button" data-mode="progress">Progress</button>
+              </div>
+              <p class="mode-note" id="modeNote">
+                <strong>Clock-driven</strong> — shared ticker. Scrub pauses and seeks both stages.
+              </p>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <section class="card cases">
+        <div class="card-head">
+          <h2>Covered cases</h2>
+          <span class="card-meta">shared example flow</span>
+        </div>
+        <div class="card-body">
+          <div class="case-grid">
+            <div class="case"><div class="k"><span class="check">✓</span>Doc switch</div><div class="v">card + showcase fixtures</div></div>
+            <div class="case"><div class="k"><span class="check">✓</span>Dual stages</div><div class="v">DOM vs Canvas, same MotionDoc</div></div>
+            <div class="case"><div class="k"><span class="check">✓</span>Transport</div><div class="v">play · pause · toggle · restart</div></div>
+            <div class="case"><div class="k"><span class="check">✓</span>Scrub + rate</div><div class="v">seekFraction · setRate</div></div>
+            <div class="case"><div class="k"><span class="check">✓</span>Progress mode</div><div class="v">setProgress(0…1)</div></div>
+            <div class="case"><div class="k"><span class="check">✓</span>onFrame meter</div><div class="v">live time + fraction</div></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="lab-foot">
+        <span>Packages <code class="mono">@blinn-motion/dom</code> · <code class="mono">@blinn-motion/canvas</code></span>
+        <span class="sep">·</span>
+        <a href="https://docs.blinnmotion.com/adapters/overview" target="_blank" rel="noreferrer">Adapters</a>
+        <span class="sep">·</span>
+        <a href="https://blinnmotion.com" target="_blank" rel="noreferrer">blinnmotion.com</a>
+      </footer>
     </div>
-
-    <div class="controls">
-      <label>Doc
-        <select id="doc">
-          <option value="card">card (intro)</option>
-          <option value="showcase" selected>showcase (new features)</option>
-        </select>
-      </label>
-      <button id="toggle">❚❚ Pause</button>
-      <button id="restart" class="ghost">↺ Restart</button>
-      <label>Scrub <input id="scrub" type="range" min="0" max="1000" value="0" /></label>
-      <label>Speed
-        <select id="speed">
-          <option value="0.25">0.25×</option>
-          <option value="0.5">0.5×</option>
-          <option value="1" selected>1×</option>
-          <option value="2">2×</option>
-        </select>
-      </label>
-      <span id="time" style="color:#8b93a7;font-variant-numeric:tabular-nums"></span>
-    </div>
-
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

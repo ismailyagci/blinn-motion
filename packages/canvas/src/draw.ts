@@ -485,10 +485,20 @@ function drawNode(ctx: CanvasRenderingContext2D, node: RenderNode, inheritedAlph
 export function drawTree(ctx: CanvasRenderingContext2D, tree: RenderTree, dpr = 1): void {
   const { width, height, background } = tree.stage;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  // Clear in CSS-pixel space (transform applies).
   ctx.clearRect(0, 0, width, height);
   if (background) {
     ctx.fillStyle = css(parseColor(background));
     ctx.fillRect(0, 0, width, height);
   }
+  // Clip to the stage rect — matches DOM adapter's `overflow: hidden` on the stage.
+  // Without this, drop shadows / scaled layers / off-stage keyframes paint past the
+  // frame edge (and can look like content "escaping" the stage in UIs that don't
+  // clip the canvas element either).
+  ctx.save();
+  ctx.beginPath();
+  ctx.rect(0, 0, width, height);
+  ctx.clip();
   for (const node of tree.nodes) drawNode(ctx, node, 1, tree.time);
+  ctx.restore();
 }

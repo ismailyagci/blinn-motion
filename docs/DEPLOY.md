@@ -61,3 +61,5 @@ npm run dev    # http://localhost:3000
 2. `mint export` → static bundle  
 3. Unzip to `dist/` (drop `serve.js` / launcher scripts)  
 4. `wrangler pages deploy` to project `blinn-motion-docs`  
+
+<!-- deploy: 2026-07-15T14:36Z -->

@@ -300,8 +300,10 @@ export class DomPlayer {
     this.duration = doc.duration || 1;
     container.innerHTML = "";
     const stage = document.createElement("div");
+    stage.setAttribute("data-blinn-stage", "dom");
     stage.style.position = "relative";
-    stage.style.overflow = "hidden";
+    stage.style.overflow = "hidden"; // clip layers that animate past stage bounds
+    stage.style.flex = "none";
     const sz = doc.stage || { width: 300, height: 300 };
     stage.style.width = sz.width + "px";
     stage.style.height = sz.height + "px";

@@ -69,6 +69,18 @@ describe("@blinn-motion/canvas player", () => {
     expect(player.canvas.style.height).toBe("320px");
   });
 
+  it("wraps the canvas in an overflow-hidden stage frame (DOM parity)", () => {
+    const host = document.createElement("div");
+    const player = create(host, doc, { autoplay: false, dpr: 1 });
+    const frame = host.querySelector("[data-blinn-stage='canvas']") as HTMLElement;
+    expect(frame).toBeTruthy();
+    expect(frame.style.overflow).toBe("hidden");
+    expect(frame.style.width).toBe("480px");
+    expect(frame.style.height).toBe("320px");
+    expect(player.frame).toBe(frame);
+    expect(frame.contains(player.canvas)).toBe(true);
+  });
+
   it("paints the initial frame (clear + transform + draws)", () => {
     const host = document.createElement("div");
     create(host, doc, { autoplay: false, dpr: 1 });
@@ -76,7 +88,11 @@ describe("@blinn-motion/canvas player", () => {
     expect(calls.clearRect).toBeGreaterThanOrEqual(1);
     // showcase has solid + gradient fills → at least one fill, plus noise fillRects
     expect((calls.fill || 0) + (calls.fillRect || 0)).toBeGreaterThanOrEqual(1);
-    expect(calls.save).toBe(calls.restore); // balanced
+    // save/restore balanced overall (stage clip + per-node pairs)
+    expect(calls.save).toBe(calls.restore);
+    // stage clip: rect + clip at least once
+    expect(calls.clip).toBeGreaterThanOrEqual(1);
+    expect(calls.rect).toBeGreaterThanOrEqual(1);
   });
 
   it("repaints on seek without throwing", () => {

@@ -15,16 +15,31 @@ export interface CanvasPlayerOptions {
   onframe?: (time: number, fraction: number) => void;
 }
 
-function resolveCanvas(target: HTMLCanvasElement | HTMLElement): HTMLCanvasElement {
-  if (target instanceof HTMLCanvasElement) return target;
-  const cv = document.createElement("canvas");
+function resolveCanvas(target: HTMLCanvasElement | HTMLElement): {
+  canvas: HTMLCanvasElement;
+  frame: HTMLElement | null;
+} {
+  if (target instanceof HTMLCanvasElement) return { canvas: target, frame: null };
+  // Stage frame mirrors DOM adapter: fixed size + overflow hidden so nothing
+  // paints outside the MotionDoc stage box (even if host UI doesn't clip).
   target.innerHTML = "";
-  target.appendChild(cv);
-  return cv;
+  const frame = document.createElement("div");
+  frame.setAttribute("data-blinn-stage", "canvas");
+  frame.style.position = "relative";
+  frame.style.overflow = "hidden";
+  frame.style.flex = "none";
+  frame.style.lineHeight = "0"; // kill inline-canvas baseline gap
+  const cv = document.createElement("canvas");
+  cv.style.display = "block";
+  frame.appendChild(cv);
+  target.appendChild(frame);
+  return { canvas: cv, frame };
 }
 
 export class CanvasPlayer {
   readonly canvas: HTMLCanvasElement;
+  /** Overflow-hidden stage frame wrapping the canvas (null if given a raw canvas). */
+  readonly frame: HTMLElement | null;
   readonly duration: number;
   private ctx: CanvasRenderingContext2D;
   private ticker: Ticker;
@@ -34,7 +49,9 @@ export class CanvasPlayer {
   constructor(target: HTMLCanvasElement | HTMLElement, doc: MotionDoc, opts: CanvasPlayerOptions = {}) {
     this.doc = doc;
     this.duration = doc.duration || 1;
-    this.canvas = resolveCanvas(target);
+    const resolved = resolveCanvas(target);
+    this.canvas = resolved.canvas;
+    this.frame = resolved.frame;
     this.ctx = this.canvas.getContext("2d")!;
     this.dpr = opts.dpr || (typeof window !== "undefined" ? window.devicePixelRatio || 1 : 1);
 
@@ -43,6 +60,15 @@ export class CanvasPlayer {
     this.canvas.height = Math.round(stage.height * this.dpr);
     this.canvas.style.width = stage.width + "px";
     this.canvas.style.height = stage.height + "px";
+    if (this.frame) {
+      this.frame.style.width = stage.width + "px";
+      this.frame.style.height = stage.height + "px";
+      // Match DOM stage background so letterboxing (if any) isn't a flash of host bg.
+      if (stage.background) {
+        // background is a MotionDoc color string; leave frame transparent — paint is on canvas
+        this.frame.style.background = "transparent";
+      }
+    }
 
     this.ticker = new Ticker({
       duration: this.duration,
