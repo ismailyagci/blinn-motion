@@ -194,28 +194,84 @@ jobs:
             --branch=main \
             --commit-dirty=true
 
-          # Attach custom subdomain (idempotent). Zone must be on this CF account.
-          echo "Ensuring custom domain: ${DOMAIN}"
-          RESP=$(curl -sS -X POST \
+          AUTH_H=(-H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" -H "Content-Type: application/json")
+
+          # 1) Attach custom subdomain on the Pages project (idempotent).
+          echo "Ensuring Pages custom domain: ${DOMAIN}"
+          RESP=$(curl -sS -X POST "${AUTH_H[@]}" \
             "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${PROJECT_NAME}/domains" \
-            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
-            -H "Content-Type: application/json" \
             --data "{\"name\":\"${DOMAIN}\"}")
           echo "$RESP" | python3 -c "
           import json,sys
           d=json.load(sys.stdin)
           if d.get('success'):
-              print('Domain attached:', d.get('result',{}).get('name') or d)
+              print('Pages domain attached:', d.get('result',{}).get('name') or d)
           else:
               errs=d.get('errors') or []
               msgs=' '.join(str(e) for e in errs)
-              # already exists / conflict → OK
               if any(e.get('code') in (8000014, 8000032) or 'already' in str(e).lower() for e in errs):
-                  print('Domain already configured:', msgs)
+                  print('Pages domain already configured:', msgs)
               else:
-                  print('::warning::Domain attach response:', d)
-                  # Don't fail deploy if project is live on pages.dev; domain can be manual
+                  print('::warning::Pages domain attach response:', d)
           "
+
+          # 2) Ensure DNS CNAME exists in the blinnmotion.com zone.
+          # Pages attach alone does not always create DNS if the token lacks Zone.DNS.
+          TARGET="${PROJECT_NAME}.pages.dev"
+          ZONE_JSON=$(curl -sS "${AUTH_H[@]}" \
+            "https://api.cloudflare.com/client/v4/zones?name=blinnmotion.com")
+          ZONE_ID=$(echo "$ZONE_JSON" | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)
+          res=d.get('result') or []
+          if not d.get('success') or not res:
+              print('', end='')
+          else:
+              print(res[0]['id'])
+          ")
+          if [ -z "$ZONE_ID" ]; then
+            echo "::warning::Could not resolve zone blinnmotion.com — create CNAME ${DOMAIN} → ${TARGET} manually."
+            echo "Zone lookup: $ZONE_JSON"
+          else
+            echo "Zone $ZONE_ID — ensuring CNAME ${DOMAIN} → ${TARGET}"
+            LIST=$(curl -sS "${AUTH_H[@]}" \
+              "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records?name=${DOMAIN}&type=CNAME")
+            REC_ID=$(echo "$LIST" | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)
+          res=d.get('result') or []
+          print(res[0]['id'] if res else '')
+          ")
+            BODY=$(python3 -c "
+          import json
+          print(json.dumps({
+            'type': 'CNAME',
+            'name': '${DOMAIN}',
+            'content': '${TARGET}',
+            'proxied': True,
+            'ttl': 1,
+            'comment': 'Blinn Motion example lab (Pages)',
+          }))
+          ")
+            if [ -n "$REC_ID" ]; then
+              DNS_RESP=$(curl -sS -X PUT "${AUTH_H[@]}" \
+                "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records/${REC_ID}" \
+                --data "$BODY")
+            else
+              DNS_RESP=$(curl -sS -X POST "${AUTH_H[@]}" \
+                "https://api.cloudflare.com/client/v4/zones/${ZONE_ID}/dns_records" \
+                --data "$BODY")
+            fi
+            echo "$DNS_RESP" | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)
+          if d.get('success'):
+              r=d['result']
+              print(f\"DNS OK: {r.get('name')} CNAME → {r.get('content')} proxied={r.get('proxied')}\")
+          else:
+              print('::warning::DNS CNAME failed (token may need Zone.DNS Edit):', d)
+          "
+          fi
 
           echo "pages_dev=https://${PROJECT_NAME}.pages.dev" >> "$GITHUB_STEP_SUMMARY"
           echo "custom=https://${DOMAIN}" >> "$GITHUB_STEP_SUMMARY"
