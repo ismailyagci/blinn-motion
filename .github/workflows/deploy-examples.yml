@@ -1,0 +1,221 @@
+# Build each web example against published @blinn-motion/* (npm registry)
+# and deploy to Cloudflare Pages with custom subdomains on blinnmotion.com.
+#
+# Local monorepo still uses workspace packages / source aliases when packages/
+# exist. CI stages a tree WITHOUT packages/ so installs resolve from npm.
+#
+# Required secrets (same as landing/docs):
+#   CLOUDFLARE_API_TOKEN
+#   CLOUDFLARE_ACCOUNT_ID
+#
+# Live URLs (after DNS/custom domain settles):
+#   https://vanilla.blinnmotion.com
+#   https://react.blinnmotion.com
+#   https://vue.blinnmotion.com
+#   https://svelte.blinnmotion.com
+#   https://angular.blinnmotion.com
+#   https://lit.blinnmotion.com
+#   https://next.blinnmotion.com
+#   https://astro.blinnmotion.com
+#
+# Skipped (not static web for Pages): expo, react-native
+
+name: Deploy examples
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "examples/**"
+      - "fixtures/**"
+      - ".github/workflows/deploy-examples.yml"
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Deploy only this example id (empty = all)"
+        required: false
+        default: ""
+
+concurrency:
+  group: deploy-examples-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: ${{ matrix.id }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - id: vanilla
+            project: blinn-motion-ex-vanilla
+            domain: vanilla.blinnmotion.com
+            out: dist
+          - id: react
+            project: blinn-motion-ex-react
+            domain: react.blinnmotion.com
+            out: dist
+          - id: vue
+            project: blinn-motion-ex-vue
+            domain: vue.blinnmotion.com
+            out: dist
+          - id: svelte
+            project: blinn-motion-ex-svelte
+            domain: svelte.blinnmotion.com
+            out: dist
+          - id: angular
+            project: blinn-motion-ex-angular
+            domain: angular.blinnmotion.com
+            out: dist
+          - id: lit
+            project: blinn-motion-ex-lit
+            domain: lit.blinnmotion.com
+            out: dist
+          - id: next
+            project: blinn-motion-ex-next
+            domain: next.blinnmotion.com
+            out: out
+          - id: astro
+            project: blinn-motion-ex-astro
+            domain: astro.blinnmotion.com
+            out: dist
+
+    steps:
+      - name: Optionally skip (only filter)
+        id: gate
+        run: |
+          only="${{ github.event.inputs.only }}"
+          if [ -n "$only" ] && [ "$only" != "${{ matrix.id }}" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Skipping ${{ matrix.id }} (only=$only)"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Checkout
+        if: steps.gate.outputs.skip != 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        if: steps.gate.outputs.skip != 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify Cloudflare secrets
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          missing=0
+          if [ -z "$CLOUDFLARE_API_TOKEN" ]; then
+            echo "::error::Secret CLOUDFLARE_API_TOKEN is empty or not set."
+            missing=1
+          fi
+          if [ -z "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "::error::Secret CLOUDFLARE_ACCOUNT_ID is empty or not set."
+            missing=1
+          fi
+          exit $missing
+
+      - name: Stage standalone tree (no monorepo packages/)
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          EXAMPLE: ${{ matrix.id }}
+        run: |
+          set -euo pipefail
+          STAGE="${RUNNER_TEMP}/blinn-ex-${EXAMPLE}"
+          rm -rf "$STAGE"
+          mkdir -p "$STAGE/examples"
+          # fixtures + shared chrome (relative imports from example sources)
+          cp -R fixtures "$STAGE/"
+          cp -R examples/_shared "$STAGE/examples/"
+          # example app only — exclude local installs/builds
+          rsync -a \
+            --exclude node_modules \
+            --exclude dist \
+            --exclude out \
+            --exclude .next \
+            "examples/${EXAMPLE}/" "$STAGE/examples/${EXAMPLE}/"
+          # Critical: no packages/ → localBlinnAlias returns {} → npm registry
+          test ! -d "$STAGE/packages"
+          echo "STAGE=$STAGE" >> "$GITHUB_ENV"
+          echo "Staged $STAGE/examples/${EXAMPLE}"
+          ls -la "$STAGE/examples/${EXAMPLE}"
+
+      - name: Install from npm registry
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: ${{ env.STAGE }}/examples/${{ matrix.id }}
+        run: npm install
+
+      - name: Build
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: ${{ env.STAGE }}/examples/${{ matrix.id }}
+        run: npm run build
+
+      - name: Verify output
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: ${{ env.STAGE }}/examples/${{ matrix.id }}
+        run: |
+          set -euo pipefail
+          OUT="${{ matrix.out }}"
+          ls -la "$OUT"
+          test -f "$OUT/index.html"
+          # Sanity: bundle should not reference monorepo absolute paths
+          if grep -R "packages/core/src" "$OUT" 2>/dev/null; then
+            echo "::error::Build appears to bundle monorepo source paths"
+            exit 1
+          fi
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.gate.outputs.skip != 'true'
+        working-directory: ${{ env.STAGE }}/examples/${{ matrix.id }}
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PROJECT_NAME: ${{ matrix.project }}
+          DOMAIN: ${{ matrix.domain }}
+          OUT: ${{ matrix.out }}
+        run: |
+          set -euo pipefail
+          if ! npx --yes wrangler@4 pages project list 2>/dev/null | grep -qE "(^|\\s)${PROJECT_NAME}(\\s|$)"; then
+            echo "Creating Pages project: ${PROJECT_NAME}"
+            npx --yes wrangler@4 pages project create "${PROJECT_NAME}" \
+              --production-branch=main
+          else
+            echo "Pages project ${PROJECT_NAME} already exists"
+          fi
+
+          npx --yes wrangler@4 pages deploy "${OUT}" \
+            --project-name="${PROJECT_NAME}" \
+            --branch=main \
+            --commit-dirty=true
+
+          # Attach custom subdomain (idempotent). Zone must be on this CF account.
+          echo "Ensuring custom domain: ${DOMAIN}"
+          RESP=$(curl -sS -X POST \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/pages/projects/${PROJECT_NAME}/domains" \
+            -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+            -H "Content-Type: application/json" \
+            --data "{\"name\":\"${DOMAIN}\"}")
+          echo "$RESP" | python3 -c "
+          import json,sys
+          d=json.load(sys.stdin)
+          if d.get('success'):
+              print('Domain attached:', d.get('result',{}).get('name') or d)
+          else:
+              errs=d.get('errors') or []
+              msgs=' '.join(str(e) for e in errs)
+              # already exists / conflict → OK
+              if any(e.get('code') in (8000014, 8000032) or 'already' in str(e).lower() for e in errs):
+                  print('Domain already configured:', msgs)
+              else:
+                  print('::warning::Domain attach response:', d)
+                  # Don't fail deploy if project is live on pages.dev; domain can be manual
+          "
+
+          echo "pages_dev=https://${PROJECT_NAME}.pages.dev" >> "$GITHUB_STEP_SUMMARY"
+          echo "custom=https://${DOMAIN}" >> "$GITHUB_STEP_SUMMARY"

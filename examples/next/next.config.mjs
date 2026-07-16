@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Consume workspace package dists (built by monorepo `npm run build`).
+  // Static export for Cloudflare Pages (no Node server).
+  output: "export",
+  images: { unoptimized: true },
+  // Local monorepo: consume workspace package source/dist.
+  // Prod staging installs published @blinn-motion/* from npm — these are no-ops then.
   transpilePackages: [
     "@blinn-motion/react",
     "@blinn-motion/core",

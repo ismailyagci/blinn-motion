@@ -1,21 +1,18 @@
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const root = path.dirname(fileURLToPath(import.meta.url));
+import { localBlinnAlias } from "../_shared/local-blinn-alias.mjs";
 
 export default defineConfig({
   integrations: [react()],
   vite: {
     resolve: {
-      alias: {
-        "@blinn-motion/react": path.resolve(root, "../../packages/react/src/index.ts"),
-        "@blinn-motion/lit": path.resolve(root, "../../packages/lit/src/index.ts"),
-        "@blinn-motion/core": path.resolve(root, "../../packages/core/src/index.ts"),
-        "@blinn-motion/dom": path.resolve(root, "../../packages/dom/src/index.ts"),
-        "@blinn-motion/canvas": path.resolve(root, "../../packages/canvas/src/index.ts"),
-      },
+      alias: localBlinnAlias(import.meta.url, {
+        "@blinn-motion/react": "../../packages/react/src/index.ts",
+        "@blinn-motion/lit": "../../packages/lit/src/index.ts",
+        "@blinn-motion/core": "../../packages/core/src/index.ts",
+        "@blinn-motion/dom": "../../packages/dom/src/index.ts",
+        "@blinn-motion/canvas": "../../packages/canvas/src/index.ts",
+      }),
     },
   },
 });

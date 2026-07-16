@@ -1,13 +1,13 @@
 import { defineConfig } from "vite";
-import { resolve } from "node:path";
+import { localBlinnAlias } from "../_shared/local-blinn-alias.mjs";
 
 export default defineConfig({
   resolve: {
-    alias: {
-      "@blinn-motion/lit": resolve(__dirname, "../../packages/lit/src/index.ts"),
-      "@blinn-motion/core": resolve(__dirname, "../../packages/core/src/index.ts"),
-      "@blinn-motion/dom": resolve(__dirname, "../../packages/dom/src/index.ts"),
-      "@blinn-motion/canvas": resolve(__dirname, "../../packages/canvas/src/index.ts"),
-    },
+    alias: localBlinnAlias(import.meta.url, {
+      "@blinn-motion/lit": "../../packages/lit/src/index.ts",
+      "@blinn-motion/core": "../../packages/core/src/index.ts",
+      "@blinn-motion/dom": "../../packages/dom/src/index.ts",
+      "@blinn-motion/canvas": "../../packages/canvas/src/index.ts",
+    }),
   },
 });
