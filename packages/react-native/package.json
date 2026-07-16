@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/react-native",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Blinn Motion React Native adapter \u2014 a <BlinnMotionView/> component and useBlinnMotion() hook that play a MotionDoc with native Views.",
   "license": "MIT",
   "type": "module",
@@ -16,7 +16,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup",
@@ -28,7 +29,7 @@
     "react-native": ">=0.70"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.2"
+    "@blinn-motion/core": "^0.1.3"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",
@@ -39,10 +40,24 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ismailyagci/blinn-motion.git"
+    "url": "git+https://github.com/ismailyagci/blinn-motion.git",
+    "directory": "packages/react-native"
   },
-  "homepage": "https://blinnmotion.com",
+  "homepage": "https://docs.blinnmotion.com/adapters/react-native",
   "bugs": {
     "url": "https://github.com/ismailyagci/blinn-motion/issues"
-  }
+  },
+  "keywords": [
+    "blinn-motion",
+    "figma",
+    "figma-motion",
+    "motiondoc",
+    "animation",
+    "motion",
+    "timeline",
+    "react-native",
+    "expo",
+    "mobile",
+    "adapter"
+  ]
 }

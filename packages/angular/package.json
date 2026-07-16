@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/angular",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Blinn Motion Angular adapter \u2014 standalone BlinnMotion component and attachBlinnMotion() for DOM/Canvas backends.",
   "license": "MIT",
   "type": "module",
@@ -16,7 +16,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup",
@@ -28,9 +29,9 @@
     "@angular/common": ">=17"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.2",
-    "@blinn-motion/dom": "^0.1.2",
-    "@blinn-motion/canvas": "^0.1.2"
+    "@blinn-motion/core": "^0.1.3",
+    "@blinn-motion/dom": "^0.1.3",
+    "@blinn-motion/canvas": "^0.1.3"
   },
   "devDependencies": {
     "@angular/common": "^19.0.0",
@@ -42,10 +43,23 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ismailyagci/blinn-motion.git"
+    "url": "git+https://github.com/ismailyagci/blinn-motion.git",
+    "directory": "packages/angular"
   },
-  "homepage": "https://blinnmotion.com",
+  "homepage": "https://docs.blinnmotion.com/adapters/angular",
   "bugs": {
     "url": "https://github.com/ismailyagci/blinn-motion/issues"
-  }
+  },
+  "keywords": [
+    "blinn-motion",
+    "figma",
+    "figma-motion",
+    "motiondoc",
+    "animation",
+    "motion",
+    "timeline",
+    "angular",
+    "standalone",
+    "adapter"
+  ]
 }

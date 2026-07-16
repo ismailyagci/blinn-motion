@@ -1,0 +1,46 @@
+# Blinn Motion — marketing site
+# https://blinnmotion.com
+
+User-agent: *
+Allow: /
+
+# AI / answer-engine crawlers — documentation & product surface are public
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+# Content signals (Cloudflare Content Signals Policy style)
+# ai-train=yes, search=yes, ai-input=yes
+User-agent: *
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+
+Sitemap: https://blinnmotion.com/sitemap.xml
+Sitemap: https://docs.blinnmotion.com/sitemap.xml
+
+# LLM indexes
+# https://blinnmotion.com/llms.txt
+# https://blinnmotion.com/llms-full.txt
+# https://docs.blinnmotion.com/llms.txt

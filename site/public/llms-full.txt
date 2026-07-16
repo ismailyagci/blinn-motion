@@ -1,0 +1,110 @@
+# Blinn Motion — full agent context
+
+> The runtime for Figma Motion. Export a Motion timeline to MotionDoc JSON and play it with a pure-JS render engine — identical across DOM, Canvas, React, Vue, Svelte, Angular, Lit, and React Native.
+
+## What it is
+
+Blinn Motion is an independent, MIT-licensed project. Designers author motion in Figma Motion; the Figma plugin exports a timeline as JSON; that JSON is converted into a small portable document called **MotionDoc**; a pure JavaScript engine resolves the document at time `t` via `sample(doc, t)` into a tree of final numbers (transforms, fills, effects); thin **adapters** paint that tree on each platform.
+
+There is no video bake and no hand rebuild in CSS as the source of truth. The same MotionDoc times identically on every adapter because they share one resolved tree and one clock model.
+
+## Pipeline
+
+```
+Figma Motion  (node.animations / timelines)
+      │  keyframes, easing, springs — raw data
+      ▼
+@blinn-motion/figma-plugin  ──►  MotionDoc JSON
+      │  sample(doc, t) — THE render method
+      ▼
+@blinn-motion/core  ──►  resolved RenderNode tree
+      │
+      ├─► @blinn-motion/dom            divs · CSS · SVG · masks
+      ├─► @blinn-motion/canvas         pure-JS 2D canvas
+      ├─► @blinn-motion/react          <BlinnMotion renderer="dom|canvas" />
+      ├─► @blinn-motion/vue            Vue 3 component + composable
+      ├─► @blinn-motion/svelte         use:blinnMotion action
+      ├─► @blinn-motion/angular        standalone <blinn-motion>
+      ├─► @blinn-motion/lit            <blinn-motion> custom element
+      └─► @blinn-motion/react-native   native <View> / <Text>
+```
+
+Meta-frameworks reuse adapters: Next.js → React client components; Astro → React/Lit islands; Expo → React Native.
+
+## When to use Blinn
+
+| Fit | Use when… |
+|-----|-----------|
+| Primary | Motion already lives in Figma and should ship in the product UI |
+| Yes | You need seek / scrub / shared timing across web and native |
+| Yes | You want a git-diffable motion artifact (MotionDoc JSON) |
+| No | You only need a one-shot video or GIF for social |
+| No | Motion is authored only outside Figma (different pipeline) |
+
+## Install (typical)
+
+```bash
+npm install @blinn-motion/core @blinn-motion/react
+# or: @blinn-motion/dom @blinn-motion/canvas @blinn-motion/vue …
+```
+
+Play a MotionDoc with the React adapter:
+
+```tsx
+import { BlinnMotion } from "@blinn-motion/react";
+import doc from "./card.motion.json";
+
+export function Demo() {
+  return <BlinnMotion doc={doc} renderer="dom" autoplay />;
+}
+```
+
+## Live URLs
+
+| Surface | URL |
+|---------|-----|
+| Landing | https://blinnmotion.com |
+| Docs | https://docs.blinnmotion.com |
+| React lab | https://react.blinnmotion.com |
+| Vanilla lab | https://vanilla.blinnmotion.com |
+| Vue lab | https://vue.blinnmotion.com |
+| Svelte lab | https://svelte.blinnmotion.com |
+| Angular lab | https://angular.blinnmotion.com |
+| Lit lab | https://lit.blinnmotion.com |
+| Next.js lab | https://next.blinnmotion.com |
+| Astro lab | https://astro.blinnmotion.com |
+| Source | https://github.com/ismailyagci/blinn-motion |
+| npm | https://www.npmjs.com/org/blinn-motion |
+
+## Docs map (prefer .md for agents)
+
+- https://docs.blinnmotion.com/llms.txt — structured index
+- https://docs.blinnmotion.com/llms-full.txt — full docs dump
+- https://docs.blinnmotion.com/quickstart.md
+- https://docs.blinnmotion.com/concepts/motiondoc.md
+- https://docs.blinnmotion.com/concepts/render-engine.md
+- https://docs.blinnmotion.com/concepts/easing.md
+- https://docs.blinnmotion.com/adapters/overview.md
+- https://docs.blinnmotion.com/adapters/dom.md
+- https://docs.blinnmotion.com/adapters/canvas.md
+- https://docs.blinnmotion.com/adapters/react.md
+- https://docs.blinnmotion.com/adapters/vue.md
+- https://docs.blinnmotion.com/adapters/svelte.md
+- https://docs.blinnmotion.com/adapters/angular.md
+- https://docs.blinnmotion.com/adapters/lit.md
+- https://docs.blinnmotion.com/adapters/react-native.md
+- https://docs.blinnmotion.com/guides/figma-plugin.md
+- https://docs.blinnmotion.com/guides/playback.md
+- https://docs.blinnmotion.com/reference/core-api.md
+- https://docs.blinnmotion.com/reference/motiondoc-schema.md
+- https://docs.blinnmotion.com/reference/figma-coverage.md
+
+## Example lab contract
+
+Each web example implements the same advanced demo flow: document switch (card + showcase fixtures), dual DOM/Canvas stages on web, transport (play/pause/restart), scrub, rate, progress-driven mode, live time/fraction meter. See repository `examples/_shared/flow.md`.
+
+Production example deploys install **published** npm packages (CI stages a tree without monorepo `packages/`).
+
+## License
+
+MIT — https://github.com/ismailyagci/blinn-motion/blob/main/LICENSE

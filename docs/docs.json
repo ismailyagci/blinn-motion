@@ -20,6 +20,29 @@
     "heading": { "family": "Space Grotesk", "weight": 700 },
     "body": { "family": "Inter" }
   },
+  "thumbnails": {
+    "background": "/images/og-background.png"
+  },
+  "seo": {
+    "metatags": {
+      "og:site_name": "Blinn Motion",
+      "og:locale": "en_US",
+      "twitter:card": "summary_large_image",
+      "theme-color": "#2F6BFF",
+      "application-name": "Blinn Motion",
+      "keywords": "Blinn Motion, Figma Motion, MotionDoc, animation runtime, Figma to code, React animation, Canvas animation"
+    },
+    "organization": {
+      "name": "Blinn Motion",
+      "url": "https://docs.blinnmotion.com",
+      "logo": "https://docs.blinnmotion.com/logo/light.svg",
+      "sameAs": [
+        "https://github.com/ismailyagci/blinn-motion",
+        "https://www.npmjs.com/org/blinn-motion",
+        "https://blinnmotion.com"
+      ]
+    }
+  },
   "navigation": {
     "tabs": [
       {
@@ -68,7 +91,10 @@
     ]
   },
   "navbar": {
-    "links": [{ "label": "Live demo", "href": "https://blinnmotion.com" }],
+    "links": [
+      { "label": "Live demo", "href": "https://blinnmotion.com" },
+      { "label": "Examples", "href": "https://blinnmotion.com/#examples" }
+    ],
     "primary": {
       "type": "button",
       "label": "GitHub",

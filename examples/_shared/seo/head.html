@@ -1,0 +1,33 @@
+<!--
+  Shared SEO head snippet for Blinn Motion example labs.
+  Copy the <meta> block into each example's index.html / layout and set:
+    __TITLE__  e.g. Blinn Motion · React lab
+    __DESC__   one-line description
+    __ORIGIN__ e.g. https://react.blinnmotion.com
+    __LAB__    e.g. React
+  OG image lives at /og.png (1200×630) in each example's public/ folder.
+  Regenerate assets: node site/scripts/generate-og.mjs
+-->
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>__TITLE__</title>
+<meta name="description" content="__DESC__" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<meta name="theme-color" content="#0B0D12" />
+<meta name="author" content="Blinn Motion" />
+<link rel="canonical" href="__ORIGIN__/" />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Blinn Motion" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:url" content="__ORIGIN__/" />
+<meta property="og:title" content="__TITLE__" />
+<meta property="og:description" content="__DESC__" />
+<meta property="og:image" content="__ORIGIN__/og.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Blinn Motion __LAB__ example lab" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="__TITLE__" />
+<meta name="twitter:description" content="__DESC__" />
+<meta name="twitter:image" content="__ORIGIN__/og.png" />

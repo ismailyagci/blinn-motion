@@ -123,6 +123,11 @@ A MotionDoc is plain JSON. Export one from the **Figma plugin**, or start from [
 | [`@blinn-motion/lit`](packages/lit) | Lit / `<blinn-motion>` custom element |
 | [`@blinn-motion/figma-plugin`](packages/figma-plugin) | Export MotionDoc + live preview |
 
+### SEO & social previews
+
+Landing, docs, and labs share OG thumbnails, `robots.txt` / sitemaps, and `llms.txt` for agents.
+See [`docs/SEO.md`](docs/SEO.md). Regenerate images: `npm run og`. Production QA: `npm run seo:qa`.
+
 ### Examples
 
 Each example under [`examples/`](examples/) implements the **same advanced demo flow** (doc switch, dual DOM/Canvas on web, transport, scrub, rate, progress-driven mode, live time/fraction). See [`examples/_shared/flow.md`](examples/_shared/flow.md).

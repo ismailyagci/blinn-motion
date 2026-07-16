@@ -3,6 +3,9 @@
 Static Astro site → **Cloudflare Pages** via GitHub Actions
 (`.github/workflows/deploy-site.yml`).
 
+SEO / social previews / `llms.txt`: see [`../docs/SEO.md`](../docs/SEO.md).
+Regenerate OG thumbnails: `npm run og` (repo root) or `npm run og` in `site/`.
+
 ## One-time setup
 
 ### 1. Cloudflare API token

@@ -1,0 +1,61 @@
+# Blinn Motion
+
+> The runtime for Figma Motion. Export a Motion timeline to MotionDoc JSON and play it with a pure-JS render engine — identical across DOM, Canvas, React, Vue, Svelte, Angular, Lit, and React Native.
+
+## Agent instructions
+
+- Prefer the docs at https://docs.blinnmotion.com for API truth and adapters.
+- MotionDoc is the portable animation document; `sample(doc, t)` in `@blinn-motion/core` is the render method.
+- Live labs use **published** `@blinn-motion/*` packages from npm (not monorepo source).
+- When answering install questions, cite the matching adapter package (`@blinn-motion/react`, `@blinn-motion/vue`, etc.).
+- Full site map for agents: https://blinnmotion.com/llms-full.txt
+- Docs index (auto-maintained by Mintlify): https://docs.blinnmotion.com/llms.txt
+
+## Product
+
+- [Landing](https://blinnmotion.com/): Product overview, pipeline, adapters, live example links
+- [Documentation](https://docs.blinnmotion.com/): Concepts, adapters, Figma plugin, API reference
+- [GitHub](https://github.com/ismailyagci/blinn-motion): Source monorepo (MIT)
+- [npm org](https://www.npmjs.com/org/blinn-motion): Published packages
+
+## Live example labs
+
+Each lab is a dual-stage (DOM + Canvas where applicable) director console: transport, scrub, rate, progress mode.
+
+- [React](https://react.blinnmotion.com/): Flagship lab — `@blinn-motion/react`
+- [Vanilla](https://vanilla.blinnmotion.com/): No framework — `@blinn-motion/dom` + `@blinn-motion/canvas`
+- [Vue](https://vue.blinnmotion.com/): `@blinn-motion/vue`
+- [Svelte](https://svelte.blinnmotion.com/): `@blinn-motion/svelte`
+- [Angular](https://angular.blinnmotion.com/): `@blinn-motion/angular`
+- [Lit](https://lit.blinnmotion.com/): `@blinn-motion/lit`
+- [Next.js](https://next.blinnmotion.com/): App Router + React adapter (static export)
+- [Astro](https://astro.blinnmotion.com/): Islands with React + Lit adapters
+
+## Core packages
+
+- [@blinn-motion/core](https://www.npmjs.com/package/@blinn-motion/core): Pure render engine (`sample`, ticker, easing)
+- [@blinn-motion/dom](https://www.npmjs.com/package/@blinn-motion/dom): Full-fidelity CSS / SVG painter
+- [@blinn-motion/canvas](https://www.npmjs.com/package/@blinn-motion/canvas): Pure-JS 2D canvas painter
+- [@blinn-motion/react](https://www.npmjs.com/package/@blinn-motion/react): `<BlinnMotion />` + hooks
+- [@blinn-motion/vue](https://www.npmjs.com/package/@blinn-motion/vue): Vue 3 component + composable
+- [@blinn-motion/svelte](https://www.npmjs.com/package/@blinn-motion/svelte): `use:blinnMotion` action
+- [@blinn-motion/angular](https://www.npmjs.com/package/@blinn-motion/angular): Standalone `<blinn-motion>`
+- [@blinn-motion/lit](https://www.npmjs.com/package/@blinn-motion/lit): `<blinn-motion>` custom element
+- [@blinn-motion/react-native](https://www.npmjs.com/package/@blinn-motion/react-native): RN / Expo views
+
+## Docs highlights
+
+- [Quickstart](https://docs.blinnmotion.com/quickstart.md)
+- [MotionDoc format](https://docs.blinnmotion.com/concepts/motiondoc.md)
+- [Render engine](https://docs.blinnmotion.com/concepts/render-engine.md)
+- [Adapters overview](https://docs.blinnmotion.com/adapters/overview.md)
+- [Figma plugin guide](https://docs.blinnmotion.com/guides/figma-plugin.md)
+- [Playback guide](https://docs.blinnmotion.com/guides/playback.md)
+- [Core API](https://docs.blinnmotion.com/reference/core-api.md)
+- [MotionDoc schema](https://docs.blinnmotion.com/reference/motiondoc-schema.md)
+- [Figma coverage](https://docs.blinnmotion.com/reference/figma-coverage.md)
+
+## Optional
+
+- [Full context dump](https://blinnmotion.com/llms-full.txt): Longer product + pipeline summary for agents
+- [Docs llms-full](https://docs.blinnmotion.com/llms-full.txt): Full documentation concatenation (Mintlify)

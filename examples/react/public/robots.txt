@@ -1,0 +1,17 @@
+# Blinn Motion example lab
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+
+Sitemap: https://blinnmotion.com/sitemap.xml
+
+# Product
+# https://blinnmotion.com
+# https://docs.blinnmotion.com
+# https://blinnmotion.com/llms.txt

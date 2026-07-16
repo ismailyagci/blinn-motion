@@ -10,8 +10,8 @@
     "web": "expo start --web"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.2",
-    "@blinn-motion/react-native": "^0.1.2"
+    "@blinn-motion/core": "^0.1.3",
+    "@blinn-motion/react-native": "^0.1.3"
   },
   "comments": {
     "install": "This is an Expo template. To run it, install the Expo runtime deps (kept out of the workspace install to stay lightweight): `cd examples/react-native && npx expo install expo expo-status-bar react react-native`, then `npm start`. Metro is preconfigured (metro.config.js) to resolve the @blinn-motion/* workspace packages."

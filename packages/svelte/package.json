@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/svelte",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Blinn Motion Svelte adapter \u2014 use:blinnMotion action and attachBlinnMotion() for DOM/Canvas backends.",
   "license": "MIT",
   "type": "module",
@@ -16,7 +16,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup",
@@ -27,9 +28,9 @@
     "svelte": ">=4"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.2",
-    "@blinn-motion/dom": "^0.1.2",
-    "@blinn-motion/canvas": "^0.1.2"
+    "@blinn-motion/core": "^0.1.3",
+    "@blinn-motion/dom": "^0.1.3",
+    "@blinn-motion/canvas": "^0.1.3"
   },
   "devDependencies": {
     "svelte": "^5.16.0"
@@ -39,10 +40,24 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ismailyagci/blinn-motion.git"
+    "url": "git+https://github.com/ismailyagci/blinn-motion.git",
+    "directory": "packages/svelte"
   },
-  "homepage": "https://blinnmotion.com",
+  "homepage": "https://docs.blinnmotion.com/adapters/svelte",
   "bugs": {
     "url": "https://github.com/ismailyagci/blinn-motion/issues"
-  }
+  },
+  "keywords": [
+    "blinn-motion",
+    "figma",
+    "figma-motion",
+    "motiondoc",
+    "animation",
+    "motion",
+    "timeline",
+    "svelte",
+    "svelte5",
+    "action",
+    "adapter"
+  ]
 }

@@ -1,15 +1,88 @@
 ---
 import "../styles/global.css";
+import { site } from "../data/site";
 
 interface Props {
   title?: string;
   description?: string;
+  /** Absolute or site-root path for OG image */
+  image?: string;
+  /** Path only (no origin) for canonical, default "/" */
+  path?: string;
+  noindex?: boolean;
 }
 
 const {
-  title = "Blinn Motion — Figma Motion → real code",
-  description = "The runtime for Figma Motion. Export a Motion timeline to MotionDoc and play it with a pure-JS engine — identical across DOM, Canvas, React, Vue, Svelte, Angular, Lit and React Native.",
+  title = site.title,
+  description = site.description,
+  image = site.ogImage,
+  path = "/",
+  noindex = false,
 } = Astro.props;
+
+const canonical = new URL(path, site.url).href;
+const ogImage = image.startsWith("http") ? image : new URL(image, site.url).href;
+const robots = noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": `${site.url}/#organization`,
+      name: site.name,
+      url: site.url,
+      logo: {
+        "@type": "ImageObject",
+        url: `${site.url}/favicon.svg`,
+      },
+      sameAs: [...site.sameAs],
+    },
+    {
+      "@type": "WebSite",
+      "@id": `${site.url}/#website`,
+      url: site.url,
+      name: site.name,
+      description: site.description,
+      publisher: { "@id": `${site.url}/#organization` },
+      inLanguage: "en",
+    },
+    {
+      "@type": "WebPage",
+      "@id": `${canonical}#webpage`,
+      url: canonical,
+      name: title,
+      description,
+      isPartOf: { "@id": `${site.url}/#website` },
+      about: { "@id": `${site.url}/#software` },
+      primaryImageOfPage: {
+        "@type": "ImageObject",
+        url: ogImage,
+        width: 1200,
+        height: 630,
+      },
+      inLanguage: "en",
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${site.url}/#software`,
+      name: site.name,
+      applicationCategory: "DeveloperApplication",
+      operatingSystem: "Web, iOS, Android",
+      description: site.description,
+      url: site.url,
+      downloadUrl: site.npm,
+      softwareHelp: site.docs,
+      offers: {
+        "@type": "Offer",
+        price: "0",
+        priceCurrency: "USD",
+      },
+      license: "https://opensource.org/licenses/MIT",
+      codeRepository: site.repo,
+    },
+  ],
+};
 ---
 
 <!doctype html>
@@ -17,16 +90,46 @@ const {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>{title}</title>
     <meta name="description" content={description} />
-    <meta name="theme-color" content="#ffffff" />
+    <meta name="keywords" content={site.keywords.join(", ")} />
+    <meta name="author" content="Blinn Motion" />
+    <meta name="robots" content={robots} />
+    <meta name="googlebot" content={robots} />
+    <meta name="theme-color" content={site.themeColor} media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content={site.themeColorDark} media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light" />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Icons -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+    <link rel="alternate" type="text/plain" title="llms.txt" href="/llms.txt" />
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={site.name} />
+    <meta property="og:locale" content={site.locale} />
+    <meta property="og:url" content={canonical} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:secure_url" content={ogImage} />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={site.ogImageAlt} />
+
+    <!-- Twitter / X -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={site.ogImageAlt} />
+
+    <!-- JSON-LD -->
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
 
     <!-- Fonts: Space Grotesk (display) · Inter (body) · JetBrains Mono (data) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

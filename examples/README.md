@@ -10,6 +10,9 @@ Shared chrome: [`_shared/lab.css`](./_shared/lab.css) · flow contract: [`_share
 Production builds install **published** `@blinn-motion/*` from npm (not monorepo `packages/`).
 CI: [Deploy examples](../.github/workflows/deploy-examples.yml).
 
+Each lab ships Open Graph / Twitter meta + `/og.png` (1200×630) and `/robots.txt`.
+Regenerate thumbnails: `npm run og` · QA: `npm run seo:qa` · details: [`docs/SEO.md`](../docs/SEO.md).
+
 | Example | Stack | Adapter | Live |
 |---------|--------|---------|------|
 | [`vanilla`](./vanilla) | Vite + TypeScript | `@blinn-motion/dom` + `canvas` | [vanilla.blinnmotion.com](https://vanilla.blinnmotion.com) |

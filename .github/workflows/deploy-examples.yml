@@ -146,10 +146,89 @@ jobs:
           echo "Staged $STAGE/examples/${EXAMPLE}"
           ls -la "$STAGE/examples/${EXAMPLE}"
 
+      # Examples pin published @blinn-motion/* versions. On a release push, Publish
+      # and Deploy examples race: npm may not have the new version yet (ETARGET).
       - name: Install from npm registry
         if: steps.gate.outputs.skip != 'true'
         working-directory: ${{ env.STAGE }}/examples/${{ matrix.id }}
-        run: npm install
+        run: |
+          set -euo pipefail
+          # Resolve required @blinn-motion/* ranges from package.json and wait until
+          # the registry serves a matching version (publish race after version bumps).
+          python3 - <<'PY'
+          import json, re, subprocess, sys, time, urllib.request
+
+          pkg = json.load(open("package.json"))
+          deps = {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}
+          needed = {k: v for k, v in deps.items() if k.startswith("@blinn-motion/")}
+          if not needed:
+              print("No @blinn-motion/* deps — skip registry wait")
+              sys.exit(0)
+
+          def latest(name):
+              url = f"https://registry.npmjs.org/{name}/latest"
+              try:
+                  with urllib.request.urlopen(url, timeout=15) as r:
+                      return json.load(r).get("version")
+              except Exception as e:
+                  print(f"  registry lookup failed for {name}: {e}")
+                  return None
+
+          def satisfies(version: str, spec: str) -> bool:
+              # Handle ^x.y.z / ~x.y.z / exact x.y.z used by these examples.
+              m = re.match(r"^([\^~]?)(\d+)\.(\d+)\.(\d+)$", spec.strip())
+              if not m:
+                  # Fallback: let npm decide later
+                  return True
+              op, maj, min_, pat = m.group(1), int(m.group(2)), int(m.group(3)), int(m.group(4))
+              vm = re.match(r"^(\d+)\.(\d+)\.(\d+)", version or "")
+              if not vm:
+                  return False
+              vmaj, vmin, vpat = int(vm.group(1)), int(vm.group(2)), int(vm.group(3))
+              if op == "^":
+                  if maj == 0:
+                      return (vmaj, vmin) == (0, min_) and vpat >= pat
+                  return vmaj == maj and (vmin, vpat) >= (min_, pat)
+              if op == "~":
+                  return (vmaj, vmin) == (maj, min_) and vpat >= pat
+              return (vmaj, vmin, vpat) == (maj, min_, pat)
+
+          print("Waiting for npm registry versions:")
+          for name, spec in sorted(needed.items()):
+              print(f"  {name}@{spec}")
+
+          deadline = time.time() + 8 * 60  # 8 minutes max
+          attempt = 0
+          while time.time() < deadline:
+              attempt += 1
+              missing = []
+              for name, spec in needed.items():
+                  ver = latest(name)
+                  ok = ver is not None and satisfies(ver, spec)
+                  print(f"  [{attempt}] {name}: latest={ver} need={spec} ok={ok}")
+                  if not ok:
+                      missing.append(name)
+              if not missing:
+                  print("All required @blinn-motion/* versions available on npm")
+                  sys.exit(0)
+              sleep = min(15 + attempt * 5, 45)
+              print(f"Missing {missing} — retry in {sleep}s (publish race?)")
+              time.sleep(sleep)
+
+          print("::error::Timed out waiting for @blinn-motion/* on npm registry")
+          sys.exit(1)
+          PY
+
+          # Retry npm install as a second safety net (registry eventual consistency).
+          for i in 1 2 3 4 5 6; do
+            if npm install; then
+              exit 0
+            fi
+            echo "npm install failed (attempt $i/6) — retrying in 20s..."
+            sleep 20
+          done
+          echo "::error::npm install failed after retries"
+          exit 1
 
       - name: Build
         if: steps.gate.outputs.skip != 'true'
@@ -275,3 +354,41 @@ jobs:
 
           echo "pages_dev=https://${PROJECT_NAME}.pages.dev" >> "$GITHUB_STEP_SUMMARY"
           echo "custom=https://${DOMAIN}" >> "$GITHUB_STEP_SUMMARY"
+
+      # Prove the public custom domain serves the lab (not Access Denied / empty).
+      # Fresh SSL / DNS can lag a few minutes after first attach — retry with backoff.
+      - name: Smoke test production URL
+        if: steps.gate.outputs.skip != 'true'
+        env:
+          DOMAIN: ${{ matrix.domain }}
+          PROJECT_NAME: ${{ matrix.project }}
+        run: |
+          set -euo pipefail
+          URL="https://${DOMAIN}/"
+          PAGES_URL="https://${PROJECT_NAME}.pages.dev/"
+          ok=0
+          for i in 1 2 3 4 5 6 7 8; do
+            code=$(curl -sS -o /tmp/ex-smoke.html -w "%{http_code}" --max-time 20 \
+              -A "BlinnMotion-CI-Smoke/1.0" "$URL" || echo "000")
+            body=$(head -c 4000 /tmp/ex-smoke.html 2>/dev/null || true)
+            denied=0
+            echo "$body" | grep -qiE 'access.?denied|cloudflare access|login\.cloudflareaccess|Error 1[0-9]{3}|Attention Required' && denied=1 || true
+            title=$(echo "$body" | sed -n 's/.*<title>\([^<]*\)<\/title>.*/\1/ip' | head -1)
+            echo "attempt $i: $URL → HTTP $code title=${title:-?} denied=$denied"
+            if [ "$code" = "200" ] && [ "$denied" = "0" ] && echo "$body" | grep -qiE 'blinn|motion|doctype html'; then
+              ok=1
+              break
+            fi
+            sleep $((10 + i * 5))
+          done
+          if [ "$ok" != "1" ]; then
+            echo "::error::Smoke test failed for $URL"
+            echo "Body preview:"
+            head -c 800 /tmp/ex-smoke.html || true
+            exit 1
+          fi
+          # pages.dev is optional (Access / network may block) — report only
+          pcode=$(curl -sS -o /dev/null -w "%{http_code}" --max-time 15 \
+            -A "BlinnMotion-CI-Smoke/1.0" "$PAGES_URL" || echo "000")
+          echo "pages.dev check: $PAGES_URL → HTTP $pcode (informational)"
+          echo "smoke_ok=$URL" >> "$GITHUB_STEP_SUMMARY"

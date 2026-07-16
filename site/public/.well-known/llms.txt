@@ -1,0 +1,7 @@
+# Blinn Motion
+
+> See https://blinnmotion.com/llms.txt for the canonical llms.txt index.
+
+- [Canonical llms.txt](https://blinnmotion.com/llms.txt)
+- [Full agent context](https://blinnmotion.com/llms-full.txt)
+- [Docs llms.txt](https://docs.blinnmotion.com/llms.txt)

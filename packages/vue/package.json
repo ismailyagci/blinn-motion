@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/vue",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Blinn Motion Vue adapter \u2014 <BlinnMotion/> component and useBlinnMotion() composable for DOM/Canvas backends.",
   "license": "MIT",
   "type": "module",
@@ -16,7 +16,8 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
     "build": "tsup",
@@ -27,9 +28,9 @@
     "vue": ">=3.3"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.2",
-    "@blinn-motion/dom": "^0.1.2",
-    "@blinn-motion/canvas": "^0.1.2"
+    "@blinn-motion/core": "^0.1.3",
+    "@blinn-motion/dom": "^0.1.3",
+    "@blinn-motion/canvas": "^0.1.3"
   },
   "devDependencies": {
     "vue": "^3.5.13"
@@ -39,10 +40,24 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ismailyagci/blinn-motion.git"
+    "url": "git+https://github.com/ismailyagci/blinn-motion.git",
+    "directory": "packages/vue"
   },
-  "homepage": "https://blinnmotion.com",
+  "homepage": "https://docs.blinnmotion.com/adapters/vue",
   "bugs": {
     "url": "https://github.com/ismailyagci/blinn-motion/issues"
-  }
+  },
+  "keywords": [
+    "blinn-motion",
+    "figma",
+    "figma-motion",
+    "motiondoc",
+    "animation",
+    "motion",
+    "timeline",
+    "vue",
+    "vue3",
+    "composable",
+    "adapter"
+  ]
 }
