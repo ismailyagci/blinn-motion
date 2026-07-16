@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/react",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Blinn Motion React adapter \u2014 a <BlinnMotion/> component and useBlinnMotion() hook that play a MotionDoc via the DOM or Canvas backend.",
   "license": "MIT",
   "type": "module",
@@ -27,9 +27,9 @@
     "react": ">=17"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.0",
-    "@blinn-motion/dom": "^0.1.0",
-    "@blinn-motion/canvas": "^0.1.0"
+    "@blinn-motion/core": "^0.1.1",
+    "@blinn-motion/dom": "^0.1.1",
+    "@blinn-motion/canvas": "^0.1.1"
   },
   "devDependencies": {
     "@types/react": "^18.3.12",

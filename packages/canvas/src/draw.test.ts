@@ -18,18 +18,19 @@ const doc = JSON.parse(readFileSync(join(here, "../../../fixtures/card.motion.js
 function mockCtx() {
   const calls: Record<string, number> = {};
   const fillStyles: unknown[] = [];
+  const conicArgs: number[][] = [];
   const rec = (name: string) => (calls[name] = (calls[name] || 0) + 1);
   const handler: ProxyHandler<Record<string, unknown>> = {
     get(target, prop: string) {
       if (prop in target) return (target as any)[prop];
       if (prop === "fillStyle") return undefined;
-      return (..._args: unknown[]) => {
+      return (...args: unknown[]) => {
         rec(prop);
-        if (
-          prop === "createLinearGradient" ||
-          prop === "createRadialGradient" ||
-          prop === "createConicGradient"
-        )
+        if (prop === "createConicGradient") {
+          conicArgs.push(args as number[]);
+          return { addColorStop: () => rec("addColorStop") };
+        }
+        if (prop === "createLinearGradient" || prop === "createRadialGradient")
           return { addColorStop: () => rec("addColorStop") };
         return undefined;
       };
@@ -41,7 +42,7 @@ function mockCtx() {
     },
   };
   const ctx = new Proxy({} as Record<string, unknown>, handler);
-  return { ctx: ctx as unknown as CanvasRenderingContext2D, calls, fillStyles };
+  return { ctx: ctx as unknown as CanvasRenderingContext2D, calls, fillStyles, conicArgs };
 }
 
 /** A minimal resolved node with sane defaults for the synthetic-tree tests. */
@@ -149,6 +150,32 @@ describe("@blinn-motion/canvas drawTree", () => {
     });
     drawTree(m.ctx, tree([n]), 1);
     expect(m.calls.createConicGradient).toBeGreaterThanOrEqual(1);
+  });
+
+  it("maps CSS conic 0deg (up) to canvas start angle -π/2 (from +x)", () => {
+    // CSS: 0deg = 12 o'clock; Canvas createConicGradient: 0 = 3 o'clock.
+    // MotionDoc angles follow CSS, so canvas θ = (cssAngle - 90)°.
+    const m = mockCtx();
+    const n = node({
+      width: 100,
+      height: 100,
+      fill: {
+        type: "angular",
+        angle: 0,
+        center: { x: 0.5, y: 0.5 },
+        radius: 0.5,
+        stops: [
+          { pos: 0, color: { r: 255, g: 0, b: 0, a: 1 } },
+          { pos: 1, color: { r: 0, g: 0, b: 255, a: 1 } },
+        ],
+      },
+    });
+    drawTree(m.ctx, tree([n]), 1);
+    expect(m.conicArgs.length).toBeGreaterThanOrEqual(1);
+    const [start, x, y] = m.conicArgs[0]!;
+    expect(start).toBeCloseTo(-Math.PI / 2, 5);
+    expect(x).toBeCloseTo(50, 5);
+    expect(y).toBeCloseTo(50, 5);
   });
 
   it("sets globalCompositeOperation for a multiply blend mode", () => {

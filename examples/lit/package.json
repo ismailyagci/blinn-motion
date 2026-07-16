@@ -9,8 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.0",
-    "@blinn-motion/lit": "^0.1.0",
+    "@blinn-motion/core": "^0.1.1",
+    "@blinn-motion/lit": "^0.1.1",
     "lit": "^3.2.1"
   },
   "devDependencies": {

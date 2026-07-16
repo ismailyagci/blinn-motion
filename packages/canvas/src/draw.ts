@@ -128,17 +128,20 @@ function paintToFillStyle(
   // radial / angular / diamond all originate from a center + radius.
   const cx = fill.center.x * w;
   const cy = fill.center.y * h;
-  const R = Math.max(0, fill.radius) * Math.max(Math.abs(w), Math.abs(h));
 
   if (fill.type === "angular") {
     // Conic gradient (modern canvas only). Fall back to the radial gradient if
     // the API is missing or throws.
+    //
+    // Angle convention (MotionDoc / CSS): `0deg` is UP (12 o'clock), clockwise.
+    // Canvas `createConicGradient(θ)`: `0` is RIGHT (+x / 3 o'clock), clockwise.
+    // So CSS angle A maps to canvas as (A - 90)°.
     const anyCtx = ctx as unknown as {
       createConicGradient?: (startAngle: number, x: number, y: number) => CanvasGradient;
     };
     if (typeof anyCtx.createConicGradient === "function") {
       try {
-        const start = (fill.angle * Math.PI) / 180;
+        const start = ((fill.angle - 90) * Math.PI) / 180;
         const g = anyCtx.createConicGradient(start, cx, cy);
         for (const s of fill.stops) g.addColorStop(clamp01(s.pos), css(s.color));
         return g;
@@ -148,11 +151,19 @@ function paintToFillStyle(
     }
   }
 
-  // radial (and diamond) → radial gradient.
-  // TODO diamond: a true diamond gradient needs a Chebyshev-distance ramp; we
-  // approximate it with the same radial gradient for now.
-  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
+  // radial (and diamond) → match CSS `radial-gradient(ellipse R% R% at …)`:
+  // percentage radii resolve against each box axis, so the ramp is elliptical
+  // on non-square boxes. Bake that into the gradient via a temporary transform
+  // (createRadialGradient samples the CTM at creation time).
+  // TODO diamond: true Chebyshev-distance ramp; approximate as ellipse for now.
+  const rx = Math.max(1e-6, Math.max(0, fill.radius) * Math.abs(w));
+  const ry = Math.max(1e-6, Math.max(0, fill.radius) * Math.abs(h));
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(rx, ry);
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
   for (const s of fill.stops) g.addColorStop(clamp01(s.pos), css(s.color));
+  ctx.restore();
   return g;
 }
 
@@ -291,6 +302,12 @@ function sidesDiffer(s: Corners): boolean {
  * carries per-side weights that differ AND its clip shape is a plain rect — in
  * which case each edge is stroked separately with its own line width.
  */
+/**
+ * Stroke the node's border to match CSS `box-sizing: border-box` borders:
+ * the declared width/height is the OUTER edge; the stroke sits fully inside
+ * the box (centerline inset by weight/2). Default canvas strokes are centered
+ * on the path and would bleed half outside — unlike DOM `border`.
+ */
 function strokeBorder(ctx: CanvasRenderingContext2D, node: RenderNode): void {
   const stroke = node.stroke;
   if (!stroke) return;
@@ -300,11 +317,64 @@ function strokeBorder(ctx: CanvasRenderingContext2D, node: RenderNode): void {
     return;
   }
   if (stroke.weight > 0) {
-    boxPath(ctx, node);
+    const inset = stroke.weight / 2;
+    ctx.save();
+    // Shrink the outline so a centered stroke of `weight` lies fully inside the box.
+    ctx.beginPath();
+    appendInsetBoxPath(ctx, node, inset);
     ctx.strokeStyle = css(stroke.color);
     ctx.lineWidth = stroke.weight;
+    ctx.lineJoin = "round";
     ctx.stroke();
+    ctx.restore();
   }
+}
+
+/** Box path inset uniformly (clamped so tiny boxes don't invert). */
+function appendInsetBoxPath(ctx: CanvasRenderingContext2D, node: RenderNode, inset: number): void {
+  const w = node.width;
+  const h = node.height;
+  const maxInset = Math.max(0, Math.min(Math.abs(w), Math.abs(h)) / 2 - 1e-6);
+  const i = Math.max(0, Math.min(inset, maxInset));
+  if (i <= 0) {
+    appendBoxPath(ctx, node);
+    return;
+  }
+  // Build a temporary node with shrunk size and walk its clip shape in local coords
+  // shifted by `i`. For ellipse/polygon we scale about the box center.
+  const clip = node.clipShape;
+  if (clip.kind === "ellipse") {
+    const rw = Math.max(0, Math.abs(w) / 2 - i);
+    const rh = Math.max(0, Math.abs(h) / 2 - i);
+    ctx.ellipse(w / 2, h / 2, rw, rh, 0, 0, Math.PI * 2);
+    return;
+  }
+  if (clip.kind === "polygon") {
+    const cx = w / 2;
+    const cy = h / 2;
+    const sx = Math.max(0, (Math.abs(w) - 2 * i) / Math.max(1e-6, Math.abs(w)));
+    const sy = Math.max(0, (Math.abs(h) - 2 * i) / Math.max(1e-6, Math.abs(h)));
+    clip.vertices.forEach((p, idx) => {
+      const x = cx + (p[0] * w - cx) * sx;
+      const y = cy + (p[1] * h - cy) * sy;
+      if (idx === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+    ctx.closePath();
+    return;
+  }
+  // rounded rect
+  const iw = Math.max(0, w - 2 * i);
+  const ih = Math.max(0, h - 2 * i);
+  const [tl, tr, br, bl] = clip.cornerRadius.map((r) => Math.max(0, r - i)) as [
+    number,
+    number,
+    number,
+    number,
+  ];
+  const maxR = Math.min(iw, ih) / 2;
+  const r = (v: number) => Math.max(0, Math.min(v, maxR));
+  roundRect(ctx, i, i, iw, ih, [r(tl), r(tr), r(br), r(bl)]);
 }
 
 function strokeSides(ctx: CanvasRenderingContext2D, node: RenderNode, sides: Corners, color: RGBA): void {
@@ -318,12 +388,15 @@ function strokeSides(ctx: CanvasRenderingContext2D, node: RenderNode, sides: Cor
     ctx.moveTo(x1, y1);
     ctx.lineTo(x2, y2);
     ctx.lineWidth = weight;
+    ctx.lineCap = "butt";
     ctx.stroke();
   };
-  edge(0, 0, w, 0, top); // top
-  edge(w, 0, w, h, right); // right
-  edge(0, h, w, h, bottom); // bottom
-  edge(0, 0, 0, h, left); // left
+  // Centerlines sit half a stroke inside the box so the full weight stays inside
+  // (matches CSS border painting within border-box).
+  edge(0, top / 2, w, top / 2, top); // top
+  edge(w - right / 2, 0, w - right / 2, h, right); // right
+  edge(0, h - bottom / 2, w, h - bottom / 2, bottom); // bottom
+  edge(left / 2, 0, left / 2, h, left); // left
 }
 
 // --------------------------------------------------------------------- effects ---

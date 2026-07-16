@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/angular",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Blinn Motion Angular adapter \u2014 standalone BlinnMotion component and attachBlinnMotion() for DOM/Canvas backends.",
   "license": "MIT",
   "type": "module",
@@ -28,9 +28,9 @@
     "@angular/common": ">=17"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.0",
-    "@blinn-motion/dom": "^0.1.0",
-    "@blinn-motion/canvas": "^0.1.0"
+    "@blinn-motion/core": "^0.1.1",
+    "@blinn-motion/dom": "^0.1.1",
+    "@blinn-motion/canvas": "^0.1.1"
   },
   "devDependencies": {
     "@angular/common": "^19.0.0",

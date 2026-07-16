@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/core",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Blinn Motion core \u2014 pure, DOM-free render engine. Samples a MotionDoc at time t into a backend-agnostic resolved render tree. Shared by every adapter.",
   "license": "MIT",
   "type": "module",

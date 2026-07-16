@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/lit",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Blinn Motion Lit adapter \u2014 <blinn-motion> custom element for DOM/Canvas backends.",
   "license": "MIT",
   "type": "module",
@@ -27,9 +27,9 @@
     "lit": ">=3"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.0",
-    "@blinn-motion/dom": "^0.1.0",
-    "@blinn-motion/canvas": "^0.1.0"
+    "@blinn-motion/core": "^0.1.1",
+    "@blinn-motion/dom": "^0.1.1",
+    "@blinn-motion/canvas": "^0.1.1"
   },
   "devDependencies": {
     "lit": "^3.2.1"

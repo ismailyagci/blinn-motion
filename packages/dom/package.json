@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/dom",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Blinn Motion DOM adapter \u2014 plays a MotionDoc into nested DOM/CSS layers (transforms, SVG paths, masks, procedural shaders). Built on @blinn-motion/core.",
   "license": "MIT",
   "type": "module",
@@ -24,7 +24,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.0"
+    "@blinn-motion/core": "^0.1.1"
   },
   "publishConfig": {
     "access": "public"
