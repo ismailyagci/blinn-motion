@@ -69,9 +69,17 @@ code,
 /* ── App shell ─────────────────────────────────────────────────────────── */
 
 .lab {
-  max-width: 1240px;
+  /* Wide enough for two full showcase stages (480px) + console on desktop. */
+  max-width: 1680px;
   margin: 0 auto;
-  padding: 20px 22px 56px;
+  padding: 20px 28px 64px;
+}
+
+@media (min-width: 1400px) {
+  .lab {
+    max-width: 1760px;
+    padding-inline: 36px;
+  }
 }
 
 .lab-top {
@@ -214,12 +222,13 @@ code,
 
 .lab-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
-  gap: 16px;
+  /* Give the stage bay most of the row so 2×480 MotionDocs fit without clipping. */
+  grid-template-columns: minmax(0, 1.65fr) minmax(300px, 0.7fr);
+  gap: 18px;
   align-items: start;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 1100px) {
   .lab-grid {
     grid-template-columns: 1fr;
   }
@@ -269,11 +278,12 @@ code,
 
 .stages {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  /* Prefer full MotionDoc width per column (showcase = 480px) before shrinking. */
+  grid-template-columns: repeat(2, minmax(min(100%, 480px), 1fr));
+  gap: 14px;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 900px) {
   .stages {
     grid-template-columns: 1fr;
   }
@@ -284,6 +294,7 @@ code,
   border-radius: var(--r);
   overflow: hidden;
   background: var(--paper);
+  min-width: 0;
 }
 
 .stage-bar {
@@ -322,34 +333,42 @@ code,
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 280px;
-  padding: 16px;
+  /* showcase 320 + padding; card 600 is taller — host grows with content */
+  min-height: 360px;
+  padding: 20px;
   background: var(--stage-check), #0e1116;
-  /* Never let layers bleed past the stage bay (DOM clips natively; canvas needs this too). */
-  overflow: hidden;
+  overflow: auto;
 }
 
-/* Keep the MotionDoc stage frame inside the bay; never expand past the card. */
+/* Desktop / wide: show MotionDoc at native stage size (no squeeze → no clip). */
 .stage-host > [data-blinn-stage] {
-  max-width: 100%;
   box-sizing: border-box;
+  flex: none;
 }
 
-/* When the bay is narrower than the stage, scale the whole frame down (preserve aspect). */
 .stage-host > [data-blinn-stage="canvas"] {
-  max-width: 100%;
+  line-height: 0;
 }
 .stage-host > [data-blinn-stage="canvas"] > canvas {
-  max-width: 100%;
-  width: 100% !important;
-  height: auto !important;
   display: block;
+  /* Native CSS size from player (stage.width/height) — do not force width:100%. */
+  max-width: none;
+  height: auto;
 }
 .stage-host > [data-blinn-stage="dom"] {
-  /* DOM stage has absolutely-positioned children sized in stage px — scale via transform when needed.
-     Container constrains with max-width; overflow already hidden on the stage itself. */
-  max-width: 100%;
   overflow: hidden !important;
+}
+
+/* Only shrink stages when the viewport cannot fit 2×480 side-by-side. */
+@media (max-width: 1200px) {
+  .stage-host > [data-blinn-stage] {
+    max-width: 100%;
+  }
+  .stage-host > [data-blinn-stage="canvas"] > canvas {
+    max-width: 100%;
+    width: 100% !important;
+    height: auto !important;
+  }
 }
 
 /* ── Console / controls ────────────────────────────────────────────────── */
