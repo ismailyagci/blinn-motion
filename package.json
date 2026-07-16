@@ -17,6 +17,7 @@
     "test:coverage": "vitest run --coverage",
     "lint": "eslint .",
     "clean": "rimraf 'packages/*/dist' 'examples/*/dist'",
+    "publish:packages": "npm publish --workspaces --access public",
     "prepare": "husky"
   },
   "devDependencies": {

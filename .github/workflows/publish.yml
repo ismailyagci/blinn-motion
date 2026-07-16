@@ -1,0 +1,108 @@
+# Publish public @blinn-motion/* packages to npm.
+#
+# Never publishes: root, examples/*, packages/figma-plugin (private: true).
+#
+# Required secret:
+#   NPM_TOKEN — npm granular access token (read+write on org blinn-motion)
+#
+# How to release:
+#   1. Bump versions in packages/*/package.json (keep them in sync for 0.x).
+#   2. Merge to main.
+#   3. Actions → Publish packages → Run workflow
+#      - dry_run: true  → validate only (default, safe)
+#      - dry_run: false → real npm publish
+#   Or create a GitHub Release (tag v*) — publishes for real.
+
+name: Publish packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run only (no packages uploaded to npm)"
+        type: boolean
+        default: true
+  release:
+    types: [published]
+
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Build, test & publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      # Needed for npm --provenance attestations
+      id-token: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Verify NPM_TOKEN
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then
+            echo "::error::Secret NPM_TOKEN is empty or not set."
+            echo "Create a granular token at https://www.npmjs.com/settings/~/tokens"
+            echo "Scope: org blinn-motion, permission read and write, max 90 days."
+            echo "Then: repo Settings → Secrets → Actions → NPM_TOKEN"
+            exit 1
+          fi
+          echo "NPM_TOKEN is set (length ${#NODE_AUTH_TOKEN})"
+
+      - name: Install
+        run: npm ci
+
+      - name: Build packages
+        run: npm run build
+
+      - name: Test
+        run: npm test
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: List packages that would publish
+        run: |
+          node <<'NODE'
+          const fs = require("fs");
+          const path = require("path");
+          const root = "packages";
+          for (const dir of fs.readdirSync(root).sort()) {
+            const pkgPath = path.join(root, dir, "package.json");
+            if (!fs.existsSync(pkgPath)) continue;
+            const pkg = JSON.parse(fs.readFileSync(pkgPath, "utf8"));
+            if (pkg.private) {
+              console.log(`skip  ${pkg.name} (private)`);
+            } else {
+              console.log(`pub   ${pkg.name}@${pkg.version}`);
+            }
+          }
+          NODE
+
+      - name: Publish to npm (dry-run)
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --workspaces --access public --dry-run
+
+      - name: Publish to npm
+        if: ${{ github.event_name == 'release' || (github.event_name == 'workflow_dispatch' && !inputs.dry_run) }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        # --provenance: signed build attestation (public repo + id-token: write)
+        run: npm publish --workspaces --access public --provenance

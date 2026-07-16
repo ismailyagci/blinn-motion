@@ -1,7 +1,7 @@
 {
   "name": "@blinn-motion/vue",
   "version": "0.1.0",
-  "description": "Blinn Motion Vue adapter — <BlinnMotion/> component and useBlinnMotion() composable for DOM/Canvas backends.",
+  "description": "Blinn Motion Vue adapter \u2014 <BlinnMotion/> component and useBlinnMotion() composable for DOM/Canvas backends.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -15,7 +15,9 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -31,5 +33,16 @@
   },
   "devDependencies": {
     "vue": "^3.5.13"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ismailyagci/blinn-motion.git"
+  },
+  "homepage": "https://blinnmotion.com",
+  "bugs": {
+    "url": "https://github.com/ismailyagci/blinn-motion/issues"
   }
 }

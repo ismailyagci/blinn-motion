@@ -1,7 +1,7 @@
 {
   "name": "@blinn-motion/dom",
   "version": "0.1.0",
-  "description": "Blinn Motion DOM adapter — plays a MotionDoc into nested DOM/CSS layers (transforms, SVG paths, masks, procedural shaders). Built on @blinn-motion/core.",
+  "description": "Blinn Motion DOM adapter \u2014 plays a MotionDoc into nested DOM/CSS layers (transforms, SVG paths, masks, procedural shaders). Built on @blinn-motion/core.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -15,7 +15,9 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
@@ -23,5 +25,16 @@
   },
   "dependencies": {
     "@blinn-motion/core": "^0.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ismailyagci/blinn-motion.git"
+  },
+  "homepage": "https://blinnmotion.com",
+  "bugs": {
+    "url": "https://github.com/ismailyagci/blinn-motion/issues"
   }
 }

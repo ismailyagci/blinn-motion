@@ -1,7 +1,7 @@
 {
   "name": "@blinn-motion/core",
   "version": "0.1.0",
-  "description": "Blinn Motion core — pure, DOM-free render engine. Samples a MotionDoc at time t into a backend-agnostic resolved render tree. Shared by every adapter.",
+  "description": "Blinn Motion core \u2014 pure, DOM-free render engine. Samples a MotionDoc at time t into a backend-agnostic resolved render tree. Shared by every adapter.",
   "license": "MIT",
   "type": "module",
   "sideEffects": false,
@@ -15,10 +15,24 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist", "SCHEMA.md"],
+  "files": [
+    "dist",
+    "SCHEMA.md"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ismailyagci/blinn-motion.git"
+  },
+  "homepage": "https://blinnmotion.com",
+  "bugs": {
+    "url": "https://github.com/ismailyagci/blinn-motion/issues"
   }
 }
