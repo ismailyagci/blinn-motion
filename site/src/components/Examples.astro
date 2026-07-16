@@ -1,0 +1,116 @@
+---
+import { liveExamples } from "../data/examples";
+import { frameworkSvg } from "../data/frameworks";
+---
+
+<section class="section" id="examples">
+  <div class="container">
+    <div class="section-head center" data-reveal>
+      <span class="eyebrow"><span class="kf"></span> Live labs</span>
+      <h2 class="title">Try it on every stack.</h2>
+      <p class="lead">
+        Production demos on Cloudflare Pages — each installs published
+        <code class="inline">@blinn-motion/*</code> packages from npm, not monorepo source.
+      </p>
+    </div>
+
+    <div class="ex-grid">
+      {liveExamples.map((ex, i) => (
+        <a
+          class:list={["ex-card", { flagship: ex.flagship }]}
+          href={ex.href}
+          target="_blank"
+          rel="noopener"
+          data-reveal
+          style={`--reveal-delay:${i * 40}ms; --c:${ex.c}; --tint:${ex.tint}`}
+        >
+          <div class="ex-top">
+            <span class="ex-logo" set:html={frameworkSvg(ex.icon, 20)} />
+            <div class="ex-id">
+              <span class="ex-name">{ex.name}</span>
+              <span class="ex-stack mono">{ex.stack}</span>
+            </div>
+            {ex.flagship && <span class="ex-badge mono">flagship</span>}
+          </div>
+          <p class="ex-desc">{ex.desc}</p>
+          <span class="ex-go mono">
+            {ex.href.replace("https://", "")}
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M10 7h7v7" /></svg>
+          </span>
+        </a>
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .ex-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .ex-card {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 18px 16px;
+    border-radius: var(--r-lg);
+    border: 1px solid var(--line);
+    background: var(--paper);
+    box-shadow: var(--shadow-sm);
+    transition: border-color 0.18s, transform 0.18s, box-shadow 0.18s;
+  }
+  .ex-card:hover {
+    border-color: color-mix(in srgb, var(--c) 45%, var(--line));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  .ex-card.flagship {
+    border-color: color-mix(in srgb, var(--c) 35%, var(--line));
+    background: linear-gradient(180deg, var(--tint) 0%, var(--paper) 55%);
+  }
+  .ex-top { display: flex; align-items: center; gap: 12px; }
+  .ex-logo {
+    width: 40px; height: 40px; border-radius: 11px; flex: none;
+    display: grid; place-items: center;
+    color: var(--c); background: var(--tint);
+    border: 1px solid color-mix(in srgb, var(--c) 22%, transparent);
+  }
+  .ex-logo :global(svg) { display: block; }
+  .ex-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .ex-name { font-size: 17px; font-weight: 650; letter-spacing: -0.02em; line-height: 1.15; }
+  .ex-stack { font-size: 11.5px; color: var(--ink-3); }
+  .ex-badge {
+    margin-left: auto;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--c);
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: var(--tint);
+    border: 1px solid color-mix(in srgb, var(--c) 20%, transparent);
+  }
+  .ex-desc {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.5;
+    flex: 1;
+  }
+  .ex-go {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--c);
+  }
+  .ex-card:hover .ex-go { text-decoration: underline; text-underline-offset: 3px; }
+
+  @media (max-width: 760px) {
+    .ex-grid { grid-template-columns: 1fr; }
+    .ex-badge { display: none; }
+  }
+</style>

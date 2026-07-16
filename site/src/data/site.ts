@@ -10,6 +10,7 @@ export const site = {
   nav: [
     { label: "Pipeline", href: "#pipeline" },
     { label: "Adapters", href: "#adapters" },
+    { label: "Examples", href: "#examples" },
     { label: "Engine", href: "#engine" },
     { label: "Features", href: "#features" },
     { label: "Code", href: "#code" },
