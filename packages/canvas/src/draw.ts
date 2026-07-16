@@ -293,55 +293,48 @@ function paintVectorPath(ctx: CanvasRenderingContext2D, node: RenderNode): void 
 
 // --------------------------------------------------------------------- borders ---
 
-function sidesDiffer(s: Corners): boolean {
-  return !(s[0] === s[1] && s[1] === s[2] && s[2] === s[3]);
-}
-
 /**
  * Stroke the node's border. Uniform (single `boxPath` stroke) unless the node
  * carries per-side weights that differ AND its clip shape is a plain rect — in
  * which case each edge is stroked separately with its own line width.
  */
 /**
- * Stroke the node's border to match CSS `box-sizing: border-box` borders:
- * the declared width/height is the OUTER edge; the stroke sits fully inside
- * the box (centerline inset by weight/2). Default canvas strokes are centered
- * on the path and would bleed half outside — unlike DOM `border`.
+ * Paint borders to match CSS `box-sizing: border-box`:
+ * declared width/height is the OUTER edge; border strips sit fully inside.
+ * Per-side weights use filled edge strips (more reliable than stroked lines,
+ * and matches how browsers paint CSS borders).
  */
 function strokeBorder(ctx: CanvasRenderingContext2D, node: RenderNode): void {
   const stroke = node.stroke;
   if (!stroke) return;
   const sides = stroke.sides;
-  if (sides && node.clipShape.kind === "rect" && sidesDiffer(sides)) {
-    strokeSides(ctx, node, sides, stroke.color);
+  // Any explicit per-side weights → filled edge strips (CSS border-box).
+  // Equal weights still go through strips so rounded clips stay consistent.
+  if (sides) {
+    paintBorderStrips(ctx, node, sides, stroke.color);
     return;
   }
   if (stroke.weight > 0) {
-    const inset = stroke.weight / 2;
+    // Uniform border: outer path minus inset path (even-odd) → true border ring,
+    // including rounded corners — same silhouette as CSS border-radius + border.
+    const w = stroke.weight;
     ctx.save();
-    // Shrink the outline so a centered stroke of `weight` lies fully inside the box.
     ctx.beginPath();
-    appendInsetBoxPath(ctx, node, inset);
-    ctx.strokeStyle = css(stroke.color);
-    ctx.lineWidth = stroke.weight;
-    ctx.lineJoin = "round";
-    ctx.stroke();
+    appendBoxPath(ctx, node);
+    appendUniformInsetPath(ctx, node, w);
+    ctx.fillStyle = css(stroke.color);
+    ctx.fill("evenodd");
     ctx.restore();
   }
 }
 
-/** Box path inset uniformly (clamped so tiny boxes don't invert). */
-function appendInsetBoxPath(ctx: CanvasRenderingContext2D, node: RenderNode, inset: number): void {
+/** Even-odd hole path inset by a uniform border weight. */
+function appendUniformInsetPath(ctx: CanvasRenderingContext2D, node: RenderNode, inset: number): void {
   const w = node.width;
   const h = node.height;
   const maxInset = Math.max(0, Math.min(Math.abs(w), Math.abs(h)) / 2 - 1e-6);
   const i = Math.max(0, Math.min(inset, maxInset));
-  if (i <= 0) {
-    appendBoxPath(ctx, node);
-    return;
-  }
-  // Build a temporary node with shrunk size and walk its clip shape in local coords
-  // shifted by `i`. For ellipse/polygon we scale about the box center.
+  if (i <= 0) return;
   const clip = node.clipShape;
   if (clip.kind === "ellipse") {
     const rw = Math.max(0, Math.abs(w) / 2 - i);
@@ -363,7 +356,6 @@ function appendInsetBoxPath(ctx: CanvasRenderingContext2D, node: RenderNode, ins
     ctx.closePath();
     return;
   }
-  // rounded rect
   const iw = Math.max(0, w - 2 * i);
   const ih = Math.max(0, h - 2 * i);
   const [tl, tr, br, bl] = clip.cornerRadius.map((r) => Math.max(0, r - i)) as [
@@ -377,26 +369,30 @@ function appendInsetBoxPath(ctx: CanvasRenderingContext2D, node: RenderNode, ins
   roundRect(ctx, i, i, iw, ih, [r(tl), r(tr), r(br), r(bl)]);
 }
 
-function strokeSides(ctx: CanvasRenderingContext2D, node: RenderNode, sides: Corners, color: RGBA): void {
+/**
+ * Per-side CSS borders as filled strips inside the box (top/right/bottom/left).
+ * Clipped to the rounded rect so corner radii match the DOM adapter.
+ */
+function paintBorderStrips(
+  ctx: CanvasRenderingContext2D,
+  node: RenderNode,
+  sides: Corners,
+  color: RGBA,
+): void {
   const w = node.width;
   const h = node.height;
-  const [top, right, bottom, left] = sides;
-  ctx.strokeStyle = css(color);
-  const edge = (x1: number, y1: number, x2: number, y2: number, weight: number) => {
-    if (!(weight > 0)) return;
-    ctx.beginPath();
-    ctx.moveTo(x1, y1);
-    ctx.lineTo(x2, y2);
-    ctx.lineWidth = weight;
-    ctx.lineCap = "butt";
-    ctx.stroke();
-  };
-  // Centerlines sit half a stroke inside the box so the full weight stays inside
-  // (matches CSS border painting within border-box).
-  edge(0, top / 2, w, top / 2, top); // top
-  edge(w - right / 2, 0, w - right / 2, h, right); // right
-  edge(0, h - bottom / 2, w, h - bottom / 2, bottom); // bottom
-  edge(left / 2, 0, left / 2, h, left); // left
+  const [top, right, bottom, left] = sides.map((v) => Math.max(0, v)) as Corners;
+  if (!(top > 0 || right > 0 || bottom > 0 || left > 0)) return;
+  ctx.save();
+  // Clip to the shape so rounded corners match CSS border-radius.
+  boxPath(ctx, node);
+  ctx.clip();
+  ctx.fillStyle = css(color);
+  if (top > 0) ctx.fillRect(0, 0, w, Math.min(top, h));
+  if (bottom > 0) ctx.fillRect(0, Math.max(0, h - bottom), w, Math.min(bottom, h));
+  if (left > 0) ctx.fillRect(0, 0, Math.min(left, w), h);
+  if (right > 0) ctx.fillRect(Math.max(0, w - right), 0, Math.min(right, w), h);
+  ctx.restore();
 }
 
 // --------------------------------------------------------------------- effects ---
@@ -430,40 +426,28 @@ function paintInnerShadow(ctx: CanvasRenderingContext2D, node: RenderNode, eff: 
 }
 
 /**
- * Procedural monochrome noise overlay clipped to the box. Pseudo-randomness comes
- * from a sine hash of the cell coordinates (no Math.random dependency), in the
- * spirit of @blinn-motion/dom's caustics. `density` drives both coverage and alpha.
+ * Effect-level noise overlay. Delegates to the same procedural buffer as
+ * `node.shader.kind === "noise"` / DOM caustics so grain matches across backends.
+ * `density`/`size` on the effect tint alpha (Figma-ish); base field is shared.
  */
-function paintNoise(ctx: CanvasRenderingContext2D, node: RenderNode, eff: NoiseEffect): void {
+function paintNoise(
+  ctx: CanvasRenderingContext2D,
+  node: RenderNode,
+  eff: NoiseEffect,
+  time: number,
+): void {
   const w = Math.abs(node.width);
   const h = Math.abs(node.height);
   if (w <= 0 || h <= 0) return;
-  const density = clamp01(eff.density != null ? eff.density : 0.5);
-  const cell = Math.max(1, eff.size || 2);
-  // Cap the grid so a huge box can't explode the loop (best-effort overlay).
-  const cols = Math.min(400, Math.ceil(w / cell));
-  const rows = Math.min(400, Math.ceil(h / cell));
-  const cw = w / cols;
-  const ch = h / rows;
   ctx.save();
   boxPath(ctx, node);
   ctx.clip();
-  ctx.fillStyle = css(eff.color);
-  for (let gy = 0; gy < rows; gy++) {
-    for (let gx = 0; gx < cols; gx++) {
-      if (hash2(gx, gy) < density) {
-        ctx.globalAlpha = clamp01(density * (0.35 + 0.65 * hash2(gy + 1, gx + 1)));
-        ctx.fillRect(gx * cw, gy * ch, cw, ch);
-      }
-    }
-  }
+  // Density scales overall opacity of the shared noise field.
+  const density = clamp01(eff.density != null ? eff.density : 0.5);
+  ctx.globalAlpha = clamp01(0.35 + density * 0.65);
+  // Re-use shader path (identical hash + resolution to DOM).
+  paintShader(ctx, "noise", w, h, time);
   ctx.restore();
-}
-
-/** Classic GLSL `fract(sin(dot)*k)` hash → pseudo-random 0..1 from integer coords. */
-function hash2(x: number, y: number): number {
-  const s = Math.sin(x * 12.9898 + y * 78.233) * 43758.5453;
-  return s - Math.floor(s);
 }
 
 /**
@@ -539,7 +523,8 @@ function drawNode(ctx: CanvasRenderingContext2D, node: RenderNode, inheritedAlph
   for (const e of node.effects) {
     if (e.type === "inner") paintInnerShadow(ctx, node, e as InnerEffect);
     else if (e.type === "glass") paintGlass(ctx, node, e as GlassEffect);
-    else if (e.type === "noise" || e.type === "texture") paintNoise(ctx, node, e as NoiseEffect);
+    else if (e.type === "noise" || e.type === "texture")
+      paintNoise(ctx, node, e as NoiseEffect, time);
   }
 
   if (node.stroke && !(node.shape && node.shape.kind === "path")) {

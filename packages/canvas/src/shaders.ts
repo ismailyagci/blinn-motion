@@ -78,7 +78,8 @@ function fillCaustics(img: ImageData, res: number, t: number): void {
  */
 export function paintShader(ctx: CanvasRenderingContext2D, kind: string, w: number, h: number, time: number): void {
   if (kind !== "noise" && kind !== "caustics") return;
-  const res = kind === "noise" ? 96 : 180;
+  // Match @blinn-motion/dom caustics.ts buffer sizes so grain/scale look identical.
+  const res = kind === "noise" ? 180 : 360;
   const o = offscreen(res);
   if (!o) return;
   if (kind === "noise") fillNoise(o.img, res, time);

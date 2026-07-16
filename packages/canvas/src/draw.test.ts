@@ -188,15 +188,15 @@ describe("@blinn-motion/canvas drawTree", () => {
     expect(m.calls["set:globalCompositeOperation"]).toBeGreaterThanOrEqual(1);
   });
 
-  it("strokes each edge separately for differing per-side borders", () => {
+  it("paints per-side borders as filled strips (CSS border-box parity)", () => {
     const m = mockCtx();
     const n = node({
       fill: { type: "solid", color: { r: 0, g: 0, b: 0, a: 1 } },
       stroke: { color: { r: 255, g: 0, b: 0, a: 1 }, weight: 2, sides: [4, 1, 4, 1] },
     });
     expect(() => drawTree(m.ctx, tree([n]), 1)).not.toThrow();
-    // 4 edges with weight > 0 → one stroke per side.
-    expect(m.calls.stroke).toBeGreaterThanOrEqual(4);
+    // 4 edges with weight > 0 → one fillRect per side (plus body fill).
+    expect(m.calls.fillRect).toBeGreaterThanOrEqual(4);
   });
 
   it("renders noise / inner / glass effects without throwing", () => {
@@ -210,37 +210,38 @@ describe("@blinn-motion/canvas drawTree", () => {
       ],
     });
     expect(() => drawTree(m.ctx, tree([n]), 1)).not.toThrow();
-    expect(m.calls.fillRect).toBeGreaterThanOrEqual(1); // noise dots
+    // noise reuses paintShader (drawImage), not cell fillRect
     expect(m.calls.save).toBe(m.calls.restore); // balanced
   });
 
-  it("strokes a uniform border exactly once via the box path", () => {
+  it("paints a uniform border as an even-odd ring (no centered stroke bleed)", () => {
     const m = mockCtx();
     const n = node({
       fill: { type: "solid", color: { r: 0, g: 0, b: 0, a: 1 } },
       stroke: { color: { r: 255, g: 0, b: 0, a: 1 }, weight: 3, sides: null },
     });
     drawTree(m.ctx, tree([n]), 1);
-    expect(m.calls.stroke).toBe(1);
+    // body fill + even-odd border fill
+    expect(m.calls.fill).toBeGreaterThanOrEqual(2);
   });
 
-  it("treats equal per-side weights as a single uniform stroke (not 4 edges)", () => {
+  it("paints equal per-side weights as four border strips", () => {
     const m = mockCtx();
     const n = node({
       stroke: { color: { r: 0, g: 0, b: 0, a: 1 }, weight: 3, sides: [3, 3, 3, 3] },
     });
     drawTree(m.ctx, tree([n]), 1);
-    expect(m.calls.stroke).toBe(1);
+    expect(m.calls.fillRect).toBeGreaterThanOrEqual(4);
   });
 
-  it("falls back to a uniform stroke for per-side weights on a non-rect shape", () => {
+  it("clips per-side border strips to non-rect shapes (ellipse)", () => {
     const m = mockCtx();
     const n = node({
       clipShape: { kind: "ellipse" },
       stroke: { color: { r: 0, g: 0, b: 0, a: 1 }, weight: 3, sides: [10, 1, 10, 1] },
     });
     drawTree(m.ctx, tree([n]), 1);
-    expect(m.calls.stroke).toBe(1); // not 4 separate edges (clip shape isn't a rect)
+    expect(m.calls.fillRect).toBeGreaterThanOrEqual(1);
     expect(m.calls.ellipse).toBeGreaterThanOrEqual(1);
   });
 

@@ -62,8 +62,8 @@ describe("@blinn-motion/canvas paintShader", () => {
     expect(drawImage).toHaveBeenCalledTimes(1);
     const [src, x, y, w, h] = drawImage.mock.calls[0]!;
     expect(src).toBeInstanceOf(HTMLCanvasElement);
-    expect(src.width).toBe(96); // noise resolution
-    expect(src.height).toBe(96);
+    expect(src.width).toBe(180); // noise resolution (matches DOM)
+    expect(src.height).toBe(180);
     expect(x).toBe(0);
     expect(y).toBe(0);
     expect(w).toBe(100);
@@ -71,7 +71,7 @@ describe("@blinn-motion/canvas paintShader", () => {
 
     // ImageData written via putImageData — first arg is the filled buffer
     const img = stub.put.mock.calls[0]![0] as ImageData;
-    expect(img.data.length).toBe(96 * 96 * 4);
+    expect(img.data.length).toBe(180 * 180 * 4);
     let allAlphaPositive = true;
     let anyFullyOpaque = false;
     for (let i = 3; i < img.data.length; i += 4) {
@@ -89,8 +89,8 @@ describe("@blinn-motion/canvas paintShader", () => {
     expect(stub.put).toHaveBeenCalledTimes(1);
     expect(drawImage).toHaveBeenCalledTimes(1);
     const src = drawImage.mock.calls[0]![0] as HTMLCanvasElement;
-    expect(src.width).toBe(180); // caustics resolution
-    expect(src.height).toBe(180);
+    expect(src.width).toBe(360); // caustics resolution (matches DOM)
+    expect(src.height).toBe(360);
 
     const img = stub.put.mock.calls[0]![0] as ImageData;
     expect(img.data[3]).toBe(255); // hard-coded opaque alpha

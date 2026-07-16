@@ -108,6 +108,20 @@ describe("@blinn-motion/dom player — showcase feature reflection", () => {
     expect(border.style.borderTopWidth).not.toBe(border.style.borderRightWidth);
   });
 
+  it("PATH_TRIM: clears stroke-dasharray when fully revealed (checkmark must reappear)", () => {
+    // Regression: after seek(0) (trimEnd=0 → empty dash) a later seek(1)
+    // must clear dasharray so the path is fully stroked again.
+    const host = document.createElement("div");
+    const player = create(host, showcase);
+    const path = sel(host, "trim").querySelector("path") as SVGPathElement | null;
+    expect(path).not.toBeNull();
+    player.seek(0); // trimEnd = 0 → nothing visible
+    // jsdom may not implement getTotalLength; if it does, dasharray is set.
+    player.seek(1); // trimEnd = 1 → fully untrimmed → dash must be cleared
+    const dash = path!.style.strokeDasharray;
+    expect(dash === "none" || dash === "" || dash === "none,").toBe(true);
+  });
+
   it("animates the stroke color: border color changes between t=0 and t=0.9", () => {
     const host = document.createElement("div");
     const player = create(host, showcase);

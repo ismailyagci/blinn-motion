@@ -224,24 +224,44 @@ function applyState(el: SvgEl, layer: Layer, s: LayerState): void {
     (el.style as any).webkitClipPath = cp;
   }
   if (shape && shape.kind === "path" && el._svgPaths) {
-    const trimmed = s.trimStart > 0 || s.trimEnd < 1;
+    const trimmed = s.trimStart > 1e-6 || s.trimEnd < 1 - 1e-6;
     for (let pi = 0; pi < el._svgPaths.length; pi++) {
       const path = el._svgPaths[pi]!;
       const pd = (shape.paths || [])[pi] || ({} as any);
-      if (pd.stroke || (b.stroke && b.stroke.color)) path.setAttribute("stroke-width", String(s.strokeWeight));
+      // Prefer path-local strokeWidth (vector layers often have no layer.stroke).
+      const sw =
+        pd.strokeWidth != null
+          ? pd.strokeWidth
+          : s.strokeWeight != null
+            ? s.strokeWeight
+            : b.stroke
+              ? b.stroke.weight
+              : 1;
+      if (pd.stroke || (b.stroke && b.stroke.color) || pd.strokeWidth != null) {
+        path.setAttribute("stroke-width", String(sw));
+      }
       if (s.strokeColorOverride != null) path.setAttribute("stroke", colorCss(s.strokeColorOverride));
       if (s.fillColorOverride != null && pd.fill) path.setAttribute("fill", colorCss(s.fillColorOverride));
-      // PATH_TRIM: reveal only [trimStart, trimEnd] of the stroke length
-      if (trimmed) {
-        try {
+      // PATH_TRIM: reveal only [trimStart, trimEnd] of the stroke length.
+      // CRITICAL: when fully untrimmed we MUST clear dasharray — otherwise the
+      // empty/partial pattern from earlier frames (e.g. t=0 trimEnd=0) sticks
+      // forever and the path never reappears (showcase checkmark bug).
+      try {
+        if (trimmed) {
           const len = path.getTotalLength();
-          const start = s.trimStart * len;
-          const vis = Math.max(0, (s.trimEnd - s.trimStart) * len);
-          path.style.strokeDasharray = vis + " " + len;
-          path.style.strokeDashoffset = String(-start);
-        } catch {
-          /* getTotalLength unavailable (jsdom) */
+          if (len > 0) {
+            const start = Math.max(0, Math.min(1, s.trimStart)) * len;
+            const end = Math.max(0, Math.min(1, s.trimEnd)) * len;
+            const vis = Math.max(0, end - start);
+            path.style.strokeDasharray = vis + " " + len;
+            path.style.strokeDashoffset = String(-start);
+          }
+        } else {
+          path.style.strokeDasharray = "none";
+          path.style.strokeDashoffset = "0";
         }
+      } catch {
+        /* getTotalLength unavailable (jsdom) */
       }
     }
   }
