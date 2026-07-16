@@ -29,6 +29,11 @@ jobs:
       - name: Install
         run: npm ci
 
+      # Packages export from dist/ only; cross-package imports
+      # (@blinn-motion/core, @blinn-motion/dom, …) fail without a build.
+      - name: Build packages
+        run: npm run build
+
       - name: Test
         run: npm test
 
