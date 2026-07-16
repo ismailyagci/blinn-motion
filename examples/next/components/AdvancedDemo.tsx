@@ -1,11 +1,11 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { BlinnMotion, type BlinnMotionHandle } from "@blinn-motion/react";
 import type { MotionDoc } from "@blinn-motion/core";
 import card from "../../../fixtures/card.motion.json";
 import showcase from "../../../fixtures/showcase.motion.json";
-import { SnippetPanel } from "../../_shared/SnippetPanel";
+import { mountSnippetPanel } from "../../_shared/snippet-panel";
 
 type FixtureId = "card" | "showcase";
 type Mode = "clock" | "progress";
@@ -33,6 +33,7 @@ const CASES = [
 export function AdvancedDemo() {
   const domRef = useRef<BlinnMotionHandle>(null);
   const canvasRef = useRef<BlinnMotionHandle>(null);
+  const snippetRef = useRef<HTMLDivElement>(null);
   const [docId, setDocId] = useState<FixtureId>("showcase");
   const [mode, setMode] = useState<Mode>("clock");
   const [progress, setProgress] = useState(0);
@@ -41,6 +42,10 @@ export function AdvancedDemo() {
   const [time, setTime] = useState(0);
   const [fraction, setFraction] = useState(0);
   const [scrub, setScrub] = useState(0);
+
+  useEffect(() => {
+    if (snippetRef.current) mountSnippetPanel(snippetRef.current, "next");
+  }, []);
 
   const doc = fixtures[docId];
   const duration = doc.duration ?? 1;
@@ -308,7 +313,7 @@ export function AdvancedDemo() {
         </div>
       </section>
 
-      <SnippetPanel stack="next" />
+      <div ref={snippetRef} />
     </div>
   );
 }
