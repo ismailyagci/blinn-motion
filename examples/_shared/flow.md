@@ -9,3 +9,4 @@ Every framework example under `examples/` implements the same cases so users lea
 5. **Progress-driven mode** — external 0..1 drive (disables clock autoplay)
 6. **Live feedback** — time + fraction from `onFrame` / frame events
 7. **Case checklist UI** — visible list of covered controls so the flow is obvious
+8. **Drop-in snippet** — install command + minimal integration code for that stack (copyable), so visitors don't need to open docs for the basics

@@ -3,6 +3,7 @@ import { BlinnMotion, type BlinnMotionHandle } from "@blinn-motion/react";
 import type { MotionDoc } from "@blinn-motion/core";
 import card from "../../../fixtures/card.motion.json";
 import showcase from "../../../fixtures/showcase.motion.json";
+import { SnippetPanel } from "../../_shared/SnippetPanel";
 import "../../_shared/lab.css";
 
 type FixtureId = "card" | "showcase";
@@ -352,6 +353,8 @@ export function App() {
           </div>
         </div>
       </section>
+
+      <SnippetPanel stack="react" />
 
       <footer className="lab-foot">
         <span>

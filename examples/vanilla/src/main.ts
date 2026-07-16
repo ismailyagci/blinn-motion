@@ -3,6 +3,7 @@ import { create as createCanvas, type CanvasPlayer } from "@blinn-motion/canvas"
 import type { MotionDoc } from "@blinn-motion/core";
 import card from "../../../fixtures/card.motion.json";
 import showcase from "../../../fixtures/showcase.motion.json";
+import { mountSnippetPanel } from "../../_shared/snippet-panel";
 
 const docs: Record<string, { doc: MotionDoc; note: string }> = {
   card: { doc: card as MotionDoc, note: "1.6s product card spring" },
@@ -157,3 +158,6 @@ $("modeSeg").addEventListener("click", (e) => {
     both((p) => p.setProgress(progress));
   }
 });
+
+const snippetHost = document.getElementById("snippet-host");
+if (snippetHost) mountSnippetPanel(snippetHost, "vanilla");

@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { BlinnMotion, type BlinnMotionHandle } from "@blinn-motion/vue";
 import { fixtures, type FixtureId } from "../../_shared/fixtures";
+import { mountSnippetPanel } from "../../_shared/snippet-panel";
 
 const fixtureMeta: { id: FixtureId; label: string; note: string }[] = [
   { id: "card", label: "Card intro", note: "1.6s product card spring" },
@@ -24,6 +25,11 @@ const domRef = ref<BlinnMotionHandle | null>(null);
 const canvasRef = ref<BlinnMotionHandle | null>(null);
 const progressProp = computed(() => (mode.value === "progress" ? progress.value : undefined));
 const duration = computed(() => doc.value.duration ?? 1);
+
+onMounted(() => {
+  const host = document.getElementById("snippet-host");
+  if (host) mountSnippetPanel(host, "vue");
+});
 
 const CASES = [
   { k: "Doc switch", v: "card + showcase fixtures" },
@@ -291,6 +297,8 @@ watch(docId, () => {
         </div>
       </div>
     </section>
+
+    <div id="snippet-host"></div>
 
     <footer class="lab-foot">
       <span>Package <code class="mono">@blinn-motion/vue</code></span>

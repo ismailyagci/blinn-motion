@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { BlinnMotionComponent } from "@blinn-motion/angular";
 import type { MotionDoc } from "@blinn-motion/core";
 import { fixtures, fixtureList, type FixtureId } from "../../_shared/fixtures";
+import { mountSnippetPanel } from "../../_shared/snippet-panel";
 
 @Component({
   selector: "blinn-angular-demo",
@@ -94,6 +95,8 @@ import { fixtures, fixtureList, type FixtureId } from "../../_shared/fixtures";
         <div class="case"><strong>Progress mode</strong> controlled 0…1 input</div>
         <div class="case"><strong>frame output</strong> live time + fraction</div>
       </div>
+
+      <div id="snippet-host"></div>
     </div>
   `,
 })
@@ -119,6 +122,8 @@ export class AppComponent implements AfterViewInit {
   ngAfterViewInit(): void {
     this.domMotion?.ensureMounted();
     this.canvasMotion?.ensureMounted();
+    const host = document.getElementById("snippet-host");
+    if (host) mountSnippetPanel(host, "angular");
   }
 
   private both(fn: (c: BlinnMotionComponent | undefined) => void) {

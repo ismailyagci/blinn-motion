@@ -30,10 +30,15 @@ import { ReactIsland } from "../components/ReactIsland";
         <h2 style="font-size: 16px; margin: 0 0 12px">Lit island (client:load)</h2>
         <div id="lit-root"></div>
       </section>
+
+      <div id="snippet-host"></div>
     </div>
     <script>
       import { mountLitIsland } from "../scripts/mount-lit";
+      import { mountSnippetPanel } from "../../../_shared/snippet-panel";
       mountLitIsland(document.getElementById("lit-root")!);
+      const snip = document.getElementById("snippet-host");
+      if (snip) mountSnippetPanel(snip, "astro");
     </script>
   </body>
 </html>

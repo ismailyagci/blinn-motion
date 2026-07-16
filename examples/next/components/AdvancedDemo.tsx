@@ -5,6 +5,7 @@ import { BlinnMotion, type BlinnMotionHandle } from "@blinn-motion/react";
 import type { MotionDoc } from "@blinn-motion/core";
 import card from "../../../fixtures/card.motion.json";
 import showcase from "../../../fixtures/showcase.motion.json";
+import { SnippetPanel } from "../../_shared/SnippetPanel";
 
 type FixtureId = "card" | "showcase";
 type Mode = "clock" | "progress";
@@ -306,6 +307,8 @@ export function AdvancedDemo() {
           </div>
         </div>
       </section>
+
+      <SnippetPanel stack="next" />
     </div>
   );
 }

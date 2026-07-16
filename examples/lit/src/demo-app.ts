@@ -4,6 +4,7 @@ import {
   type BlinnMotionElement as BMEl,
 } from "@blinn-motion/lit";
 import { fixtures, fixtureList, type FixtureId } from "../../_shared/fixtures";
+import { mountSnippetPanel } from "../../_shared/snippet-panel";
 
 defineBlinnMotionElement();
 
@@ -63,6 +64,11 @@ class BlinnDemoApp extends LitElement {
     this.syncProps();
     const primary = this.querySelector("blinn-motion") as BMEl | null;
     primary?.addEventListener("frame", this.onFrame);
+    const host = this.querySelector("#snippet-host") as HTMLElement | null;
+    if (host && !host.dataset.mounted) {
+      host.dataset.mounted = "1";
+      mountSnippetPanel(host, "lit");
+    }
   }
 
   updated() {
@@ -175,6 +181,7 @@ class BlinnDemoApp extends LitElement {
           <div class="case"><strong>Progress mode</strong> controlled 0…1 property</div>
           <div class="case"><strong>frame event</strong> live time + fraction</div>
         </div>
+        <div id="snippet-host"></div>
       </div>
     `;
   }

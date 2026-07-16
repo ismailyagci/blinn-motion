@@ -1,6 +1,13 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { blinnMotion, getBlinnHandle, type BlinnMotionHandle } from "@blinn-motion/svelte";
   import { fixtures, fixtureList, type FixtureId } from "../../_shared/fixtures";
+  import { mountSnippetPanel } from "../../_shared/snippet-panel";
+
+  onMount(() => {
+    const host = document.getElementById("snippet-host");
+    if (host) mountSnippetPanel(host, "svelte");
+  });
 
   let docId: FixtureId = $state("showcase");
   let mode: "clock" | "progress" = $state("clock");
@@ -152,4 +159,6 @@
     <div class="case"><strong>Progress mode</strong> controlled 0…1 param</div>
     <div class="case"><strong>onFrame meter</strong> live time + fraction</div>
   </div>
+
+  <div id="snippet-host"></div>
 </div>
