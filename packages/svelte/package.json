@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/svelte",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Blinn Motion Svelte adapter \u2014 use:blinnMotion action and attachBlinnMotion() for DOM/Canvas backends.",
   "license": "MIT",
   "type": "module",
@@ -27,9 +27,9 @@
     "svelte": ">=4"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.1",
-    "@blinn-motion/dom": "^0.1.1",
-    "@blinn-motion/canvas": "^0.1.1"
+    "@blinn-motion/core": "^0.1.2",
+    "@blinn-motion/dom": "^0.1.2",
+    "@blinn-motion/canvas": "^0.1.2"
   },
   "devDependencies": {
     "svelte": "^5.16.0"

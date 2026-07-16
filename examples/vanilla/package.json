@@ -9,9 +9,9 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.1",
-    "@blinn-motion/dom": "^0.1.1",
-    "@blinn-motion/canvas": "^0.1.1"
+    "@blinn-motion/core": "^0.1.2",
+    "@blinn-motion/dom": "^0.1.2",
+    "@blinn-motion/canvas": "^0.1.2"
   },
   "devDependencies": {
     "vite": "^5.4.11"

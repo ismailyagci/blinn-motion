@@ -1,5 +1,5 @@
 import "@angular/compiler";
-import "../../_shared/lab.css";
+import "../../_shared/demo.css";
 import { bootstrapApplication } from "@angular/platform-browser";
 import { provideExperimentalZonelessChangeDetection } from "@angular/core";
 import { AppComponent } from "./app.component";

@@ -1,3 +1,12 @@
-@import "../../../_shared/lab.css";
+@import "../../../_shared/demo.css";
 
-h2 { color: var(--ink); font-weight: 600; }
+h2 {
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 15px;
+  margin: 0 0 12px;
+}
+
+.demo .stages {
+  margin-bottom: 22px;
+}

@@ -1,6 +1,6 @@
 {
   "name": "@blinn-motion/canvas",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Blinn Motion Canvas adapter \u2014 paints @blinn-motion/core's resolved render tree onto a 2D canvas. Pure JS, no DOM layout.",
   "license": "MIT",
   "type": "module",
@@ -24,7 +24,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@blinn-motion/core": "^0.1.1"
+    "@blinn-motion/core": "^0.1.2"
   },
   "publishConfig": {
     "access": "public"
