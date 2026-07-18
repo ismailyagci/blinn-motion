@@ -1,18 +1,7 @@
 ---
 import { site } from "../data/site";
 import StageDemo from "./StageDemo.astro";
-import { frameworkSvg, type FrameworkIconId } from "../data/frameworks";
-
-const adapters: { k: string; c: string; id: FrameworkIconId }[] = [
-  { k: "DOM", c: "var(--blue)", id: "dom" },
-  { k: "Canvas", c: "var(--cyan)", id: "canvas" },
-  { k: "React", c: "var(--violet)", id: "react" },
-  { k: "Vue", c: "#42b883", id: "vue" },
-  { k: "Svelte", c: "#ff3e00", id: "svelte" },
-  { k: "Angular", c: "#dd0031", id: "angular" },
-  { k: "Lit", c: "#324fff", id: "lit" },
-  { k: "RN", c: "var(--coral)", id: "rn" },
-];
+import { frameworkSvg, heroChips } from "../data/frameworks";
 ---
 
 <section class="hero" id="hero">
@@ -37,15 +26,15 @@ const adapters: { k: string; c: string; id: FrameworkIconId }[] = [
           Read the docs
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
         </a>
-        <a class="btn btn-ghost" href="#examples">Live examples</a>
-        <a class="btn btn-ghost" href={site.repo} target="_blank" rel="noopener">GitHub</a>
+        <a class="btn btn-ghost" href="#platforms">Platforms</a>
+        <a class="btn btn-ghost" href="#live-compare">vs Lottie</a>
         <a class="btn btn-ghost" href="#code">See the code</a>
       </div>
 
       <div class="trust" data-reveal style="--reveal-delay:230ms">
-        <span class="trust-label mono">renders identically on</span>
+        <span class="trust-label mono">identical timing on</span>
         <div class="trust-chips">
-          {adapters.map((a) => (
+          {heroChips.map((a) => (
             <span class="tchip" style={`--kc:${a.c}`}>
               <span class="tchip-logo" set:html={frameworkSvg(a.id, 15)} />
               {a.k}

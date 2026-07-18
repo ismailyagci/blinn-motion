@@ -14,16 +14,25 @@ This note covers **landing**, **docs**, and **example labs**.
 
 | Asset | Path | Role |
 |-------|------|------|
-| OG image | `/og.png` (1200×630) | Link preview thumbnail |
+| OG image | `/og.png` (1200×630) | Default link preview |
 | Square | `/og-square.png` | Alternate share |
+| Section OGs | `/og/sections/{slug}.png` | Per-section share cards |
+| Share URLs | `/s/{slug}` | Unique OG meta → redirects to `/#{hash}` |
 | Apple icon | `/apple-touch-icon.png` | iOS home screen |
 | robots | `/robots.txt` | Crawl rules + sitemaps |
-| sitemap | `/sitemap.xml` | Landing + docs + labs |
+| sitemap | `/sitemap.xml` | Landing + share pages + docs + labs |
 | llms.txt | `/llms.txt` | Agent index ([llmstxt.org](https://llmstxt.org)) |
 | llms-full | `/llms-full.txt` | Longer agent context |
 | well-known | `/.well-known/llms.txt` | Discovery alias |
 
 Meta + JSON-LD live in `site/src/layouts/Base.astro` (canonical, Open Graph, Twitter, SoftwareApplication).
+
+**Why `/s/{slug}`?** Open Graph crawlers ignore URL `#hash` fragments, so `#live-compare`
+always shows the homepage card. Share pages under `/s/` carry section-specific
+`og:title` / `og:description` / `og:image`, then redirect humans to the real section.
+
+Slugs (see `site/src/data/sections.ts`): `pipeline`, `platforms`, `vs-lottie`,
+`performance`, `engine`, `features`, `code`, `compare`.
 
 ### Regenerate thumbnails
 

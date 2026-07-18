@@ -1,0 +1,191 @@
+---
+import { adapters, liveLabs, frameworkSvg } from "../data/frameworks";
+import ShareChip from "./ShareChip.astro";
+---
+
+<section class="section section-alt" id="platforms">
+  <div class="container">
+    <div class="section-head center" data-reveal>
+      <span class="eyebrow"><span class="kf"></span> Platforms</span>
+      <h2 class="title">One document.<br />Every stack, same timing.</h2>
+      <p class="lead">
+        Thin adapters paint the <em>same</em> resolved tree. Pick a package —
+        open a live lab where one exists.
+      </p>
+      <div style="display:flex;justify-content:center;margin-top:18px">
+        <ShareChip slug="platforms" label="Copy share link" />
+      </div>
+    </div>
+
+    <div class="plat-grid">
+      {adapters.map((p, i) => (
+        <article
+          class:list={["card", "plat", { flagship: p.flagship }]}
+          data-reveal
+          style={`--reveal-delay:${i * 40}ms; --c:${p.c}; --tint:${p.tint}`}
+        >
+          <div class="plat-top">
+            <span class="plat-logo" set:html={frameworkSvg(p.id, 20)} />
+            <div class="plat-id">
+              <h3 class="plat-name">{p.name}</h3>
+              {p.pkg && <span class="plat-pkg mono">{p.pkg}</span>}
+            </div>
+            <span class="plat-badge mono">{p.badge}</span>
+          </div>
+          <p class="plat-blurb">{p.blurb}</p>
+          <pre class="plat-code mono"><code>{p.code}</code></pre>
+          {p.lab ? (
+            <a class="plat-lab mono" href={p.lab} target="_blank" rel="noopener">
+              Open live lab
+              <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17L17 7M10 7h7v7" /></svg>
+            </a>
+          ) : (
+            <span class="plat-lab muted mono">Package only</span>
+          )}
+        </article>
+      ))}
+    </div>
+
+    {liveLabs.some((p) => p.kind === "host") && (
+      <div class="host-row" data-reveal>
+        <span class="host-label mono">Also runs on</span>
+        <div class="host-chips">
+          {liveLabs
+            .filter((p) => p.kind === "host")
+            .map((p) => (
+              <a
+                class="host-chip"
+                href={p.lab}
+                target="_blank"
+                rel="noopener"
+                style={`--c:${p.c}; --tint:${p.tint}`}
+              >
+                <span class="host-logo" set:html={frameworkSvg(p.id, 16)} />
+                <span class="host-name">{p.name}</span>
+                <span class="host-meta mono">{p.badge}</span>
+              </a>
+            ))}
+        </div>
+      </div>
+    )}
+  </div>
+</section>
+
+<style>
+  .plat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .plat {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px 18px 16px;
+  }
+  .plat.flagship {
+    border-color: color-mix(in srgb, var(--c) 32%, var(--line));
+    background: linear-gradient(180deg, var(--tint) 0%, var(--paper) 50%);
+  }
+  .plat-top { display: flex; align-items: center; gap: 12px; }
+  .plat-logo {
+    width: 40px; height: 40px; border-radius: 11px; flex: none;
+    display: grid; place-items: center;
+    color: var(--c); background: var(--tint);
+    border: 1px solid color-mix(in srgb, var(--c) 22%, transparent);
+  }
+  .plat-logo :global(svg) { display: block; }
+  .plat-id { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .plat-name { font-size: 17px; letter-spacing: -0.02em; line-height: 1.15; }
+  .plat-pkg { font-size: 11.5px; color: var(--ink-3); }
+  .plat-badge {
+    margin-left: auto;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--ink-2);
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: var(--tint);
+    white-space: nowrap;
+  }
+  .plat-blurb {
+    margin: 0;
+    color: var(--ink-2);
+    font-size: 14px;
+    line-height: 1.5;
+    flex: 1;
+  }
+  .plat-code {
+    margin: 0;
+    padding: 12px 13px;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-sm);
+    font-size: 12px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .plat.flagship .plat-code { background: rgba(255, 255, 255, 0.72); }
+  .plat-lab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--c);
+    width: fit-content;
+  }
+  .plat-lab:hover { text-decoration: underline; text-underline-offset: 3px; }
+  .plat-lab.muted { color: var(--ink-3); cursor: default; }
+
+  .host-row {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px 18px;
+    padding: 16px 18px;
+    border-radius: var(--r-lg);
+    border: 1px solid var(--line);
+    background: var(--paper);
+  }
+  .host-label {
+    font-size: 11.5px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .host-chips { display: flex; flex-wrap: wrap; gap: 10px; }
+  .host-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px 8px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--paper-2);
+    transition: border-color 0.16s, transform 0.16s;
+  }
+  .host-chip:hover {
+    border-color: color-mix(in srgb, var(--c) 40%, var(--line));
+    transform: translateY(-1px);
+  }
+  .host-logo {
+    width: 26px; height: 26px; border-radius: 7px;
+    display: grid; place-items: center;
+    color: var(--c); background: var(--tint);
+  }
+  .host-logo :global(svg) { display: block; }
+  .host-name { font-size: 13.5px; font-weight: 600; letter-spacing: -0.01em; }
+  .host-meta { font-size: 11px; color: var(--ink-3); }
+
+  @media (max-width: 900px) {
+    .plat-grid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 760px) {
+    .plat-badge { display: none; }
+  }
+</style>

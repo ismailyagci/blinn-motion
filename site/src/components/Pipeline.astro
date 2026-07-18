@@ -1,5 +1,5 @@
 ---
-import { frameworkSvg, type FrameworkIconId } from "../data/frameworks";
+import { adapters, frameworkSvg } from "../data/frameworks";
 
 function icon(name: string): string {
   const icons: Record<string, string> = {
@@ -14,17 +14,6 @@ const steps = [
   { n: "01", pkg: "Figma Motion", title: "Animate on the timeline", body: "Keyframes, easing curves and springs live in <code class='inline'>node.animations</code> — raw data, never rasterized.", accent: "var(--violet)", icon: "figma" },
   { n: "02", pkg: "@blinn-motion/figma-plugin", title: "Export, don't bake", body: "The plugin reads the timeline and emits a tiny <code class='inline'>MotionDoc</code> — no PNGs, no video, just your motion.", accent: "var(--blue)", icon: "plug" },
   { n: "03", pkg: "@blinn-motion/core", title: "sample(doc, t)", body: "The pure render method walks the doc, solves every track at time <code class='inline'>t</code>, returns a resolved tree of final numbers.", accent: "var(--coral)", icon: "cpu" },
-];
-
-const targets: { k: string; d: string; c: string; id: FrameworkIconId }[] = [
-  { k: "DOM", d: "divs · CSS · SVG", c: "var(--blue)", id: "dom" },
-  { k: "Canvas", d: "pure-JS 2D", c: "var(--cyan)", id: "canvas" },
-  { k: "React", d: "<BlinnMotion />", c: "var(--violet)", id: "react" },
-  { k: "Vue", d: "component + composable", c: "#42b883", id: "vue" },
-  { k: "Svelte", d: "use:blinnMotion", c: "#ff3e00", id: "svelte" },
-  { k: "Angular", d: "standalone component", c: "#dd0031", id: "angular" },
-  { k: "Lit", d: "<blinn-motion>", c: "#324fff", id: "lit" },
-  { k: "React Native", d: "Expo · native Views", c: "var(--coral)", id: "rn" },
 ];
 ---
 
@@ -58,23 +47,30 @@ const targets: { k: string; d: string; c: string; id: FrameworkIconId }[] = [
       ))}
     </div>
 
-    <div class="fanout" data-reveal>
-      <div class="fan-label mono"><span class="fan-line"></span><span>one resolved tree · eight thin adapters</span><span class="fan-line"></span></div>
-      <div class="fan-targets">
-        {targets.map((t, i) => (
-          <div class="fan-card" data-reveal style={`--reveal-delay:${(i % 4) * 50}ms; --c:${t.c}`}>
-            <span class="fan-logo" set:html={frameworkSvg(t.id, 18)} />
-            <strong>{t.k}</strong>
-            <span class="fan-d mono">{t.d}</span>
-          </div>
-        ))}
+    <a class="fanout" href="#platforms" data-reveal>
+      <div class="fan-label mono">
+        <span class="fan-line"></span>
+        <span>one resolved tree · {adapters.length} thin adapters</span>
+        <span class="fan-line"></span>
       </div>
-    </div>
+      <div class="fan-strip">
+        {adapters.map((t) => (
+          <span class="fan-pill" style={`--c:${t.c}`}>
+            <span class="fan-logo" set:html={frameworkSvg(t.id, 15)} />
+            {t.short}
+          </span>
+        ))}
+        <span class="fan-go mono">
+          See packages &amp; labs
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+        </span>
+      </div>
+    </a>
   </div>
 </section>
 
 <style>
-  .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch; gap: 8px; margin-bottom: 52px; }
+  .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; align-items: stretch; gap: 8px; margin-bottom: 40px; }
   .step { display: flex; flex-direction: column; }
   .step-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   .step-icon {
@@ -90,32 +86,64 @@ const targets: { k: string; d: string; c: string; id: FrameworkIconId }[] = [
   .connector svg { animation: nudge 2.4s ease-in-out infinite; }
   @keyframes nudge { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(4px); } }
 
-  .fan-label { display: flex; align-items: center; gap: 16px; color: var(--ink-3); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase; margin-bottom: 20px; }
+  .fanout {
+    display: block;
+    padding: 18px 20px;
+    border-radius: var(--r-lg);
+    border: 1px solid var(--line);
+    background: var(--paper-2);
+    transition: border-color 0.18s, box-shadow 0.18s;
+  }
+  .fanout:hover {
+    border-color: var(--line-2);
+    box-shadow: var(--shadow-sm);
+  }
+  .fan-label {
+    display: flex; align-items: center; gap: 16px;
+    color: var(--ink-3); font-size: 12px; letter-spacing: 0.04em; text-transform: uppercase;
+    margin-bottom: 14px;
+  }
   .fan-line { flex: 1; height: 1px; background: var(--line); }
 
-  .fan-targets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-  @media (min-width: 1100px) {
-    .fan-targets { grid-template-columns: repeat(4, 1fr); }
+  .fan-strip {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
   }
-  .fan-card {
-    display: flex; flex-direction: column; gap: 6px; padding: 17px;
-    border-radius: var(--r); border: 1px solid var(--line); background: var(--paper);
-    position: relative; overflow: hidden; transition: transform 0.2s, border-color 0.2s;
+  .fan-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 6px 11px 6px 8px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    font-size: 13px;
+    font-weight: 500;
   }
-  .fan-card::after { content: ""; position: absolute; inset: 0 auto 0 0; width: 3px; background: var(--c); }
-  .fan-card:hover { transform: translateY(-3px); border-color: var(--line-2); }
   .fan-logo {
-    width: 32px; height: 32px; border-radius: 9px; display: grid; place-items: center;
-    color: var(--c); background: color-mix(in srgb, var(--c) 14%, transparent);
-    margin-bottom: 2px;
+    width: 22px; height: 22px; border-radius: 6px;
+    display: grid; place-items: center;
+    color: var(--c);
+    background: color-mix(in srgb, var(--c) 14%, transparent);
   }
   .fan-logo :global(svg) { display: block; }
-  .fan-card strong { font-size: 15px; font-weight: 600; font-family: var(--display); letter-spacing: -0.01em; }
-  .fan-d { font-size: 11.5px; color: var(--ink-3); }
+  .fan-go {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-left: auto;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--blue);
+    padding: 6px 4px;
+  }
+  .fanout:hover .fan-go { text-decoration: underline; text-underline-offset: 3px; }
 
   @media (max-width: 900px) {
     .flow { grid-template-columns: 1fr; }
     .connector { transform: rotate(90deg); padding: 4px 0; }
-    .fan-targets { grid-template-columns: repeat(2, 1fr); }
+    .fan-go { margin-left: 0; width: 100%; justify-content: flex-start; padding-top: 6px; }
   }
 </style>

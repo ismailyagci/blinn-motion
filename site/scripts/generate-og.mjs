@@ -201,6 +201,66 @@ const LABS = [
   { id: "astro", title: "Astro lab", subtitle: "Islands · React + Lit" },
 ];
 
+/** Per landing-section share cards → site/public/og/sections/{slug}.png */
+const SECTIONS = [
+  {
+    slug: "pipeline",
+    title: "Figma → numbers",
+    subtitle: "MotionDoc pipeline · sample(doc, t)",
+    badge: "THE PIPELINE",
+    footer: "blinnmotion.com/s/pipeline",
+  },
+  {
+    slug: "platforms",
+    title: "One doc.\nEvery stack.",
+    subtitle: "DOM · Canvas · React · Vue · Svelte · more",
+    badge: "PLATFORMS",
+    footer: "blinnmotion.com/s/platforms",
+  },
+  {
+    slug: "vs-lottie",
+    title: "Same motion.\n~8× lighter.",
+    subtitle: "Live Blinn vs Lottie head-to-head",
+    badge: "VS LOTTIE",
+    footer: "blinnmotion.com/s/vs-lottie",
+  },
+  {
+    slug: "performance",
+    title: "Tiny player.\nSparse JSON.",
+    subtitle: "~9 KB gzip core+DOM vs ~75 KB lottie-web",
+    badge: "PERFORMANCE",
+    footer: "blinnmotion.com/s/performance",
+  },
+  {
+    slug: "engine",
+    title: "sample(doc, t)",
+    subtitle: "Pure · DOM-free · springs & curves",
+    badge: "RENDER ENGINE",
+    footer: "blinnmotion.com/s/engine",
+  },
+  {
+    slug: "features",
+    title: "Figma Motion,\nshipped as code",
+    subtitle: "Source of truth · diffable · seekable",
+    badge: "WHY BLINN",
+    footer: "blinnmotion.com/s/features",
+  },
+  {
+    slug: "code",
+    title: "Three lines\nto motion",
+    subtitle: "npm i @blinn-motion/react",
+    badge: "USE IT IN CODE",
+    footer: "blinnmotion.com/s/code",
+  },
+  {
+    slug: "compare",
+    title: "Ship the\ntimeline",
+    subtitle: "Not hand CSS · not baked video",
+    badge: "FIGMA AS SOURCE",
+    footer: "blinnmotion.com/s/compare",
+  },
+];
+
 async function main() {
   // Landing OG
   await writePng(
@@ -280,6 +340,21 @@ async function main() {
     }),
     join(DOCS_IMAGES, "og.png")
   );
+
+  // Per-section share images (unique OG per landing section)
+  const sectionDir = join(SITE_PUBLIC, "og/sections");
+  mkdirSync(sectionDir, { recursive: true });
+  for (const sec of SECTIONS) {
+    await writePng(
+      ogSvg({
+        title: sec.title,
+        subtitle: sec.subtitle,
+        badge: sec.badge,
+        footer: sec.footer,
+      }),
+      join(sectionDir, `${sec.slug}.png`)
+    );
+  }
 
   console.log("OG assets generated.");
 }

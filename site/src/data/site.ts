@@ -38,10 +38,9 @@ export const site = {
   ],
   nav: [
     { label: "Pipeline", href: "#pipeline" },
-    { label: "Adapters", href: "#adapters" },
-    { label: "Examples", href: "#examples" },
+    { label: "Platforms", href: "#platforms" },
+    { label: "vs Lottie", href: "#live-compare" },
     { label: "Engine", href: "#engine" },
-    { label: "Features", href: "#features" },
     { label: "Code", href: "#code" },
   ],
 } as const;

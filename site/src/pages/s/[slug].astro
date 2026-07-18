@@ -1,0 +1,133 @@
+---
+/**
+ * Per-section share landing.
+ * Social crawlers read unique OG tags here; humans are sent to /#{hash}.
+ */
+import Base from "../../layouts/Base.astro";
+import { site } from "../../data/site";
+import { shareSections, getShareSection } from "../../data/sections";
+
+export function getStaticPaths() {
+  return shareSections.map((s) => ({ params: { slug: s.slug } }));
+}
+
+const { slug } = Astro.params;
+const section = getShareSection(slug!);
+
+if (!section) {
+  return Astro.redirect("/");
+}
+
+const target = `/#${section.hash}`;
+const path = `/s/${section.slug}`;
+---
+
+<Base
+  title={section.title}
+  description={section.description}
+  image={section.image}
+  imageAlt={section.imageAlt}
+  path={path}
+>
+  <main class="jump">
+    <div class="card">
+      <a class="brand" href="/">
+        <span class="logo" aria-hidden="true">
+          <svg viewBox="0 0 64 64" width="36" height="36">
+            <rect x="6" y="6" width="52" height="52" rx="15" fill="#11141A"></rect>
+            <g fill="none" stroke="#fff" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M24 18 V46"></path>
+              <path d="M24 18 H32.5 C38.6 18 38.6 32 32.5 32 H24"></path>
+              <path d="M24 32 H34.5 C41.2 32 41.2 46 34.5 46 H24"></path>
+            </g>
+            <rect x="43.6" y="43.6" width="7.6" height="7.6" rx="1.5" transform="rotate(45 47.4 47.4)" fill="#2F6BFF"></rect>
+          </svg>
+        </span>
+        <span class="brand-name">Blinn Motion</span>
+      </a>
+
+      <p class="badge mono">{section.badge}</p>
+      <h1>{section.label}</h1>
+      <p class="lead">{section.description}</p>
+
+      <a class="btn" href={target}>Open section →</a>
+      <p class="hint mono">Redirecting to {site.url}/#{section.hash}</p>
+    </div>
+  </main>
+
+  <!--
+    Instant client jump. Social crawlers (Twitter, Slack, iMessage, LinkedIn…)
+    typically fetch this HTML and read OG tags without running the script —
+    so previews stay section-specific while people land on the real section.
+  -->
+  <script define:vars={{ target }}>
+    window.location.replace(target);
+  </script>
+</Base>
+
+<style>
+  .jump {
+    min-height: 100dvh;
+    display: grid;
+    place-items: center;
+    padding: 32px 20px;
+    background: var(--paper-2);
+  }
+  .card {
+    width: min(440px, 100%);
+    padding: 32px 28px;
+    border-radius: var(--r-xl);
+    border: 1px solid var(--line);
+    background: var(--paper);
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 22px;
+  }
+  .brand-name {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: 18px;
+    letter-spacing: -0.03em;
+  }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--blue);
+    margin: 0 0 12px;
+  }
+  h1 {
+    font-size: 28px;
+    letter-spacing: -0.03em;
+    margin: 0 0 12px;
+  }
+  .lead {
+    margin: 0 0 24px;
+    color: var(--ink-2);
+    font-size: 15px;
+    line-height: 1.55;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 18px;
+    border-radius: 12px;
+    background: var(--ink);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14.5px;
+  }
+  .btn:hover { opacity: 0.92; }
+  .hint {
+    margin: 18px 0 0;
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+</style>

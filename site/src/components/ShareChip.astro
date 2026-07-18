@@ -1,0 +1,74 @@
+---
+/**
+ * Tiny “Copy share link” control for a section — uses /s/{slug} so previews
+ * pick up that section’s OG image.
+ */
+interface Props {
+  slug: string;
+  /** Optional visible label */
+  label?: string;
+}
+const { slug, label = "Share" } = Astro.props;
+const path = `/s/${slug}`;
+---
+
+<button class="share-chip mono" type="button" data-share-path={path} aria-label={`Copy share link for ${slug}`}>
+  <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+    <path d="M8.6 13.5 15.4 17.5M15.4 6.5 8.6 10.5"/>
+  </svg>
+  <span data-share-label>{label}</span>
+</button>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>("[data-share-path]").forEach((btn) => {
+    if ((btn as HTMLButtonElement & { __shareBound?: boolean }).__shareBound) return;
+    (btn as HTMLButtonElement & { __shareBound?: boolean }).__shareBound = true;
+    btn.addEventListener("click", async () => {
+      const path = btn.dataset.sharePath ?? "/";
+      const url = new URL(path, window.location.origin).href;
+      const label = btn.querySelector("[data-share-label]");
+      try {
+        await navigator.clipboard.writeText(url);
+        if (label) {
+          const prev = label.textContent;
+          label.textContent = "Copied";
+          btn.classList.add("done");
+          setTimeout(() => {
+            label.textContent = prev;
+            btn.classList.remove("done");
+          }, 1400);
+        }
+      } catch {
+        window.prompt("Copy share link", url);
+      }
+    });
+  });
+</script>
+
+<style>
+  .share-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink-3);
+    font-size: 11.5px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    padding: 6px 10px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .share-chip:hover {
+    color: var(--ink);
+    border-color: var(--line-2);
+  }
+  .share-chip.done {
+    color: #0a8a5f;
+    border-color: #bfe9d8;
+    background: var(--mint-t);
+  }
+</style>

@@ -1,5 +1,5 @@
 ---
-import { frameworkSvg, type FrameworkIconId } from "../data/frameworks";
+import { frameworkSvg, usageTabs } from "../data/frameworks";
 
 // Tiny, dependency-free highlighter for these controlled snippets.
 function esc(s: string): string {
@@ -21,13 +21,13 @@ function highlight(code: string): string {
   return out;
 }
 
-const tabs: { id: string; label: string; icon: FrameworkIconId; code: string }[] = [
-  { id: "dom", label: "DOM", icon: "dom", code: `import { create } from "@blinn-motion/dom";\nimport doc from "./card.motion.json";\n\nconst player = create(\n  document.getElementById("stage")!,\n  doc,\n  { loop: true }\n);\n\nplayer.play();\nplayer.seek(0.8);          // seconds\nplayer.setProgress(0.5);   // 0…1 — scroll / gesture` },
-  { id: "canvas", label: "Canvas", icon: "canvas", code: `import { create } from "@blinn-motion/canvas";\nimport doc from "./card.motion.json";\n\nconst player = create(canvasHost, doc, { loop: true });\nplayer.play();\n// drive from scroll instead of the clock:\n// player.setProgress(scrollY / range);` },
-  { id: "react", label: "React", icon: "react", code: `import { BlinnMotion } from "@blinn-motion/react";\nimport doc from "./card.motion.json";\n\n// clock-driven\n<BlinnMotion doc={doc} renderer="canvas" loop autoplay />\n\n// progress-driven (scroll, drag, state)\n<BlinnMotion doc={doc} progress={scrollP} />` },
-  { id: "vue", label: "Vue", icon: "vue", code: `import { BlinnMotion } from "@blinn-motion/vue";\nimport doc from "./card.motion.json";\n\n// clock-driven\n<BlinnMotion :doc="doc" renderer="dom" :loop="true" :autoplay="true" />\n\n// progress-driven\n// <BlinnMotion :doc="doc" :progress="scrollP" />` },
-  { id: "rn", label: "React Native", icon: "rn", code: `import { BlinnMotionView } from "@blinn-motion/react-native";\nimport doc from "./card.motion.json";\n\n// clock\n<BlinnMotionView doc={doc} loop autoplay />\n\n// or progress-driven\n<BlinnMotionView doc={doc} progress={gestureP} />` },
-];
+const tabs = usageTabs.map((p) => ({
+  id: p.id,
+  label: p.short,
+  icon: p.id,
+  code: p.usage!,
+  pkg: p.pkg,
+}));
 ---
 
 <section class="section" id="code">
@@ -36,7 +36,7 @@ const tabs: { id: string; label: string; icon: FrameworkIconId; code: string }[]
       <div class="code-intro" data-reveal>
         <span class="eyebrow"><span class="kf"></span> Use it in code</span>
         <h2 class="title">Three lines to motion</h2>
-        <p class="lead">Hand the engine a <code class="inline">MotionDoc</code> and a host. Play on a clock, or drive with <code class="inline">setProgress(0…1)</code> / a controlled <code class="inline">progress</code> prop. Same surface on React, Vue, Svelte, Angular, Lit, DOM, Canvas and RN.</p>
+        <p class="lead">Hand the engine a <code class="inline">MotionDoc</code> and a host. Play on a clock, or drive with <code class="inline">setProgress(0…1)</code> / a controlled <code class="inline">progress</code> prop.</p>
 
         <div class="install" data-reveal>
           <span class="install-label mono">install</span>
@@ -128,7 +128,7 @@ const tabs: { id: string; label: string; icon: FrameworkIconId; code: string }[]
   }
 
   .code-card { padding: 0; overflow: hidden; }
-  .code-tabs { display: flex; align-items: center; gap: 2px; padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--paper-2); }
+  .code-tabs { display: flex; align-items: center; gap: 2px; padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--paper-2); flex-wrap: wrap; }
   .code-tab {
     border: 0; background: transparent; color: var(--ink-3);
     font-family: var(--mono); font-size: 12.5px; font-weight: 500; padding: 7px 12px; border-radius: 8px; cursor: pointer;

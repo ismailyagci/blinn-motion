@@ -1,0 +1,325 @@
+---
+/**
+ * Blinn vs Lottie — payload & architecture comparison for product UI motion.
+ * Bundle figures are minify+gzip for the typical web player path.
+ * Sources: local package build measurements; lottie-web via Bundlephobia (~v5.13).
+ */
+import ShareChip from "./ShareChip.astro";
+
+const metrics = [
+  {
+    k: "Player JS (gzip)",
+    blinn: "~9 KB",
+    blinnNote: "core + dom",
+    lottie: "~75 KB",
+    lottieNote: "lottie-web full",
+    win: "blinn" as const,
+    ratio: "~8× smaller",
+  },
+  {
+    k: "Light player (gzip)",
+    blinn: "~9 KB",
+    blinnNote: "same path",
+    lottie: "~38 KB",
+    lottieNote: "lottie_light",
+    win: "blinn" as const,
+    ratio: "~4× smaller",
+  },
+  {
+    k: "Runtime deps",
+    blinn: "Zero",
+    blinnNote: "pure JS core",
+    lottie: "Player runtime",
+    lottieNote: "full AE feature set",
+    win: "blinn" as const,
+    ratio: "No bloat tax",
+  },
+  {
+    k: "Source pipeline",
+    blinn: "Figma Motion",
+    blinnNote: "product UI timelines",
+    lottie: "After Effects",
+    lottieNote: "Bodymovin / LottieFiles",
+    win: "tie" as const,
+    ratio: "Different jobs",
+  },
+];
+
+const wins = [
+  {
+    t: "Tiny install surface",
+    d: "Ship ~9 KB gzip for core + DOM instead of a 40–75 KB Lottie player. Product pages stay lean when motion is a polish layer, not the product.",
+  },
+  {
+    t: "CSS-native DOM path",
+    d: "The DOM adapter paints with transforms, opacity and SVG the browser already optimizes — no full scene graph re-parse every frame for simple UI motion.",
+  },
+  {
+    t: "Seek / scrub without re-authoring",
+    d: "sample(doc, t) is pure and deterministic. Scroll- and gesture-linked progress is a first-class API, not a bolted-on player control.",
+  },
+  {
+    t: "Diffable MotionDoc",
+    d: "Keyframe JSON stays small and reviewable in PRs. No opaque binary player state — engineers own the artifact.",
+  },
+];
+---
+
+<section class="section" id="performance">
+  <div class="container">
+    <div class="section-head center" data-reveal>
+      <span class="eyebrow"><span class="kf"></span> Performance</span>
+      <h2 class="title">Built lighter than Lottie<br />for product UI motion</h2>
+      <p class="lead">
+        Lottie is excellent for After Effects illustration. Blinn is the thin runtime for
+        <strong>Figma Motion</strong> — same seekable timeline, a fraction of the player weight.
+        See the live side-by-side in <a href="#live-compare" style="color:var(--blue);font-weight:600">vs Lottie</a>.
+      </p>
+      <div style="display:flex;justify-content:center;margin-top:18px">
+        <ShareChip slug="performance" label="Copy share link" />
+      </div>
+    </div>
+
+    <div class="perf-hero" data-reveal>
+      <div class="perf-stat blinn">
+        <span class="perf-label mono">Blinn · core + DOM</span>
+        <strong class="perf-num">~9<span>KB</span></strong>
+        <span class="perf-unit">gzip · minify</span>
+      </div>
+      <div class="perf-vs mono" aria-hidden="true">vs</div>
+      <div class="perf-stat lottie">
+        <span class="perf-label mono">lottie-web</span>
+        <strong class="perf-num dim">~75<span>KB</span></strong>
+        <span class="perf-unit">gzip · minify</span>
+      </div>
+      <div class="perf-callout">
+        <span class="perf-callout-k mono">~8× lighter player</span>
+        <p>Typical web path for UI motion. Light Lottie is still ~4× heavier (~38 KB gzip).</p>
+      </div>
+    </div>
+
+    <div class="perf-table card" data-reveal>
+      <div class="perf-head">
+        <span class="ph-aspect"></span>
+        <span class="ph-blinn">
+          <span class="ph-logo" aria-hidden="true">
+            <svg viewBox="0 0 64 64" width="16" height="16"><rect x="6" y="6" width="52" height="52" rx="15" fill="#11141A"/><g fill="none" stroke="#fff" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 18 V46"/><path d="M24 18 H32.5 C38.6 18 38.6 32 32.5 32 H24"/><path d="M24 32 H34.5 C41.2 32 41.2 46 34.5 46 H24"/></g><rect x="43.6" y="43.6" width="7.6" height="7.6" rx="1.5" transform="rotate(45 47.4 47.4)" fill="#2F6BFF"/></svg>
+          </span>
+          Blinn Motion
+        </span>
+        <span class="ph-alt mono">Lottie</span>
+        <span class="ph-ratio mono">Edge</span>
+      </div>
+      {metrics.map((m, i) => (
+        <div class="perf-row" data-reveal style={`--reveal-delay:${i * 40}ms`}>
+          <span class="pr-aspect">{m.k}</span>
+          <span class:list={["pr-blinn", { win: m.win === "blinn" }]}>
+            <strong>{m.blinn}</strong>
+            <span class="pr-note mono">{m.blinnNote}</span>
+          </span>
+          <span class="pr-alt">
+            <strong>{m.lottie}</strong>
+            <span class="pr-note mono">{m.lottieNote}</span>
+          </span>
+          <span class:list={["pr-ratio mono", { blinn: m.win === "blinn", tie: m.win === "tie" }]}>
+            {m.ratio}
+          </span>
+        </div>
+      ))}
+    </div>
+
+    <div class="win-grid">
+      {wins.map((w, i) => (
+        <article class="card win" data-reveal style={`--reveal-delay:${i * 50}ms`}>
+          <h3 class="win-title">{w.t}</h3>
+          <p class="win-desc">{w.d}</p>
+        </article>
+      ))}
+    </div>
+
+    <p class="perf-note" data-reveal>
+      Sizes measured from published package builds (Blinn core+dom minify+gzip) and
+      public <code class="inline">lottie-web</code> bundle figures. Animation JSON size varies by scene —
+      MotionDoc keyframes stay sparse; Lottie AE exports often denser. Different source tools, different jobs.
+    </p>
+  </div>
+</section>
+
+<style>
+  .perf-hero {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr minmax(200px, 0.9fr);
+    gap: 18px;
+    align-items: stretch;
+    margin-bottom: 22px;
+  }
+  .perf-stat {
+    padding: 22px 22px 20px;
+    border-radius: var(--r-lg);
+    border: 1px solid var(--line);
+    background: var(--paper);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .perf-stat.blinn {
+    border-color: color-mix(in srgb, var(--blue) 35%, var(--line));
+    background: linear-gradient(180deg, var(--blue-t) 0%, var(--paper) 70%);
+  }
+  .perf-label {
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+  .perf-num {
+    font-family: var(--display);
+    font-size: clamp(42px, 5vw, 56px);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--ink);
+  }
+  .perf-num span {
+    font-size: 0.42em;
+    letter-spacing: -0.02em;
+    margin-left: 4px;
+    color: var(--ink-2);
+  }
+  .perf-num.dim { color: var(--ink-3); }
+  .perf-unit { font-size: 13px; color: var(--ink-3); }
+  .perf-vs {
+    align-self: center;
+    font-size: 12px;
+    color: var(--ink-3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .perf-callout {
+    padding: 20px 18px;
+    border-radius: var(--r-lg);
+    border: 1px solid color-mix(in srgb, var(--mint) 35%, var(--line));
+    background: var(--mint-t);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 8px;
+  }
+  .perf-callout-k {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0a8a5f;
+    letter-spacing: 0.02em;
+  }
+  .perf-callout p {
+    margin: 0;
+    font-size: 13.5px;
+    line-height: 1.5;
+    color: var(--ink-2);
+  }
+
+  .perf-table { padding: 0; overflow: hidden; margin-bottom: 22px; }
+  .perf-head, .perf-row {
+    display: grid;
+    grid-template-columns: 1.15fr 1.2fr 1.2fr 0.85fr;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 20px;
+  }
+  .perf-head {
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--line);
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .ph-blinn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: var(--display);
+  }
+  .ph-logo { display: grid; place-items: center; }
+  .ph-alt { color: var(--ink-3); font-weight: 500; }
+  .ph-ratio { color: var(--ink-3); font-weight: 500; }
+
+  .perf-row { border-bottom: 1px solid var(--line); font-size: 14px; }
+  .perf-row:last-child { border-bottom: 0; }
+  .pr-aspect { font-weight: 600; color: var(--ink); }
+  .pr-blinn, .pr-alt {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .pr-blinn strong, .pr-alt strong { font-weight: 600; font-size: 15px; letter-spacing: -0.01em; }
+  .pr-blinn.win strong { color: var(--ink); }
+  .pr-blinn.win {
+    padding: 8px 12px;
+    margin: -6px -8px;
+    border-radius: 10px;
+    background: var(--blue-t);
+  }
+  .pr-alt strong { color: var(--ink-2); font-weight: 500; }
+  .pr-note { font-size: 11px; color: var(--ink-3); }
+  .pr-ratio {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-3);
+  }
+  .pr-ratio.blinn { color: #0a8a5f; }
+  .pr-ratio.tie { color: var(--ink-3); font-weight: 500; }
+
+  .win-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+  .win { padding: 20px 20px 18px; }
+  .win-title {
+    font-size: 16px;
+    letter-spacing: -0.015em;
+    margin-bottom: 8px;
+  }
+  .win-desc {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.55;
+    color: var(--ink-2);
+  }
+
+  .perf-note {
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 12.5px;
+    margin-top: 22px;
+    max-width: 640px;
+    margin-inline: auto;
+    line-height: 1.55;
+  }
+
+  @media (max-width: 960px) {
+    .perf-hero { grid-template-columns: 1fr 1fr; }
+    .perf-vs { display: none; }
+    .perf-callout { grid-column: 1 / -1; }
+  }
+  @media (max-width: 760px) {
+    .perf-hero { grid-template-columns: 1fr; }
+    .perf-head { display: none; }
+    .perf-row {
+      grid-template-columns: 1fr;
+      gap: 8px;
+      padding: 16px 16px;
+    }
+    .pr-aspect {
+      font-family: var(--mono);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--ink-3);
+      font-weight: 500;
+    }
+    .pr-blinn.win { margin: 0; }
+    .pr-blinn::before { content: "Blinn — "; color: var(--ink-3); font-weight: 500; font-size: 12px; }
+    .pr-alt::before { content: "Lottie — "; color: var(--ink-3); font-weight: 500; font-size: 12px; }
+    .win-grid { grid-template-columns: 1fr; }
+  }
+</style>

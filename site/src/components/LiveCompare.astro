@@ -1,0 +1,417 @@
+---
+/**
+ * Head-to-head: LottieFiles “Successful” vs pixel-faithful Blinn recreation.
+ * Geometry + keyframes extracted from public/compare/success.lottie.json.
+ */
+import ShareChip from "./ShareChip.astro";
+
+const sizes = {
+  lottieMin: 25_513,
+  lottieGz: 3_920,
+  blinnMin: 2_960,
+  blinnGz: 1_029,
+  lottiePlayerGz: 75_000,
+  blinnPlayerGz: 9_000,
+};
+
+const fmt = (n: number) => {
+  if (n >= 1024 * 1024) return `${(n / (1024 * 1024)).toFixed(2)} MB`;
+  if (n >= 10_000) return `${(n / 1024).toFixed(1)} KB`;
+  if (n >= 1024) return `${(n / 1024).toFixed(2)} KB`;
+  return `${n} B`;
+};
+
+const lottieTotal = sizes.lottieGz + sizes.lottiePlayerGz;
+const blinnTotal = sizes.blinnGz + sizes.blinnPlayerGz;
+const jsonRatio = sizes.lottieMin / sizes.blinnMin;
+const totalRatio = lottieTotal / blinnTotal;
+const blinnWins = blinnTotal < lottieTotal;
+---
+
+<section class="section section-alt" id="live-compare">
+  <div class="container">
+    <div class="section-head center" data-reveal>
+      <span class="eyebrow"><span class="kf"></span> Live head-to-head</span>
+      <h2 class="title">Same motion.<br />Pixel-matched.</h2>
+      <p class="lead">
+        Left: the public LottieFiles file, played by <code class="inline">lottie-web</code>.
+        Right: the <strong>same</strong> geometry, keyframes and easings as a Blinn MotionDoc + SVG paint —
+        check path-trim, polystars, ellipses, confetti dots. Zero restyle.
+      </p>
+      <div class="share-row">
+        <ShareChip slug="vs-lottie" label="Copy share link" />
+      </div>
+    </div>
+
+    <div class="duo" data-reveal>
+      <article class="pane lottie-pane">
+        <header class="pane-head">
+          <div class="pane-id">
+            <span class="pane-badge mono">Lottie</span>
+            <h3 class="pane-title">lottie-web · SVG</h3>
+          </div>
+          <span class="pane-live mono"><span class="dot"></span>LIVE</span>
+        </header>
+        <div class="viewport" id="lottie-viewport" aria-label="Original Lottie animation"></div>
+        <div class="pane-meta mono">
+          <span>success.lottie.json</span>
+          <span>LottieFiles · lf20_jbrw3hcz</span>
+        </div>
+        <dl class="stats">
+          <div>
+            <dt>Animation JSON</dt>
+            <dd>
+              <strong>{fmt(sizes.lottieMin)}</strong>
+              <span class="sub">{fmt(sizes.lottieGz)} gzip</span>
+            </dd>
+          </div>
+          <div>
+            <dt>Player (gzip)</dt>
+            <dd><strong>~{fmt(sizes.lottiePlayerGz)}</strong><span class="sub">lottie-web</span></dd>
+          </div>
+          <div class="total">
+            <dt>Ship cost</dt>
+            <dd><strong>~{fmt(lottieTotal)}</strong><span class="sub">player + JSON gzip</span></dd>
+          </div>
+        </dl>
+      </article>
+
+      <article class="pane blinn-pane">
+        <header class="pane-head">
+          <div class="pane-id">
+            <span class="pane-badge mono win">Blinn</span>
+            <h3 class="pane-title">MotionDoc · exact SVG</h3>
+          </div>
+          <span class="pane-live mono"><span class="dot"></span>LIVE</span>
+        </header>
+        <div class="viewport" id="blinn-viewport" aria-label="Blinn exact recreation"></div>
+        <div class="pane-meta mono">
+          <span>success.blinn.json</span>
+          <span>extracted keyframes · same paths</span>
+        </div>
+        <dl class="stats">
+          <div>
+            <dt>Animation JSON</dt>
+            <dd>
+              <strong class="good">{fmt(sizes.blinnMin)}</strong>
+              <span class="sub">{fmt(sizes.blinnGz)} gzip · {jsonRatio.toFixed(1)}× smaller</span>
+            </dd>
+          </div>
+          <div>
+            <dt>Player (gzip)</dt>
+            <dd><strong class="good">~{fmt(sizes.blinnPlayerGz)}</strong><span class="sub">core + paint</span></dd>
+          </div>
+          <div class="total">
+            <dt>Ship cost</dt>
+            <dd>
+              <strong class="good">~{fmt(blinnTotal)}</strong>
+              <span class="sub">player + JSON gzip · {totalRatio.toFixed(1)}× lighter</span>
+            </dd>
+          </div>
+        </dl>
+      </article>
+    </div>
+
+    <div class:list={["verdict", { win: blinnWins }]} data-reveal>
+      <div class="verdict-copy">
+        <span class="verdict-k mono">Verdict</span>
+        <p>
+          <strong>Same picture, smaller file.</strong>
+          Animation JSON is {jsonRatio.toFixed(1)}× smaller; total ship cost ~{totalRatio.toFixed(1)}× lighter.
+          Lottie carries AE shape trees + unused glyph outlines — Blinn keeps only the resolved motion.
+        </p>
+      </div>
+      <div class="bars" aria-hidden="true">
+        <div class="bar-row">
+          <span class="bar-label mono">Lottie</span>
+          <div class="bar-track"><div class="bar-fill lottie" style="width:100%"></div></div>
+          <span class="bar-val mono">{fmt(lottieTotal)}</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-label mono">Blinn</span>
+          <div class="bar-track">
+            <div class="bar-fill blinn" style={`width:${Math.max(6, (blinnTotal / lottieTotal) * 100).toFixed(1)}%`}></div>
+          </div>
+          <span class="bar-val mono">{fmt(blinnTotal)}</span>
+        </div>
+      </div>
+    </div>
+
+    <p class="fine mono" data-reveal>
+      Keyframes, cubic easings (0.333,0 → 0.667,1), check trim path, 4 polystars, 8 confetti dots and
+      both green ellipses taken from the Lottie JSON. Text layer in the source has empty <code class="inline">t:""</code> — matched.
+      Player sizes: lottie-web ~75&nbsp;KB gzip · Blinn core+DOM ~9&nbsp;KB gzip.
+    </p>
+  </div>
+</section>
+
+<script>
+  import { mountExact, DURATION } from "../scripts/success-exact";
+
+  const blinnEl = document.getElementById("blinn-viewport");
+  const lottieEl = document.getElementById("lottie-viewport");
+
+  let blinnPlayer: ReturnType<typeof mountExact> | null = null;
+  let lottieAnim: { goToAndStop: (v: number, isFrame?: boolean) => void; play: () => void; destroy?: () => void; totalFrames: number; frameRate: number } | null = null;
+
+  if (blinnEl) {
+    blinnPlayer = mountExact(blinnEl);
+  }
+
+  const startSynced = () => {
+    // Shared clock so both sides stay frame-aligned for visual A/B
+    let t0 = performance.now();
+    let raf = 0;
+    const loop = (now: number) => {
+      const t = ((now - t0) / 1000) % DURATION;
+      blinnPlayer?.seek(t);
+      if (lottieAnim) {
+        // Lottie uses frames
+        const frame = (t / DURATION) * (lottieAnim.totalFrames || 47);
+        lottieAnim.goToAndStop(frame, true);
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    cancelAnimationFrame(raf);
+    t0 = performance.now();
+    raf = requestAnimationFrame(loop);
+  };
+
+  if (lottieEl) {
+    const w = window as Window & {
+      lottie?: {
+        loadAnimation: (opts: Record<string, unknown>) => {
+          goToAndStop: (v: number, isFrame?: boolean) => void;
+          play: () => void;
+          destroy?: () => void;
+          totalFrames: number;
+          frameRate: number;
+          addEventListener: (type: string, cb: () => void) => void;
+        };
+      };
+    };
+
+    const boot = () => {
+      if (!w.lottie || !lottieEl) return;
+      lottieAnim = w.lottie.loadAnimation({
+        container: lottieEl,
+        renderer: "svg",
+        loop: true,
+        autoplay: false,
+        path: "/compare/success.lottie.json",
+        rendererSettings: {
+          preserveAspectRatio: "xMidYMid meet",
+          progressiveLoad: false,
+        },
+      });
+      // Wait until data is ready so totalFrames is correct
+      lottieAnim.addEventListener("DOMLoaded", () => {
+        startSynced();
+      });
+    };
+
+    if (w.lottie) {
+      boot();
+    } else {
+      const s = document.createElement("script");
+      s.src = "https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js";
+      s.async = true;
+      s.onload = boot;
+      s.onerror = () => {
+        lottieEl.innerHTML =
+          '<p style="margin:auto;color:#79808f;font:12px/1.4 JetBrains Mono,monospace;padding:16px;text-align:center">Could not load lottie-web CDN</p>';
+        // Still play Blinn solo
+        blinnPlayer?.play();
+      };
+      document.head.appendChild(s);
+    }
+  } else {
+    blinnPlayer?.play();
+  }
+</script>
+
+<style>
+  .duo {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .pane {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--r-lg);
+    border: 1px solid var(--line);
+    background: var(--paper);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+  }
+  .blinn-pane {
+    border-color: color-mix(in srgb, var(--blue) 32%, var(--line));
+    box-shadow: 0 1px 2px rgba(17, 20, 26, 0.04), 0 16px 36px -20px rgba(47, 107, 255, 0.35);
+  }
+  .pane-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper-2);
+  }
+  .pane-id { display: flex; flex-direction: column; gap: 4px; }
+  .pane-badge {
+    width: fit-content;
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 8px;
+    border-radius: 999px;
+    color: var(--ink-2);
+    background: var(--paper-3);
+  }
+  .pane-badge.win { color: #0a8a5f; background: var(--mint-t); }
+  .pane-title {
+    font-size: 15px;
+    font-weight: 650;
+    letter-spacing: -0.02em;
+  }
+  .pane-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+  .pane-live .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--mint);
+    box-shadow: 0 0 0 3px var(--mint-t);
+  }
+
+  .viewport {
+    position: relative;
+    height: 300px;
+    overflow: hidden;
+    /* Match Lottie default transparent on light paper */
+    background: #ffffff;
+  }
+  .viewport :global(svg) {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .pane-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: 11px;
+    color: var(--ink-3);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .stats {
+    display: grid;
+    margin: 0;
+    padding: 4px 0 8px;
+  }
+  .stats > div {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: baseline;
+    padding: 10px 16px;
+  }
+  .stats > div.total {
+    margin-top: 4px;
+    border-top: 1px solid var(--line);
+    background: var(--paper-2);
+  }
+  .stats dt { font-size: 13px; color: var(--ink-2); }
+  .stats dd {
+    margin: 0;
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .stats strong {
+    font-family: var(--display);
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+  .stats strong.good { color: #0a8a5f; }
+  .stats .sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink-3);
+  }
+
+  .verdict {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 22px;
+    align-items: center;
+    padding: 20px 22px;
+    border-radius: var(--r-lg);
+    border: 1px solid color-mix(in srgb, var(--mint) 35%, var(--line));
+    background: linear-gradient(180deg, var(--mint-t) 0%, var(--paper) 70%);
+  }
+  .verdict-k {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #0a8a5f;
+    margin-bottom: 8px;
+  }
+  .verdict-copy p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    max-width: 48ch;
+  }
+  .verdict-copy strong { color: var(--ink); }
+
+  .bars { display: flex; flex-direction: column; gap: 12px; }
+  .bar-row {
+    display: grid;
+    grid-template-columns: 52px 1fr 64px;
+    gap: 10px;
+    align-items: center;
+  }
+  .bar-label { font-size: 11px; color: var(--ink-3); }
+  .bar-track {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--paper-3);
+    overflow: hidden;
+  }
+  .bar-fill { height: 100%; border-radius: 999px; }
+  .bar-fill.lottie { background: var(--ink-3); }
+  .bar-fill.blinn { background: var(--blue); }
+  .bar-val { font-size: 11px; color: var(--ink-2); text-align: right; }
+
+  .share-row {
+    display: flex;
+    justify-content: center;
+    margin-top: 18px;
+  }
+  .fine {
+    text-align: center;
+    color: var(--ink-3);
+    font-size: 11.5px;
+    line-height: 1.55;
+    margin: 18px auto 0;
+    max-width: 700px;
+  }
+
+  @media (max-width: 900px) {
+    .duo { grid-template-columns: 1fr; }
+    .verdict { grid-template-columns: 1fr; }
+  }
+</style>

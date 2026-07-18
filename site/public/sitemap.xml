@@ -12,6 +12,15 @@
       <image:caption>The runtime for Figma Motion — MotionDoc to pure-JS engine across every platform</image:caption>
     </image:image>
   </url>
+  <!-- Section share landings (unique OG previews) -->
+  <url><loc>https://blinnmotion.com/s/pipeline</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://blinnmotion.com/s/platforms</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://blinnmotion.com/s/vs-lottie</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://blinnmotion.com/s/performance</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://blinnmotion.com/s/engine</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://blinnmotion.com/s/features</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://blinnmotion.com/s/code</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
+  <url><loc>https://blinnmotion.com/s/compare</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
   <url>
     <loc>https://docs.blinnmotion.com/</loc>
     <changefreq>weekly</changefreq>
