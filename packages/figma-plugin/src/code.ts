@@ -7,7 +7,7 @@
 //   2) `doc`  — our own engine format (MotionDoc, see engine/SCHEMA.md), played by motion-engine.js
 // and posts both to the UI for preview / download.
 
-figma.showUI(__html__, { width: 820, height: 620, themeColors: true });
+figma.showUI(__html__, { width: 920, height: 720, themeColors: true });
 
 // ---------------------------------------------------------------- helpers ---
 
@@ -885,7 +885,7 @@ figma.ui.onmessage = (msg: any) => {
   if (!msg) return;
   if (msg.type === 'ready' || msg.type === 'reexport') exportSelection();
   else if (msg.type === 'createDemo') createDemo();
-  else if (msg.type === 'resize') figma.ui.resize(Math.max(560, msg.width | 0), Math.max(400, msg.height | 0));
+  else if (msg.type === 'resize') figma.ui.resize(Math.max(640, msg.width | 0), Math.max(480, msg.height | 0));
   else if (msg.type === 'close') figma.closePlugin();
   else if (msg.type === 'notify') figma.notify(msg.message || '');
   else if (msg.type === 'open-url' && typeof msg.url === 'string') {
