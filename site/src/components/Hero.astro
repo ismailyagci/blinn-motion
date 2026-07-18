@@ -84,14 +84,24 @@ import { frameworkSvg, heroChips } from "../data/frameworks";
   }
   .tchip-logo :global(svg) { display: block; }
 
-  .hero-stage { min-width: 0; }
+  .hero-stage { min-width: 0; max-width: 100%; }
+  .hero-copy { min-width: 0; max-width: 100%; }
+  .hero-grid { min-width: 0; }
+  .trust { max-width: 100%; }
+  .trust-chips { max-width: 100%; }
 
   @media (max-width: 920px) {
     .hero-grid { grid-template-columns: 1fr; gap: 44px; }
     .hero-copy { text-align: center; }
     .hero-actions, .trust-chips { justify-content: center; }
     .hero-lead { margin-inline: auto; }
-    .trust { display: inline-block; }
+    /* block (not inline-block) so wide chip rows wrap instead of expanding the page */
+    .trust { display: block; width: 100%; }
     .hero-stage { order: -1; }
+  }
+  @media (max-width: 420px) {
+    .hero-title { font-size: clamp(32px, 9vw, 40px); }
+    .hero-actions { gap: 8px; }
+    .btn { padding: 11px 14px; font-size: 14px; }
   }
 </style>

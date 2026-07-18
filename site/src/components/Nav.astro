@@ -76,7 +76,15 @@ import { site } from "../data/site";
     backdrop-filter: blur(12px) saturate(150%);
     border-bottom-color: var(--line);
   }
-  .nav-inner { display: flex; align-items: center; gap: 18px; height: 64px; }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    height: 64px;
+    min-width: 0;
+    max-width: 100%;
+  }
+  .nav { max-width: 100%; overflow-x: clip; }
   .brand { display: inline-flex; align-items: center; gap: 9px; }
   .logo { display: grid; place-items: center; }
   .brand-name { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: -0.03em; }

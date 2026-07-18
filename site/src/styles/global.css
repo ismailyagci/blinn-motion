@@ -55,10 +55,17 @@
 * { box-sizing: border-box; }
 *::selection { background: #ffe48a; color: var(--ink); }
 
-html, body { height: 100%; }
+html {
+  height: 100%;
+  /* clip > hidden: prevents iOS from expanding scroll width from off-screen kids */
+  overflow-x: clip;
+  max-width: 100%;
+}
 
 body {
   margin: 0;
+  height: 100%;
+  max-width: 100%;
   font-family: var(--body);
   background: var(--paper);
   color: var(--ink);
@@ -66,7 +73,8 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  overflow-x: clip;
+  position: relative;
 }
 
 a { color: inherit; text-decoration: none; }
@@ -74,8 +82,24 @@ img, svg { display: block; max-width: 100%; }
 button { font-family: inherit; }
 
 /* ---------- layout ---------- */
-.container { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: 28px; }
-.section { position: relative; padding-block: clamp(64px, 9vw, 116px); }
+.container {
+  width: 100%;
+  max-width: var(--maxw);
+  margin-inline: auto;
+  padding-inline: clamp(16px, 4vw, 28px);
+  min-width: 0;
+}
+.section {
+  position: relative;
+  padding-block: clamp(64px, 9vw, 116px);
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: clip;
+}
+main {
+  max-width: 100%;
+  overflow-x: clip;
+}
 .section-tight { padding-block: clamp(44px, 6vw, 80px); }
 .section-alt { background: var(--paper-2); border-block: 1px solid var(--line); }
 
@@ -101,8 +125,22 @@ button { font-family: inherit; }
   width: 8px; height: 8px; border-radius: 50%; background: var(--mint);
 }
 
-.section-head { max-width: 660px; margin-bottom: 52px; }
+.section-head { max-width: 660px; margin-bottom: 52px; min-width: 0; }
 .section-head.center { margin-inline: auto; text-align: center; }
+
+/* Grid/flex children default to min-width:auto and can force page-wide overflow */
+.container > *,
+main > section > .container > * {
+  min-width: 0;
+}
+
+pre, code {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
 h1, h2, h3 { margin: 0; font-family: var(--display); line-height: 1.04; letter-spacing: -0.03em; font-weight: 700; color: var(--ink); }
 h2.title { font-size: clamp(29px, 4.3vw, 46px); margin-top: 16px; letter-spacing: -0.035em; }

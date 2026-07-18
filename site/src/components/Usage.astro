@@ -105,13 +105,14 @@ const tabs = usageTabs.map((p) => ({
 </script>
 
 <style>
-  .code-layout { display: grid; grid-template-columns: 0.82fr 1.18fr; gap: clamp(28px, 4vw, 56px); align-items: center; }
+  .code-layout { display: grid; grid-template-columns: 0.82fr 1.18fr; gap: clamp(28px, 4vw, 56px); align-items: center; min-width: 0; }
+  .code-intro { min-width: 0; }
   .code-intro .lead { max-width: 440px; }
 
-  .install { margin-top: 26px; max-width: 380px; }
+  .install { margin-top: 26px; max-width: min(380px, 100%); min-width: 0; }
   .install-label { display: block; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 8px; }
-  .install-row { display: flex; align-items: center; gap: 10px; padding: 11px 11px 11px 15px; border-radius: var(--r); border: 1px solid var(--line); background: var(--paper-2); }
-  .install-row code { font-size: 13.5px; color: var(--ink); flex: 1; }
+  .install-row { display: flex; align-items: center; gap: 10px; padding: 11px 11px 11px 15px; border-radius: var(--r); border: 1px solid var(--line); background: var(--paper-2); min-width: 0; }
+  .install-row code { font-size: 13.5px; color: var(--ink); flex: 1; min-width: 0; overflow-x: auto; white-space: nowrap; }
   .install-more { margin: 10px 0 0; font-size: 11px; color: var(--ink-3); line-height: 1.4; }
 
   .copy {
@@ -127,8 +128,8 @@ const tabs = usageTabs.map((p) => ({
     background: var(--paper); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; white-space: nowrap;
   }
 
-  .code-card { padding: 0; overflow: hidden; }
-  .code-tabs { display: flex; align-items: center; gap: 2px; padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--paper-2); flex-wrap: wrap; }
+  .code-card { padding: 0; overflow: hidden; min-width: 0; max-width: 100%; }
+  .code-tabs { display: flex; align-items: center; gap: 2px; padding: 8px 10px; border-bottom: 1px solid var(--line); background: var(--paper-2); flex-wrap: wrap; min-width: 0; }
   .code-tab {
     border: 0; background: transparent; color: var(--ink-3);
     font-family: var(--mono); font-size: 12.5px; font-weight: 500; padding: 7px 12px; border-radius: 8px; cursor: pointer;
