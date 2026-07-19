@@ -3,6 +3,11 @@
 Plays the shared `fixtures/card.motion.json` MotionDoc with **@blinn-motion/react-native**,
 which renders @blinn-motion/core's resolved render tree into native `<View>`/`<Text>` nodes.
 
+| | |
+|--|--|
+| 📚 Docs | [React Native adapter](https://docs.blinnmotion.com/adapters/react-native) |
+| 🔴 Live | — (native; run locally) |
+
 ## Why it's a template
 
 This package is kept lightweight on purpose: the heavy Expo / React Native runtime

@@ -4,6 +4,11 @@
 
 Advanced shared demo flow: MotionDoc switch, dual DOM/Canvas, transport, scrub, rate, progress mode, live meter.
 
+| | |
+|--|--|
+| 📚 Docs | [Svelte adapter](https://docs.blinnmotion.com/adapters/svelte) |
+| 🔴 Live | [svelte.blinnmotion.com](https://svelte.blinnmotion.com) |
+
 ```bash
 npm install
 npm run dev
