@@ -12,6 +12,22 @@
       <image:caption>The runtime for Figma Motion — MotionDoc to pure-JS engine across every platform</image:caption>
     </image:image>
   </url>
+  <!-- SEO content pages -->
+  <url>
+    <loc>https://blinnmotion.com/figma-motion-to-code</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.95</priority>
+  </url>
+  <url>
+    <loc>https://blinnmotion.com/vs-lottie</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://blinnmotion.com/faq</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.85</priority>
+  </url>
   <!-- Section share landings (unique OG previews) -->
   <url><loc>https://blinnmotion.com/s/pipeline</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://blinnmotion.com/s/platforms</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
@@ -25,6 +41,21 @@
     <loc>https://docs.blinnmotion.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://docs.blinnmotion.com/quickstart/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://docs.blinnmotion.com/guides/figma-plugin/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.85</priority>
+  </url>
+  <url>
+    <loc>https://docs.blinnmotion.com/concepts/motiondoc/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://react.blinnmotion.com/</loc>

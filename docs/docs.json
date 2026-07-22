@@ -30,7 +30,7 @@
       "twitter:card": "summary_large_image",
       "theme-color": "#2F6BFF",
       "application-name": "Blinn Motion",
-      "keywords": "Blinn Motion, Figma Motion, MotionDoc, animation runtime, Figma to code, React animation, Canvas animation"
+      "keywords": "Blinn Motion, Figma Motion, Figma Motion to code, MotionDoc, animation runtime, Figma to code, Lottie alternative, React animation, Canvas animation, React Native animation"
     },
     "organization": {
       "name": "Blinn Motion",
@@ -76,7 +76,11 @@
           },
           {
             "group": "Guides",
-            "pages": ["guides/figma-plugin", "guides/playback"]
+            "pages": [
+              "guides/figma-plugin",
+              "guides/figma-motion-to-react",
+              "guides/playback"
+            ]
           },
           {
             "group": "Reference",

@@ -12,7 +12,8 @@ import { frameworkSvg, heroChips } from "../data/frameworks";
       </span>
 
       <h1 class="hero-title" data-reveal style="--reveal-delay:50ms">
-        Animate in Figma.<br />Ship&nbsp;it <span class="mark-violet">everywhere</span>.
+        <span class="hero-brand">Blinn Motion</span>
+        <span class="hero-tagline">Animate in Figma.<br />Ship&nbsp;it <span class="mark-violet">everywhere</span>.</span>
       </h1>
 
       <p class="hero-lead" data-reveal style="--reveal-delay:110ms">
@@ -60,11 +61,25 @@ import { frameworkSvg, heroChips } from "../data/frameworks";
   }
   .hero-eyebrow .kf { background: var(--blue); }
   .hero-title {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 22px;
+    font-weight: 700;
+  }
+  .hero-brand {
+    font-size: clamp(15px, 1.35vw, 17px);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--blue);
+    font-family: var(--display);
+  }
+  .hero-tagline {
     font-size: clamp(38px, 5.4vw, 64px);
     line-height: 1.02;
     letter-spacing: -0.045em;
     font-weight: 700;
-    margin-top: 22px;
+    color: var(--ink);
   }
   .hero-lead { color: var(--ink-2); font-size: clamp(16px, 1.45vw, 19px); line-height: 1.6; margin-top: 22px; max-width: 500px; }
 

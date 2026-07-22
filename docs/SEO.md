@@ -45,17 +45,44 @@ Writes landing, docs background, and every `examples/*/public/og.png`.
 
 ## Docs (`docs/`)
 
-Mintlify already generates per-page OG cards, sitemap, robots, and `llms.txt` / `llms-full.txt`.
+Mintlify static export (`mint export` → Cloudflare Pages) is an SPA-style bundle.
+**Without injection**, `/robots.txt`, `/sitemap.xml`, and `/llms.txt` often return
+`text/html` (homepage shell) — which breaks Google Search Console sitemaps.
+
+### Fix (required on every docs deploy)
+
+`docs/scripts/inject-seo.mjs` writes real crawl files into `docs/dist/` after unpack:
+
+| File | Source |
+|------|--------|
+| `robots.txt` | `docs/seo/robots.txt` |
+| `sitemap.xml` | generated from `docs.json` navigation |
+| `llms.txt` | generated from nav pages |
+| `_headers` | `docs/seo/_headers` (content-types) |
+
+CI runs inject after unzip (`.github/workflows/deploy-docs.yml`). Locally:
+`npm run build` in `docs/` (unpack calls inject).
+
+### Edge backup (Cloudflare Worker)
+
+Worker **`blinn-docs-seo`** is routed on:
+
+- `docs.blinnmotion.com/robots.txt`
+- `docs.blinnmotion.com/sitemap.xml`
+- `docs.blinnmotion.com/llms.txt`
+
+It returns `text/plain` / `application/xml` with header `x-blinn-seo: worker`.
+Keep the inject step so Pages origin is also correct if routes change.
+
+### Mintlify config
 
 Configured in `docs/docs.json`:
 
-- `thumbnails.background` → `/images/og-background.png` (branded canvas; title/description overlaid by Mintlify)
+- `thumbnails.background` → `/images/og-background.png`
 - `seo.metatags` → site-wide defaults
 - `seo.organization` → JSON-LD publisher entity
 
 Optional static fallback: `docs/images/og.png`.
-
-Do **not** commit a custom `docs/llms.txt` unless you intend to **override** Mintlify’s auto index.
 
 ## Example labs
 

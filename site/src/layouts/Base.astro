@@ -1,6 +1,7 @@
 ---
 import "../styles/global.css";
 import { site } from "../data/site";
+import { faqJsonLd } from "../data/faq";
 
 interface Props {
   title?: string;
@@ -12,6 +13,8 @@ interface Props {
   /** Path only (no origin) for canonical, default "/" */
   path?: string;
   noindex?: boolean;
+  /** Include homepage FAQ schema (default: path is /) */
+  includeFaqSchema?: boolean;
 }
 
 const {
@@ -21,11 +24,13 @@ const {
   imageAlt = site.ogImageAlt,
   path = "/",
   noindex = false,
+  includeFaqSchema,
 } = Astro.props;
 
 const canonical = new URL(path, site.url).href;
 const ogImage = image.startsWith("http") ? image : new URL(image, site.url).href;
 const robots = noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large";
+const withFaq = includeFaqSchema ?? path === "/";
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -37,7 +42,9 @@ const jsonLd = {
       url: site.url,
       logo: {
         "@type": "ImageObject",
-        url: `${site.url}/favicon.svg`,
+        url: `${site.url}/og-square.png`,
+        width: 1200,
+        height: 1200,
       },
       sameAs: [...site.sameAs],
     },
@@ -83,9 +90,17 @@ const jsonLd = {
       },
       license: "https://opensource.org/licenses/MIT",
       codeRepository: site.repo,
+      featureList: [
+        "Figma Motion export to MotionDoc",
+        "Pure-JS render engine",
+        "DOM, Canvas, React, Vue, Svelte, Angular, Lit, React Native",
+        "Seek, scrub, and progress-driven playback",
+      ],
     },
   ],
 };
+
+const faqLd = withFaq ? faqJsonLd(`${site.url}/faq`) : null;
 ---
 
 <!doctype html>
@@ -133,6 +148,7 @@ const jsonLd = {
 
     <!-- JSON-LD -->
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    {faqLd && <script type="application/ld+json" set:html={JSON.stringify(faqLd)} />}
 
     <!-- Fonts: Space Grotesk (display) · Inter (body) · JetBrains Mono (data) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

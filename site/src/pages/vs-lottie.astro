@@ -1,0 +1,107 @@
+---
+import Article from "../layouts/Article.astro";
+import { site } from "../data/site";
+
+const title = "Blinn Motion vs Lottie — Figma UI motion, lighter runtime";
+const description =
+  "Compare Blinn Motion and Lottie for product UI: Figma Motion source of truth, sparse MotionDoc, ~9 KB player vs lottie-web, seek and progress on every platform.";
+const path = "/vs-lottie";
+---
+
+<Article
+  title={title}
+  description={description}
+  path={path}
+  image="/og/sections/vs-lottie.png"
+  imageAlt="Blinn Motion vs Lottie — same motion, smaller payload"
+  eyebrow="Comparison"
+  h1="Blinn Motion vs Lottie"
+  lead="Same idea — ship motion as data — different authoring path, payload shape, and player size. Pick based on where motion is designed."
+>
+  <p>
+    <strong>Lottie</strong> made vector animation portable: After Effects (or similar) → JSON →
+    <code>lottie-web</code> / native players. <strong>Blinn Motion</strong> targets a different source of truth:
+    <strong>Figma Motion</strong> timelines for product UI, exported as a sparse <strong>MotionDoc</strong> and played by a pure-JS engine.
+  </p>
+
+  <h2>Side-by-side</h2>
+  <table>
+    <thead>
+      <tr>
+        <th></th>
+        <th>Blinn Motion</th>
+        <th>Lottie</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Primary authoring</td>
+        <td>Figma Motion</td>
+        <td>After Effects (+ Bodymovin / similar)</td>
+      </tr>
+      <tr>
+        <td>Document</td>
+        <td>MotionDoc (sparse UI keyframes)</td>
+        <td>Lottie JSON (often illustration-dense)</td>
+      </tr>
+      <tr>
+        <td>Typical player (web)</td>
+        <td>~9 KB gzip (core + DOM)</td>
+        <td>~75 KB gzip (lottie-web ballpark)</td>
+      </tr>
+      <tr>
+        <td>Web + RN from one file</td>
+        <td>Yes (adapters)</td>
+        <td>Yes (ecosystem players)</td>
+      </tr>
+      <tr>
+        <td>Seek / scrub / progress</td>
+        <td>First-class API</td>
+        <td>Supported, varies by player</td>
+      </tr>
+      <tr>
+        <td>Best fit</td>
+        <td>Product UI that lives in Figma</td>
+        <td>Illustration loops, AE pipelines</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>When Blinn is the better default</h2>
+  <ul>
+    <li>Design already owns motion in <strong>Figma</strong>, not AE.</li>
+    <li>You want <strong>git-diffable</strong> motion next to app code.</li>
+    <li>You need <strong>identical timing</strong> across DOM, Canvas, and React Native.</li>
+    <li>Ship cost matters: sparse JSON + small pure-JS player for UI chrome, not full AE graphs.</li>
+  </ul>
+
+  <h2>When Lottie still wins</h2>
+  <ul>
+    <li>Motion is authored in After Effects or an existing Lottie library.</li>
+    <li>You need a mature illustration/asset ecosystem and community renderers.</li>
+    <li>The deliverable is a complex character or marketing loop, not nested product frames.</li>
+  </ul>
+
+  <h2>Live comparison</h2>
+  <p>
+    The landing page runs a head-to-head stage: a real Lottie file next to a pixel-matched MotionDoc.
+    Open <a href="/#live-compare">blinnmotion.com → vs Lottie</a> or the share card
+    <a href="/s/vs-lottie">/s/vs-lottie</a> (unique OG preview).
+  </p>
+
+  <h2>Ship Figma Motion without the AE detour</h2>
+  <p>
+    If your designers animate in Figma Motion, Blinn avoids re-authoring in AE just to get a Lottie file.
+    Export with the <a href={`${site.docs}/guides/figma-plugin`}>Figma plugin</a>, then mount with
+    <a href={`${site.docs}/adapters/react`}>@blinn-motion/react</a> (or any adapter).
+  </p>
+  <pre><code>npm i @blinn-motion/react
+# play a MotionDoc exported from Figma Motion</code></pre>
+
+  <h2>Keep reading</h2>
+  <ul>
+    <li><a href="/figma-motion-to-code">Figma Motion to code</a> — full handoff pipeline</li>
+    <li><a href={`${site.docs}/concepts/render-engine`}>Render engine</a> — <code>sample(doc, t)</code></li>
+    <li><a href="/faq">FAQ</a></li>
+  </ul>
+</Article>

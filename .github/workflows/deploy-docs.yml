@@ -129,6 +129,9 @@ jobs:
           echo "dist/ contents:"
           ls -la dist | head -30
 
+      - name: Inject robots.txt + sitemap.xml + llms.txt
+        run: node ./scripts/inject-seo.mjs
+
       - name: Deploy to Cloudflare Pages
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

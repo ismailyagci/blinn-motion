@@ -1,0 +1,74 @@
+---
+title: "Figma Motion to React"
+description: "Export Figma Motion to a MotionDoc and play it in React with @blinn-motion/react — seek, scrub, and scroll progress."
+---
+
+Ship a **Figma Motion** timeline into a React app without rebuilding keyframes in CSS or Framer Motion by hand.
+
+## What you get
+
+| Piece | Role |
+|-------|------|
+| Figma Motion | Authoring (keyframes, springs, easing) |
+| Blinn Figma plugin | Export → **MotionDoc** JSON |
+| `@blinn-motion/react` | `<BlinnMotion />` + hooks |
+| `@blinn-motion/core` | Pure `sample(doc, t)` engine (pulled in automatically) |
+
+Same document can later power Vue, DOM, Canvas, or React Native — see [adapters overview](/adapters/overview).
+
+## Steps
+
+<Steps>
+  <Step title="Animate in Figma Motion">
+    Put animated layers inside a **top-level frame**. That frame is what the plugin exports.
+  </Step>
+
+  <Step title="Export a MotionDoc">
+    Run the [Blinn Motion plugin](/guides/figma-plugin) → Export → **React** → download JSON.
+    Commit the file next to your components (e.g. `card.motion.json`).
+  </Step>
+
+  <Step title="Install">
+    ```bash
+    npm i @blinn-motion/react
+    ```
+  </Step>
+
+  <Step title="Mount in a client component">
+    ```tsx
+    import { BlinnMotion } from "@blinn-motion/react";
+    import doc from "./card.motion.json";
+
+    export function CardMotion() {
+      return (
+        <BlinnMotion
+          doc={doc}
+          renderer="canvas" // or "dom"
+          loop
+          autoplay
+        />
+      );
+    }
+    ```
+
+    **Next.js App Router:** mark the parent with `"use client"` (or put this in a client component). Static export works — no Node runtime required for playback.
+  </Step>
+
+  <Step title="Optional: scroll-driven progress">
+    ```tsx
+    <BlinnMotion doc={doc} progress={scrollProgress} />
+    ```
+    `progress` is `0…1`. See [playback](/guides/playback) for seek, rate, and tickers.
+  </Step>
+</Steps>
+
+## Live lab
+
+Open the dual-stage director console: [react.blinnmotion.com](https://react.blinnmotion.com/).
+
+## Related
+
+- Marketing guide: [Figma Motion to code](https://blinnmotion.com/figma-motion-to-code)
+- [MotionDoc format](/concepts/motiondoc)
+- [Figma coverage](/reference/figma-coverage)
+- [vs Lottie](https://blinnmotion.com/vs-lottie)

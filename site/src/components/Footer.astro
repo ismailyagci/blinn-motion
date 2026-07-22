@@ -31,13 +31,13 @@ const cols = [
     })),
   },
   {
-    title: "Documentation",
+    title: "Guides",
     links: [
+      { label: "Figma Motion to code", href: "/figma-motion-to-code" },
+      { label: "vs Lottie", href: "/vs-lottie" },
+      { label: "FAQ", href: "/faq" },
       { label: "Quickstart", href: `${site.docs}/quickstart` },
-      { label: "The MotionDoc format", href: `${site.docs}/concepts/motiondoc` },
-      { label: "Adapters overview", href: `${site.docs}/adapters/overview` },
       { label: "Figma plugin", href: `${site.docs}/guides/figma-plugin` },
-      { label: "API reference", href: `${site.docs}/reference/core-api` },
       { label: "GitHub", href: site.repo },
     ],
   },
@@ -48,7 +48,7 @@ const cols = [
   <div class="container">
     <div class="footer-top">
       <div class="footer-brand">
-        <a class="brand" href="#top">
+        <a class="brand" href="/">
           <span class="logo">
             <svg viewBox="0 0 64 64" width="28" height="28"><rect x="6" y="6" width="52" height="52" rx="15" fill="#11141A"/><g fill="none" stroke="#fff" stroke-width="6.2" stroke-linecap="round" stroke-linejoin="round"><path d="M24 18 V46"/><path d="M24 18 H32.5 C38.6 18 38.6 32 32.5 32 H24"/><path d="M24 32 H34.5 C41.2 32 41.2 46 34.5 46 H24"/></g><rect x="43.6" y="43.6" width="7.6" height="7.6" rx="1.5" transform="rotate(45 47.4 47.4)" fill="#2F6BFF"/></svg>
           </span>
@@ -65,9 +65,18 @@ const cols = [
         {cols.map((c) => (
           <div class="footer-col">
             <h4 class="mono">{c.title}</h4>
-            {c.links.map((l) => (
-              <a href={l.href} class="mono" target={l.href.startsWith("#") ? undefined : "_blank"} rel={l.href.startsWith("#") ? undefined : "noopener"}>{l.label}</a>
-            ))}
+            {c.links.map((l) => {
+              const external = /^https?:\/\//.test(l.href) && !l.href.startsWith(site.url);
+              const hashOnly = l.href.startsWith("#");
+              return (
+                <a
+                  href={hashOnly ? `/${l.href}` : l.href}
+                  class="mono"
+                  target={external ? "_blank" : undefined}
+                  rel={external ? "noopener" : undefined}
+                >{l.label}</a>
+              );
+            })}
           </div>
         ))}
       </div>

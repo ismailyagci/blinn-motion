@@ -1,0 +1,41 @@
+# Blinn Motion docs — https://docs.blinnmotion.com
+
+User-agent: *
+Allow: /
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Anthropic-ai
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Applebot-Extended
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: *
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+
+Sitemap: https://docs.blinnmotion.com/sitemap.xml
+Sitemap: https://blinnmotion.com/sitemap.xml
+
+# LLM indexes
+# https://docs.blinnmotion.com/llms.txt
+# https://blinnmotion.com/llms.txt

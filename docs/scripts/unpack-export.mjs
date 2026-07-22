@@ -30,4 +30,7 @@ if (!existsSync(join(dist, "index.html"))) {
   process.exit(1);
 }
 
+// Real robots.txt / sitemap.xml / llms.txt (Mintlify SPA often serves HTML for these).
+execFileSync(process.execPath, [join(root, "scripts", "inject-seo.mjs")], { stdio: "inherit" });
+
 console.log("OK — static docs in docs/dist/");

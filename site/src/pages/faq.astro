@@ -1,0 +1,60 @@
+---
+import Article from "../layouts/Article.astro";
+import { faqs, faqJsonLd } from "../data/faq";
+import { site } from "../data/site";
+
+const title = "Blinn Motion FAQ — Figma Motion runtime";
+const description =
+  "FAQ for Blinn Motion: Figma Motion to code, MotionDoc, Lottie comparison, React and React Native adapters, open source license, scroll-driven progress.";
+const path = "/faq";
+---
+
+<Article
+  title={title}
+  description={description}
+  path={path}
+  eyebrow="FAQ"
+  h1="Frequently asked questions"
+  lead="Short answers about the Figma Motion runtime, MotionDoc, platforms, and how Blinn compares to copy-paste export and Lottie."
+  extraJsonLd={faqJsonLd(`${site.url}${path}`)}
+>
+  <div class="faq-list">
+    {faqs.map((f) => (
+      <section class="faq-item">
+        <h2>{f.question}</h2>
+        <p>{f.answer}</p>
+      </section>
+    ))}
+  </div>
+
+  <h2>Next steps</h2>
+  <ul>
+    <li><a href="/figma-motion-to-code">Figma Motion to code</a> — step-by-step handoff</li>
+    <li><a href="/vs-lottie">vs Lottie</a> — when to pick which</li>
+    <li><a href={`${site.docs}/quickstart`}>Docs quickstart</a></li>
+    <li><a href="https://react.blinnmotion.com/">React live lab</a></li>
+  </ul>
+</Article>
+
+<style>
+  .faq-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 2em;
+  }
+  .faq-item {
+    padding: 4px 0 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .faq-item:last-child {
+    border-bottom: none;
+  }
+  .faq-item h2 {
+    font-size: 1.2rem !important;
+    margin: 0 0 0.5em !important;
+  }
+  .faq-item p {
+    margin: 0 !important;
+  }
+</style>

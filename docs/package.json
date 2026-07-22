@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "mintlify dev",
     "export": "mint export --output export.zip",
+    "inject-seo": "node ./scripts/inject-seo.mjs",
     "build": "npm run export && node ./scripts/unpack-export.mjs",
     "broken-links": "mintlify broken-links",
     "upgrade": "mintlify upgrade"

@@ -1,0 +1,163 @@
+---
+import Article from "../layouts/Article.astro";
+import { site } from "../data/site";
+
+const title = "Figma Motion to code — Blinn Motion runtime";
+const description =
+  "Export Figma Motion to production code with Blinn Motion. MotionDoc JSON + pure-JS engine for React, Vue, DOM, Canvas, and React Native — seek, scrub, identical timing.";
+const path = "/figma-motion-to-code";
+
+const howTo = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: "Export Figma Motion to production code with Blinn Motion",
+  description,
+  totalTime: "PT10M",
+  tool: [
+    { "@type": "HowToTool", name: "Figma with Figma Motion" },
+    { "@type": "HowToTool", name: "Blinn Motion Figma plugin" },
+    { "@type": "HowToTool", name: "Node.js / npm" },
+  ],
+  step: [
+    {
+      "@type": "HowToStep",
+      name: "Animate in Figma Motion",
+      text: "Build your timeline on a top-level frame with Figma Motion keyframes, springs, and easing.",
+    },
+    {
+      "@type": "HowToStep",
+      name: "Export a MotionDoc",
+      text: "Run the Blinn Motion plugin, pick your framework, and download the MotionDoc JSON.",
+      url: "https://docs.blinnmotion.com/guides/figma-plugin/",
+    },
+    {
+      "@type": "HowToStep",
+      name: "Install an adapter",
+      text: "npm i @blinn-motion/react (or vue, svelte, angular, lit, dom, canvas, react-native).",
+    },
+    {
+      "@type": "HowToStep",
+      name: "Mount and play",
+      text: "Pass the MotionDoc to the adapter and call play(), or drive progress 0…1 for scroll-linked motion.",
+      url: "https://docs.blinnmotion.com/quickstart/",
+    },
+  ],
+};
+---
+
+<Article
+  title={title}
+  description={description}
+  path={path}
+  eyebrow="Figma Motion → production"
+  h1="Figma Motion to code with Blinn Motion"
+  lead="Turn a Figma Motion timeline into a portable MotionDoc and play it with a pure-JS engine — the same motion on every platform."
+  extraJsonLd={howTo}
+>
+  <p>
+    <strong>Figma Motion</strong> lets designers author real timelines on the canvas. Shipping that motion
+    into an app still means a handoff: CSS snippets, one-off React paste, video exports, or a full rebuild.
+    <strong>Blinn Motion</strong> is the runtime path: export once, play everywhere.
+  </p>
+
+  <h2>Why “export from Figma” is not always enough</h2>
+  <p>
+    Figma’s own Dev Mode handoff can copy CSS, JSON, or framework-oriented snippets. That is useful for
+    inspection and small cases. Production product UI usually needs more:
+  </p>
+  <ul>
+    <li><strong>One artifact in git</strong> — a diffable JSON file, not a screenshot of a panel</li>
+    <li><strong>Seek, scrub, and shared clocks</strong> — scrubbers, storyboards, multi-view sync</li>
+    <li><strong>Scroll and gesture drivers</strong> — progress 0…1, not only “press play”</li>
+    <li><strong>Web and native</strong> — DOM/Canvas and React Native from the same document</li>
+  </ul>
+  <p>
+    Blinn targets that gap. The Figma timeline becomes a <a href={`${site.docs}/concepts/motiondoc`}>MotionDoc</a>;
+    <code>sample(doc, t)</code> in <code>@blinn-motion/core</code> is the render method; adapters only paint.
+  </p>
+
+  <h2>The pipeline</h2>
+  <pre><code>Figma Motion timeline
+        │  plugin export
+        ▼
+   MotionDoc JSON   (git-friendly)
+        │  sample(doc, t)
+        ▼
+   pure-JS render tree
+        │
+        ├─ DOM / CSS / SVG
+        ├─ Canvas 2D
+        ├─ React · Vue · Svelte · Angular · Lit
+        └─ React Native</code></pre>
+
+  <h2>Quick path: Figma → React</h2>
+  <ol>
+    <li>Animate a frame in <strong>Figma Motion</strong>.</li>
+    <li>Open the <a href={`${site.docs}/guides/figma-plugin`}>Blinn Motion plugin</a> → Export → React → download JSON.</li>
+    <li>Install: <code>npm i @blinn-motion/react</code></li>
+    <li>Mount:</li>
+  </ol>
+  <pre><code>import &#123; BlinnMotion &#125; from "@blinn-motion/react";
+import doc from "./card.motion.json";
+
+// clock-driven
+&lt;BlinnMotion doc=&#123;doc&#125; renderer="canvas" loop autoplay /&gt;
+
+// progress-driven (scroll, drag, state)
+&lt;BlinnMotion doc=&#123;doc&#125; progress=&#123;scrollP&#125; /&gt;</code></pre>
+  <p>
+    Full walkthrough: <a href={`${site.docs}/quickstart`}>docs quickstart</a> · live lab:
+    <a href="https://react.blinnmotion.com/">react.blinnmotion.com</a>.
+  </p>
+
+  <h2>When to use Blinn vs native Figma export</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Need</th>
+        <th>Figma copy/export</th>
+        <th>Blinn Motion</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>One-off CSS for a marketing section</td>
+        <td>Often enough</td>
+        <td>Optional</td>
+      </tr>
+      <tr>
+        <td>Same motion on React + RN</td>
+        <td>Manual port</td>
+        <td>One MotionDoc</td>
+      </tr>
+      <tr>
+        <td>Scrubber / timeline UI</td>
+        <td>Rebuild yourself</td>
+        <td>Built-in seek / progress</td>
+      </tr>
+      <tr>
+        <td>Git review of motion changes</td>
+        <td>Hard</td>
+        <td>Diff the JSON</td>
+      </tr>
+      <tr>
+        <td>MP4 / GIF for social</td>
+        <td>Native export</td>
+        <td>Not the primary path</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Related guides</h2>
+  <ul>
+    <li><a href="/vs-lottie">Blinn Motion vs Lottie</a> — payload and player size for UI motion</li>
+    <li><a href="/faq">FAQ</a> — frameworks, license, scroll-driven motion</li>
+    <li><a href={`${site.docs}/reference/figma-coverage`}>Figma Motion coverage</a> — what converts today</li>
+    <li><a href={`${site.docs}/guides/playback`}>Playback guide</a> — play, pause, seek, rates</li>
+  </ul>
+
+  <blockquote>
+    Product home: <a href="/">{site.url}</a> · Docs: <a href={site.docs}>{site.docs}</a> · MIT on
+    <a href={site.repo}>GitHub</a>.
+  </blockquote>
+</Article>

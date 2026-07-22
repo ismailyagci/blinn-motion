@@ -17,19 +17,23 @@ export const site = {
   // http://localhost:3000 (npm run dev in /docs) — point this there to test the link.
   docs: "https://docs.blinnmotion.com",
   /** Default page title + description for <Base> */
-  title: "Blinn Motion — Figma Motion → real code",
+  title: "Blinn Motion — Figma Motion to code, everywhere",
   description:
-    "The runtime for Figma Motion. Export a Motion timeline to MotionDoc and play it with a pure-JS engine — identical across DOM, Canvas, React, Vue, Svelte, Angular, Lit and React Native.",
+    "Blinn Motion is the runtime for Figma Motion. Export a timeline to MotionDoc and play it with a pure-JS engine — identical across DOM, Canvas, React, Vue, Svelte, Angular, Lit and React Native.",
   keywords: [
     "Blinn Motion",
     "Figma Motion",
+    "Figma Motion to code",
+    "Figma Motion React",
     "MotionDoc",
     "animation runtime",
     "Figma to code",
+    "Lottie alternative",
     "motion design",
     "React animation",
     "Canvas animation",
     "CSS animation engine",
+    "React Native animation",
   ],
   sameAs: [
     "https://github.com/ismailyagci/blinn-motion",

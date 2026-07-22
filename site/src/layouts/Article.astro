@@ -1,0 +1,222 @@
+---
+/**
+ * Long-form SEO / content page shell.
+ * Full HTML content is crawlable (not a hash fragment of the homepage).
+ */
+import Base from "./Base.astro";
+import Nav from "../components/Nav.astro";
+import Footer from "../components/Footer.astro";
+
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  /** Optional OG image path */
+  image?: string;
+  imageAlt?: string;
+  /** Extra JSON-LD graph nodes (FAQ, HowTo, …) */
+  extraJsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  eyebrow?: string;
+  h1: string;
+  lead?: string;
+}
+
+const {
+  title,
+  description,
+  path,
+  image,
+  imageAlt,
+  extraJsonLd,
+  eyebrow = "Guide",
+  h1,
+  lead,
+} = Astro.props;
+
+const nodes = Array.isArray(extraJsonLd)
+  ? extraJsonLd
+  : extraJsonLd
+    ? [extraJsonLd]
+    : [];
+---
+
+<Base
+  title={title}
+  description={description}
+  path={path}
+  image={image}
+  imageAlt={imageAlt}
+>
+  {nodes.map((node) => (
+    <script type="application/ld+json" set:html={JSON.stringify(node)} />
+  ))}
+  <Nav />
+  <main class="article-main">
+    <header class="article-hero section-tight">
+      <div class="container article-narrow">
+        <p class="eyebrow"><span class="kf"></span> {eyebrow}</p>
+        <h1 class="article-h1">{h1}</h1>
+        {lead && <p class="lead article-lead">{lead}</p>}
+      </div>
+    </header>
+    <article class="article-body section-tight">
+      <div class="container article-narrow">
+        <slot />
+      </div>
+    </article>
+    <section class="section-tight article-cta-wrap">
+      <div class="container article-narrow">
+        <div class="article-cta card">
+          <h2>Ship Figma Motion with Blinn</h2>
+          <p>
+            Export a MotionDoc from the Figma plugin, install an adapter, and play the same
+            timeline on every platform.
+          </p>
+          <div class="article-cta-actions">
+            <a class="btn btn-primary" href="https://docs.blinnmotion.com/quickstart">
+              Quickstart →
+            </a>
+            <a class="btn btn-ghost" href="/">Product overview</a>
+            <a class="btn btn-ghost" href="https://github.com/ismailyagci/blinn-motion" target="_blank" rel="noopener">
+              GitHub
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+  <Footer />
+</Base>
+
+<style>
+  .article-main {
+    border-top: 1px solid var(--line);
+  }
+  .article-narrow {
+    max-width: 720px;
+  }
+  .article-h1 {
+    font-size: clamp(32px, 4.8vw, 48px);
+    letter-spacing: -0.04em;
+    margin-top: 16px;
+    line-height: 1.05;
+  }
+  .article-lead {
+    margin-top: 18px;
+    max-width: 40em;
+  }
+  .article-body :global(h2) {
+    font-size: clamp(22px, 2.6vw, 28px);
+    margin: 2.2em 0 0.7em;
+    letter-spacing: -0.03em;
+  }
+  .article-body :global(h3) {
+    font-size: 1.15rem;
+    margin: 1.8em 0 0.55em;
+  }
+  .article-body :global(p),
+  .article-body :global(li) {
+    color: var(--ink-2);
+    font-size: 1.05rem;
+    line-height: 1.7;
+  }
+  .article-body :global(p) {
+    margin: 0 0 1.1em;
+  }
+  .article-body :global(ul),
+  .article-body :global(ol) {
+    margin: 0 0 1.25em;
+    padding-left: 1.25em;
+  }
+  .article-body :global(li) {
+    margin: 0.35em 0;
+  }
+  .article-body :global(a) {
+    color: var(--blue);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .article-body :global(a:hover) {
+    color: #2055e0;
+  }
+  .article-body :global(strong) {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .article-body :global(code) {
+    font-family: var(--mono);
+    font-size: 0.9em;
+    background: var(--paper-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.12em 0.4em;
+  }
+  .article-body :global(pre) {
+    margin: 0 0 1.4em;
+    padding: 16px 18px;
+    border-radius: var(--r);
+    border: 1px solid var(--line);
+    background: var(--paper-2);
+    overflow-x: auto;
+    font-family: var(--mono);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--ink);
+  }
+  .article-body :global(pre code) {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+  }
+  .article-body :global(table) {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0 0 1.5em;
+    font-size: 0.95rem;
+  }
+  .article-body :global(th),
+  .article-body :global(td) {
+    border: 1px solid var(--line);
+    padding: 10px 12px;
+    text-align: left;
+    vertical-align: top;
+  }
+  .article-body :global(th) {
+    background: var(--paper-2);
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .article-body :global(td) {
+    color: var(--ink-2);
+  }
+  .article-body :global(blockquote) {
+    margin: 0 0 1.4em;
+    padding: 12px 16px;
+    border-left: 3px solid var(--blue);
+    background: var(--blue-t);
+    color: var(--ink-2);
+    border-radius: 0 var(--r-sm) var(--r-sm) 0;
+  }
+  .article-cta-wrap {
+    padding-bottom: clamp(48px, 7vw, 80px);
+  }
+  .article-cta {
+    padding: 28px 26px;
+  }
+  .article-cta h2 {
+    font-size: 1.35rem;
+    margin: 0 0 10px;
+  }
+  .article-cta p {
+    margin: 0;
+    color: var(--ink-2);
+    line-height: 1.55;
+  }
+  .article-cta-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 18px;
+  }
+</style>
