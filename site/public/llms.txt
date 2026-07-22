@@ -14,9 +14,9 @@
 ## Product
 
 - [Landing](https://blinnmotion.com/): Product overview, pipeline, adapters, live example links
-- [Figma Motion to code](https://blinnmotion.com/figma-motion-to-code): Handoff pipeline guide (primary SEO article)
-- [vs Lottie](https://blinnmotion.com/vs-lottie): Comparison for product UI motion
-- [FAQ](https://blinnmotion.com/faq): Short product answers
+- [Figma Motion to code](https://blinnmotion.com/figma-motion-to-code/): Handoff pipeline guide (primary SEO article)
+- [vs Lottie](https://blinnmotion.com/vs-lottie/): Comparison for product UI motion
+- [FAQ](https://blinnmotion.com/faq/): Short product answers
 - [Documentation](https://docs.blinnmotion.com/): Concepts, adapters, Figma plugin, API reference
 - [GitHub](https://github.com/ismailyagci/blinn-motion): Source monorepo (MIT)
 - [npm org](https://www.npmjs.com/org/blinn-motion): Published packages

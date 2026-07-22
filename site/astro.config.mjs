@@ -4,6 +4,8 @@ import { defineConfig } from "astro/config";
 // Standalone marketing site for BlinnMotion. Static output — no SSR needed.
 export default defineConfig({
   site: "https://blinnmotion.com",
+  // Match Cloudflare Pages directory URLs (…/faq/ → 200, …/faq → 308).
+  trailingSlash: "always",
   server: { port: 4321 },
   devToolbar: { enabled: false },
 });
